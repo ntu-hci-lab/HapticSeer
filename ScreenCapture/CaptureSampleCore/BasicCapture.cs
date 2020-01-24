@@ -23,7 +23,14 @@
 //  ---------------------------------------------------------------------------------
 
 using Composition.WindowsRuntimeHelpers;
+using SharpDX;
+using SharpDX.Direct3D11;
+using SharpDX.DXGI;
+using SharpDX.IO;
+using SharpDX.WIC;
 using System;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 using Windows.Graphics;
 using Windows.Graphics.Capture;
 using Windows.Graphics.DirectX;
@@ -36,6 +43,8 @@ namespace CaptureSampleCore
     {
         public double RecordFrameRate;
         private long LastTick;
+        public Process proc;
+
         private GraphicsCaptureItem item;
         private Direct3D11CaptureFramePool framePool;
         private GraphicsCaptureSession session;
@@ -45,6 +54,38 @@ namespace CaptureSampleCore
         private SharpDX.Direct3D11.Device d3dDevice;
         private SharpDX.DXGI.SwapChain1 swapChain;
 
+        public struct Rect
+        {
+            public int Left;
+            public int Top;
+            public int Right;
+            public int Bottom;
+        }
+        [DllImport("user32.dll")]
+        private static extern int GetWindowRect(IntPtr hwnd, out Rect lpRect);
+        [DllImport("user32.dll")]
+        public static extern bool GetClientRect(IntPtr hwnd, out Rect lpRect);
+        private Rect BorderSize = new Rect();
+
+        private void OnWindowsSizeChange()
+        {
+            if (proc == null)
+                return;
+
+            Rect WindowsPositionInScreen, WindowsPositionInRef;
+            GetWindowRect(proc.MainWindowHandle, out WindowsPositionInScreen);
+            GetClientRect(proc.MainWindowHandle, out WindowsPositionInRef);
+            int TotalBorderWidthSize =
+                (WindowsPositionInScreen.Right - WindowsPositionInScreen.Left)
+                - (WindowsPositionInRef.Right - WindowsPositionInRef.Left);
+            int TotalBorderHeightSize =
+                            (WindowsPositionInScreen.Bottom - WindowsPositionInScreen.Top)
+                            - (WindowsPositionInRef.Bottom - WindowsPositionInRef.Top);
+            int _BorderSize = TotalBorderWidthSize / 2;
+            int TitleBarSize = TotalBorderHeightSize - _BorderSize;
+            BorderSize.Left = BorderSize.Right = BorderSize.Bottom = _BorderSize;
+            BorderSize.Top = TitleBarSize;
+        }
         public BasicCapture(IDirect3DDevice d, GraphicsCaptureItem i)
         {
             item = i;
@@ -100,7 +141,57 @@ namespace CaptureSampleCore
         {
             return compositor.CreateCompositionSurfaceForSwapChain(swapChain);
         }
-        private void OnFrameArrived(Direct3D11CaptureFramePool sender, object args)
+        private void GetBitmap(Texture2D texture, string FileName)
+        {
+            // Create texture copy
+            var copy = new Texture2D(d3dDevice, new Texture2DDescription
+            {
+                Width = texture.Description.Width,
+                Height = texture.Description.Height,
+                MipLevels = 1,
+                ArraySize = 1,
+                Format = texture.Description.Format,
+                Usage = ResourceUsage.Staging,
+                SampleDescription = new SampleDescription(1, 0),
+                BindFlags = BindFlags.None,
+                CpuAccessFlags = CpuAccessFlags.Read,
+                OptionFlags = ResourceOptionFlags.None
+            });
+
+            // Copy data
+            d3dDevice.ImmediateContext.CopyResource(texture, copy);
+
+            var dataBox = d3dDevice.ImmediateContext.MapSubresource(copy, 0, 0, MapMode.Read, SharpDX.Direct3D11.MapFlags.None,
+                out DataStream stream);
+            var rect = new DataRectangle
+            {
+                DataPointer = stream.DataPointer,
+                Pitch = dataBox.RowPitch
+            };
+            var factory = new ImagingFactory();
+
+            var format = PixelFormat.Format32bppPBGRA;
+            Bitmap bmp = new Bitmap(factory, copy.Description.Width, copy.Description.Height, format, rect);
+
+            using (var wic = new WICStream(factory, FileName + ".jpeg", NativeFileAccess.ReadWrite))
+            using (var encoder = new JpegBitmapEncoder(factory, wic))
+            using (var frame = new BitmapFrameEncode(encoder))
+            {
+                frame.Initialize();
+                frame.SetSize(bmp.Size.Width, bmp.Size.Height);
+                frame.SetPixelFormat(ref format);
+                frame.WriteSource(bmp);
+                frame.Commit();
+                encoder.Commit();
+            }
+
+            d3dDevice.ImmediateContext.UnmapSubresource(copy, 0);
+            copy.Dispose();
+            bmp.Dispose();
+        }
+
+
+    private void OnFrameArrived(Direct3D11CaptureFramePool sender, object args)
         {
             var newSize = false;
 
@@ -112,6 +203,7 @@ namespace CaptureSampleCore
                 if (frame.ContentSize.Width != lastSize.Width ||
                     frame.ContentSize.Height != lastSize.Height)
                 {
+                    OnWindowsSizeChange();
                     // The thing we have been capturing has changed size.
                     // We need to resize the swap chain first, then blit the pixels.
                     // After we do that, retire the frame and then recreate the frame pool.
@@ -129,6 +221,7 @@ namespace CaptureSampleCore
                 using (var bitmap = Direct3D11Helper.CreateSharpDXTexture2D(frame.Surface))
                 {
                     d3dDevice.ImmediateContext.CopyResource(bitmap, backBuffer);
+                    GetBitmap(bitmap, frame.SystemRelativeTime.Ticks.ToString());
                 }
 
             } // Retire the frame.

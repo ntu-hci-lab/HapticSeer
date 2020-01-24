@@ -24,6 +24,7 @@
 
 using Composition.WindowsRuntimeHelpers;
 using System;
+using System.Diagnostics;
 using System.Numerics;
 using Windows.Graphics.Capture;
 using Windows.Graphics.DirectX.Direct3D11;
@@ -42,6 +43,7 @@ namespace CaptureSampleCore
         private IDirect3DDevice device;
         private BasicCapture capture;
 
+        private Process proc;
         public double FrameRate
         {
             get
@@ -79,7 +81,10 @@ namespace CaptureSampleCore
             content.Shadow = shadow;
             root.Children.InsertAtTop(content);
         }
-
+        public void SetProcess(Process proc)
+        {
+            this.proc = proc;
+        }
         public Visual Visual => root;
 
         public void Dispose()
@@ -96,7 +101,7 @@ namespace CaptureSampleCore
         {
             StopCapture();
             capture = new BasicCapture(device, item);
-
+            capture.proc = proc;
             var surface = capture.CreateSurface(compositor);
             brush.Surface = surface;
 

@@ -64,20 +64,6 @@ namespace WPFCaptureSample
         private Stopwatch timestamp = new Stopwatch();
         //Main Thread Context
         SynchronizationContext syncContext;
-        public struct Rect
-        {
-            public int Left;
-            public int Top;
-            public int Right;
-            public int Bottom;
-        }
-
-        [DllImport("user32.dll")]
-        private static extern int GetWindowRect(IntPtr hwnd, out Rect lpRect);
-        [DllImport("user32.dll")]
-        public static extern bool GetClientRect(IntPtr hwnd, out Rect lpRect);
-
-
         public MainWindow()
         {
             InitializeComponent();
@@ -109,9 +95,7 @@ namespace WPFCaptureSample
         }
         private void AttachHook(Process process)
         {
-            Rect rect1, rect2;
-            GetWindowRect(process.MainWindowHandle, out rect1);
-            GetClientRect(process.MainWindowHandle, out rect2);
+            sample.SetProcess(process);
             timestamp.Restart();
             remoteAPIHook = new RemoteAPIHook(process);
             ControllerInputHooker = new ControllerInputFunctionSet(process);
@@ -204,7 +188,6 @@ namespace WPFCaptureSample
             {
                 StopCapture();
                 MonitorComboBox.SelectedIndex = -1;
-                string c = process.Modules[0].ModuleName;
                 AttachHook(process);
                 var hwnd = process.MainWindowHandle;
                 try
