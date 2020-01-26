@@ -61,7 +61,13 @@ namespace WPFCaptureSample
         private RemoteAPIHook remoteAPIHook;
         private ControllerInputFunctionSet ControllerInputHooker;
         private ControllerOutputFunctionSet ControllerOutputHooker;
-        private Stopwatch timestamp = new Stopwatch();
+        private ulong StartRecordTime;
+        private BasicCapture basicCapture;
+        private BitmapHandler bitmapHandler;
+        private JSONHandler json = new JSONHandler();
+        [DllImport("kernel32")]
+        extern static UInt64 GetTickCount64();
+
         //Main Thread Context
         SynchronizationContext syncContext;
         public MainWindow()
@@ -91,12 +97,14 @@ namespace WPFCaptureSample
         }
         private string DirectJSONOutput(XINPUT_GAMEPAD GamePadInfo, ushort LeftMotor, ushort RightMotor)
         {
-            return GamePadInfo.ToJSON(LeftMotor, RightMotor, timestamp.ElapsedMilliseconds);
+            return GamePadInfo.ToJSON(LeftMotor, RightMotor, GetTickCount64() - StartRecordTime);
         }
         private void AttachHook(Process process)
         {
-            sample.SetProcess(process);
-            timestamp.Restart();
+            basicCapture = sample.GetBasicCapture();
+            basicCapture.proc = process;
+            basicCapture.StartRecordTime = StartRecordTime = GetTickCount64();
+            //basicCapture.OnBitmapCreate = bitmapHandler.PushBuffer;
             remoteAPIHook = new RemoteAPIHook(process);
             ControllerInputHooker = new ControllerInputFunctionSet(process);
             ControllerOutputHooker = new ControllerOutputFunctionSet(process);
@@ -106,28 +114,6 @@ namespace WPFCaptureSample
         public void _Refresh()
         {
             Label_FPS_Text.Content = ((int)sample.FrameRate).ToString() + " FPS";
-            /*
-            bool IsUpdate = false;
-            lock (controllerHooker.EventLock)
-            {
-                long TimeStampRec = 0;
-                if (controllerHooker.EventsRec.Count != 0)
-                {
-                    IsUpdate = true;
-                    for (int i = 0; i < controllerHooker.EventsRec.Count; ++i)
-                    {
-                        if (TimeStampRec != controllerHooker.EventsTimestamp[0])
-                        {
-                            TimeStampRec = controllerHooker.EventsTimestamp[0];
-                            listView_EventRec.Items.Add("At time: " + TimeStampRec);
-                        }
-                        controllerHooker.EventsTimestamp.RemoveAt(0);
-                        listView_EventRec.Items.Add(controllerHooker.EventsRec[0]);
-                        controllerHooker.EventsRec.RemoveAt(0);
-                    }
-                }
-            }
-            */
             bool IsMotorDiff = ControllerOutputHooker.AccessXInputSetState().FetchStateFromRemoteProcess(remoteAPIHook);
             bool IsInputDiff = ControllerInputHooker.AccessXInputGetState().FetchStateFromRemoteProcess(remoteAPIHook);
             if (IsMotorDiff || IsInputDiff) //Not Output Yet
@@ -135,11 +121,8 @@ namespace WPFCaptureSample
                 ushort Left, Right;
                 ControllerOutputHooker.AccessXInputSetState().GetData(out Left, out Right);
                 string Output = DirectJSONOutput(ControllerInputHooker.AccessXInputGetState().GetData(), Left, Right);
-                Console.WriteLine(Output);
+                json.AddNew(Output);
             }
-
-            //if (IsUpdate)
-            //    listView_EventRec.ScrollIntoView(listView_EventRec.Items[listView_EventRec.Items.Count - 1]);
         }
         public void Refresh(object state)
         {
@@ -170,10 +153,14 @@ namespace WPFCaptureSample
             InitMonitorList();
             TimeUIRefresh = new Timer(new TimerCallback(Refresh), null, 0, 1);
             syncContext = SynchronizationContext.Current;
+            bitmapHandler = new BitmapHandler("");
+            if (GetTickCount64() >=  int.MaxValue * 0.9)
+                MessageBox.Show("You had better restart your computer! Poor Computer!", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
 
         private void StopButton_Click(object sender, RoutedEventArgs e)
         {
+            Console.WriteLine(json.Output());
             StopCapture();
             WindowComboBox.SelectedIndex = -1;
             MonitorComboBox.SelectedIndex = -1;
@@ -188,7 +175,6 @@ namespace WPFCaptureSample
             {
                 StopCapture();
                 MonitorComboBox.SelectedIndex = -1;
-                AttachHook(process);
                 var hwnd = process.MainWindowHandle;
                 try
                 {
@@ -200,6 +186,7 @@ namespace WPFCaptureSample
                     processes.Remove(process);
                     comboBox.SelectedIndex = -1;
                 }
+                AttachHook(process);
             }
         }
 
@@ -284,6 +271,7 @@ namespace WPFCaptureSample
             if (item != null)
             {
                 InitWindowList();
+                sample.StartCaptureFromItem(item);
                 string title = item.DisplayName;
                 foreach (Process process in WindowComboBox.ItemsSource)
                 {
@@ -293,7 +281,6 @@ namespace WPFCaptureSample
                         break;
                     }
                 }
-                sample.StartCaptureFromItem(item);
             }
         }
 

@@ -43,7 +43,6 @@ namespace CaptureSampleCore
         private IDirect3DDevice device;
         private BasicCapture capture;
 
-        private Process proc;
         public double FrameRate
         {
             get
@@ -81,9 +80,9 @@ namespace CaptureSampleCore
             content.Shadow = shadow;
             root.Children.InsertAtTop(content);
         }
-        public void SetProcess(Process proc)
+        public BasicCapture GetBasicCapture()
         {
-            this.proc = proc;
+            return capture;
         }
         public Visual Visual => root;
 
@@ -101,7 +100,6 @@ namespace CaptureSampleCore
         {
             StopCapture();
             capture = new BasicCapture(device, item);
-            capture.proc = proc;
             var surface = capture.CreateSurface(compositor);
             brush.Surface = surface;
 

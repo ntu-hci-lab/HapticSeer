@@ -92,11 +92,13 @@ namespace WPFCaptureSample.API_Hook.FunctionInfo.XInputBaseHooker
         }
         public bool IsDiff(XINPUT_GAMEPAD Target)
         {
+            if (Target == null)
+                return true;
             return Target.Index != Index;
         }
         private byte[] RawData = new byte[12];
 
-        public string ToJSON(ushort LeftMotor, ushort RightMotor, long Timestamp)
+        public string ToJSON(ushort LeftMotor, ushort RightMotor, ulong Timestamp)
         {
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder

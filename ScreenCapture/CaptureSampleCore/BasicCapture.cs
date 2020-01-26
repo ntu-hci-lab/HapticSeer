@@ -44,7 +44,7 @@ namespace CaptureSampleCore
         public double RecordFrameRate;
         private long LastTick;
         public Process proc;
-
+        public ulong StartRecordTime;
         private GraphicsCaptureItem item;
         private Direct3D11CaptureFramePool framePool;
         private GraphicsCaptureSession session;
@@ -66,12 +66,14 @@ namespace CaptureSampleCore
         [DllImport("user32.dll")]
         public static extern bool GetClientRect(IntPtr hwnd, out Rect lpRect);
         private Rect BorderSize = new Rect();
+        private bool BorderSizeInited = false;
 
+        public Action<Bitmap, ulong> OnBitmapCreate;
         private void OnWindowsSizeChange()
         {
             if (proc == null)
                 return;
-
+            BorderSizeInited = true;
             Rect WindowsPositionInScreen, WindowsPositionInRef;
             GetWindowRect(proc.MainWindowHandle, out WindowsPositionInScreen);
             GetClientRect(proc.MainWindowHandle, out WindowsPositionInRef);
@@ -141,7 +143,8 @@ namespace CaptureSampleCore
         {
             return compositor.CreateCompositionSurfaceForSwapChain(swapChain);
         }
-        private void GetBitmap(Texture2D texture, string FileName)
+
+        private void GetBitmap(Texture2D texture, ulong timestamp)
         {
             // Create texture copy
             var copy = new Texture2D(d3dDevice, new Texture2DDescription
@@ -161,40 +164,59 @@ namespace CaptureSampleCore
             // Copy data
             d3dDevice.ImmediateContext.CopyResource(texture, copy);
 
-            var dataBox = d3dDevice.ImmediateContext.MapSubresource(copy, 0, 0, MapMode.Read, SharpDX.Direct3D11.MapFlags.None,
-                out DataStream stream);
+            // Map image from GPU
+            var dataBox = d3dDevice.ImmediateContext.MapSubresource(copy, 0, 0, MapMode.Read, SharpDX.Direct3D11.MapFlags.None, out DataStream stream);
+            
+            //Get Pixel Address & Row Size
             var rect = new DataRectangle
             {
                 DataPointer = stream.DataPointer,
                 Pitch = dataBox.RowPitch
             };
+
             var factory = new ImagingFactory();
-
             var format = PixelFormat.Format32bppPBGRA;
-            Bitmap bmp = new Bitmap(factory, copy.Description.Width, copy.Description.Height, format, rect);
 
-            using (var wic = new WICStream(factory, FileName + ".jpeg", NativeFileAccess.ReadWrite))
-            using (var encoder = new JpegBitmapEncoder(factory, wic))
-            using (var frame = new BitmapFrameEncode(encoder))
+            int NewImageWidth = copy.Description.Width - BorderSize.Left - BorderSize.Right,
+                NewImageHeight = copy.Description.Height - BorderSize.Top - BorderSize.Bottom;
+            if (NewImageWidth < 0 || NewImageHeight < 0)
+                return;
+            //Create New Image
+            Bitmap bmp = new Bitmap(factory, NewImageWidth, NewImageHeight, format, BitmapCreateCacheOption.CacheOnLoad);
+            //Get Address of New Image with Writing Lock
+            BitmapLock bLock = bmp.Lock(BitmapLockFlags.Write);
+            
+            //Fetch Address from bLock
+            IntPtr DestPtr = bLock.Data.DataPointer;
+            //Fetch Starting Image from old image
+            int NumsBytesOfSkipPixel =
+                rect.Pitch * BorderSize.Top //Skip TitleBar (Pitch: Bytes per Row. 64b align)
+                + BorderSize.Left * 4; //Skip Left Borderline with 4 Bytes per Pixel
+            IntPtr SourcePtr = IntPtr.Add(dataBox.DataPointer, NumsBytesOfSkipPixel);
+
+            for (int i = 0; i < NewImageHeight; ++i )
             {
-                frame.Initialize();
-                frame.SetSize(bmp.Size.Width, bmp.Size.Height);
-                frame.SetPixelFormat(ref format);
-                frame.WriteSource(bmp);
-                frame.Commit();
-                encoder.Commit();
+                Utilities.CopyMemory(DestPtr, SourcePtr, NewImageWidth * 4);
+                SourcePtr = IntPtr.Add(SourcePtr, rect.Pitch);
+                DestPtr = IntPtr.Add(DestPtr, bLock.Data.Pitch);
             }
 
+            //Release Write Lock
+            bLock.Dispose();
+
+            //Ummapped Image
             d3dDevice.ImmediateContext.UnmapSubresource(copy, 0);
             copy.Dispose();
-            bmp.Dispose();
+            if (OnBitmapCreate != null)
+                OnBitmapCreate(bmp, timestamp);
         }
 
 
-    private void OnFrameArrived(Direct3D11CaptureFramePool sender, object args)
+        private void OnFrameArrived(Direct3D11CaptureFramePool sender, object args)
         {
+            if (StartRecordTime == 0)
+                return;
             var newSize = false;
-
             using (var frame = sender.TryGetNextFrame())
             {
                 double DeltaTick = frame.SystemRelativeTime.Ticks - LastTick;
@@ -217,13 +239,15 @@ namespace CaptureSampleCore
                         SharpDX.DXGI.SwapChainFlags.None);
                 }
 
+                if (!BorderSizeInited)
+                    OnWindowsSizeChange();
                 using (var backBuffer = swapChain.GetBackBuffer<SharpDX.Direct3D11.Texture2D>(0))
                 using (var bitmap = Direct3D11Helper.CreateSharpDXTexture2D(frame.Surface))
                 {
                     d3dDevice.ImmediateContext.CopyResource(bitmap, backBuffer);
-                    GetBitmap(bitmap, frame.SystemRelativeTime.Ticks.ToString());
+                    if (!newSize)
+                        GetBitmap(bitmap, (ulong)frame.SystemRelativeTime.Ticks / TimeSpan.TicksPerMillisecond - StartRecordTime);
                 }
-
             } // Retire the frame.
 
             swapChain.Present(0, SharpDX.DXGI.PresentFlags.None);
