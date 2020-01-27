@@ -27,6 +27,7 @@ using Composition.WindowsRuntimeHelpers;
 using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.InteropServices;
@@ -64,7 +65,7 @@ namespace WPFCaptureSample
         private ulong StartRecordTime;
         private BasicCapture basicCapture;
         private BitmapHandler bitmapHandler;
-        private JSONHandler json = new JSONHandler();
+        private JSONHandler json;
         [DllImport("kernel32")]
         extern static UInt64 GetTickCount64();
 
@@ -101,10 +102,17 @@ namespace WPFCaptureSample
         }
         private void AttachHook(Process process)
         {
+            StopButton.IsEnabled = true;
             basicCapture = sample.GetBasicCapture();
             basicCapture.proc = process;
-            basicCapture.StartRecordTime = StartRecordTime = GetTickCount64();
-            //basicCapture.OnBitmapCreate = bitmapHandler.PushBuffer;
+            basicCapture.StartRecordTime = StartRecordTime = GetTickCount64();  //Relative Time
+            DateTime date = DateTime.Now;   //Absolute Time
+            string DateStr = date.ToString("yyyyMMdd_HHmmss");
+            json = new JSONHandler(DateStr + @"\");
+            Form_MainWindow.Title = "WPF Capture Sample " + DateStr;
+            Directory.CreateDirectory(DateStr);
+            bitmapHandler = new BitmapHandler(DateStr + @"\");
+            basicCapture.OnBitmapCreate = bitmapHandler.PushBuffer;
             remoteAPIHook = new RemoteAPIHook(process);
             ControllerInputHooker = new ControllerInputFunctionSet(process);
             ControllerOutputHooker = new ControllerOutputFunctionSet(process);
@@ -113,7 +121,7 @@ namespace WPFCaptureSample
         }
         public void _Refresh()
         {
-            Label_FPS_Text.Content = ((int)sample.FrameRate).ToString() + " FPS";
+            Label_FPS_Text.Content = ((int)basicCapture.RecordFrameRate).ToString() + " FPS";
             bool IsMotorDiff = ControllerOutputHooker.AccessXInputSetState().FetchStateFromRemoteProcess(remoteAPIHook);
             bool IsInputDiff = ControllerInputHooker.AccessXInputGetState().FetchStateFromRemoteProcess(remoteAPIHook);
             if (IsMotorDiff || IsInputDiff) //Not Output Yet
@@ -137,7 +145,7 @@ namespace WPFCaptureSample
         {
             var interopWindow = new WindowInteropHelper(this);
             hwnd = interopWindow.Handle;
-
+            
             var presentationSource = PresentationSource.FromVisual(this);
             double dpiX = 1.0;
             double dpiY = 1.0;
@@ -153,14 +161,19 @@ namespace WPFCaptureSample
             InitMonitorList();
             TimeUIRefresh = new Timer(new TimerCallback(Refresh), null, 0, 1);
             syncContext = SynchronizationContext.Current;
-            bitmapHandler = new BitmapHandler("");
             if (GetTickCount64() >=  int.MaxValue * 0.9)
                 MessageBox.Show("You had better restart your computer! Poor Computer!", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
 
         private void StopButton_Click(object sender, RoutedEventArgs e)
         {
-            Console.WriteLine(json.Output());
+            Form_MainWindow.Title = "WPF Capture Sample";
+            json.ToFile();
+            json = null;
+            ControllerInputHooker = null;
+            ControllerOutputHooker = null;
+            bitmapHandler = null;
+            StopButton.IsEnabled = false;
             StopCapture();
             WindowComboBox.SelectedIndex = -1;
             MonitorComboBox.SelectedIndex = -1;
@@ -315,9 +328,10 @@ namespace WPFCaptureSample
             sample.StopCapture();
         }
 
-        private void Button_RefreshEventList_Click(object sender, RoutedEventArgs e)
+        private void Form_MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            listView_EventRec.Items.Clear();
+            if (StopButton.IsEnabled)
+                StopButton_Click(StopButton, null);
         }
     }
 }

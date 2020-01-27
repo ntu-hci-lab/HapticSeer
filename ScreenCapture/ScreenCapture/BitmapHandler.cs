@@ -23,8 +23,11 @@ namespace CaptureSampleCore
     public class BitmapHandler
     {
         private BufferBlock<BitmapInfo> bufferBlock = new BufferBlock<BitmapInfo>();
-        private Thread[] thread;
         private string OutputPath;
+        ~BitmapHandler()
+        {
+            bufferBlock.Complete();
+        }
         public void PushBuffer(Bitmap bitmap, ulong timestamp)
         {
             BitmapInfo bitmapInfo = new BitmapInfo(bitmap, timestamp);
@@ -40,7 +43,7 @@ namespace CaptureSampleCore
                 Bitmap bitmap = data.bitmap;
                 ulong timestamp = data.timestamp;
                 var factory = new ImagingFactory();
-                using (var wic = new WICStream(factory, timestamp.ToString() + ".jpeg", NativeFileAccess.ReadWrite))
+                using (var wic = new WICStream(factory, bitmapHandler.OutputPath + timestamp.ToString() + ".jpeg", NativeFileAccess.ReadWrite))
                 using (var encoder = new JpegBitmapEncoder(factory, wic))
                 using (var frame = new BitmapFrameEncode(encoder))
                 {
@@ -58,6 +61,7 @@ namespace CaptureSampleCore
         }
         public BitmapHandler(string OutputPath, int ThreadNums = 2)
         {
+            this.OutputPath = OutputPath;
             for (int i = 0; i < ThreadNums; ++i)
             {
                 ThreadPool.QueueUserWorkItem(new WaitCallback((s)=> 

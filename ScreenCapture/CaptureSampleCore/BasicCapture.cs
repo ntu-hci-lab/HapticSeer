@@ -41,7 +41,7 @@ namespace CaptureSampleCore
 {
     public class BasicCapture : IDisposable
     {
-        public double RecordFrameRate;
+        public double RecordFrameRate = -1;
         private long LastTick;
         public Process proc;
         public ulong StartRecordTime;
@@ -221,7 +221,11 @@ namespace CaptureSampleCore
             {
                 double DeltaTick = frame.SystemRelativeTime.Ticks - LastTick;
                 LastTick = frame.SystemRelativeTime.Ticks;
-                RecordFrameRate = 1 / (DeltaTick / TimeSpan.TicksPerSecond);
+                double TempRecordFrameRate = 1 / (DeltaTick / TimeSpan.TicksPerSecond);
+                if (RecordFrameRate > 0)
+                    RecordFrameRate = 0.9 * RecordFrameRate + TempRecordFrameRate * 0.1; //Low Pass Filter
+                else
+                    RecordFrameRate = TempRecordFrameRate;
                 if (frame.ContentSize.Width != lastSize.Width ||
                     frame.ContentSize.Height != lastSize.Height)
                 {

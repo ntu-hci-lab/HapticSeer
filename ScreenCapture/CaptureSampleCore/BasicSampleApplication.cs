@@ -42,17 +42,7 @@ namespace CaptureSampleCore
 
         private IDirect3DDevice device;
         private BasicCapture capture;
-
-        public double FrameRate
-        {
-            get
-            {
-                if (capture == null)
-                    return 0;
-                return capture.RecordFrameRate;
-            }
-        }
-
+        
         public BasicSampleApplication(Compositor c)
         {
             compositor = c;
