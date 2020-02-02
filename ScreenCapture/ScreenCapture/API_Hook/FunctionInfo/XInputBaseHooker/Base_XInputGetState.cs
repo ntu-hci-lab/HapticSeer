@@ -104,8 +104,8 @@ namespace WPFCaptureSample.API_Hook.FunctionInfo.XInputBaseHooker
             stringBuilder
                 .Append("{").AppendLine()
                 .Append("\"TimeStamp\": ").Append(Timestamp).Append(",").AppendLine()
-                .Append("\"Left Motor\": ").Append(LeftMotor).Append(",").AppendLine()
-                .Append("\"Right Motor\": ").Append(RightMotor);
+                .Append("\"Left_Motor\": ").Append(LeftMotor).Append(",").AppendLine()
+                .Append("\"Right_Motor\": ").Append(RightMotor);
             for (int i = 0; i < wButtonsIsPressed.Length; ++i)
             {
                 if (wButtonsName[i].Equals("DummyField"))

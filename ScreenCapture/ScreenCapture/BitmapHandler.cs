@@ -24,6 +24,7 @@ namespace CaptureSampleCore
     {
         private BufferBlock<BitmapInfo> bufferBlock = new BufferBlock<BitmapInfo>();
         private string OutputPath;
+        public bool IsStart = true;
         ~BitmapHandler()
         {
             bufferBlock.Complete();
@@ -39,24 +40,27 @@ namespace CaptureSampleCore
             ISourceBlock<BitmapInfo> source = bitmapHandler.bufferBlock;
             while (await source.OutputAvailableAsync().ConfigureAwait(true))
             {
-                BitmapInfo data = source.Receive();
-                Bitmap bitmap = data.bitmap;
-                ulong timestamp = data.timestamp;
-                var factory = new ImagingFactory();
-                using (var wic = new WICStream(factory, bitmapHandler.OutputPath + timestamp.ToString() + ".jpeg", NativeFileAccess.ReadWrite))
-                using (var encoder = new JpegBitmapEncoder(factory, wic))
-                using (var frame = new BitmapFrameEncode(encoder))
+                if (bitmapHandler.IsStart)
                 {
-                    frame.Initialize();
-                    frame.SetSize(bitmap.Size.Width, bitmap.Size.Height);
-                    Guid format = bitmap.PixelFormat;
-                    frame.SetPixelFormat(ref format);
-                    frame.WriteSource(bitmap);
-                    frame.Commit();
-                    encoder.Commit();
+                    BitmapInfo data = source.Receive();
+                    Bitmap bitmap = data.bitmap;
+                    ulong timestamp = data.timestamp;
+                    var factory = new ImagingFactory();
+                    using (var wic = new WICStream(factory, bitmapHandler.OutputPath + timestamp.ToString() + ".jpeg", NativeFileAccess.ReadWrite))
+                    using (var encoder = new JpegBitmapEncoder(factory, wic))
+                    using (var frame = new BitmapFrameEncode(encoder))
+                    {
+                        frame.Initialize();
+                        frame.SetSize(bitmap.Size.Width, bitmap.Size.Height);
+                        Guid format = bitmap.PixelFormat;
+                        frame.SetPixelFormat(ref format);
+                        frame.WriteSource(bitmap);
+                        frame.Commit();
+                        encoder.Commit();
+                    }
+                    factory.Dispose();
+                    bitmap.Dispose();
                 }
-                factory.Dispose();
-                bitmap.Dispose();
             }
         }
         public BitmapHandler(string OutputPath, int ThreadNums = 2)

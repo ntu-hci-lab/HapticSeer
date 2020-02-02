@@ -24,11 +24,14 @@
 
 using CaptureSampleCore;
 using Composition.WindowsRuntimeHelpers;
+using NAudio.CoreAudioApi;
+using NAudio.Wave;
 using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Media;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -42,6 +45,7 @@ using Windows.UI.Composition;
 using WPFCaptureSample.API_Hook;
 using WPFCaptureSample.API_Hook.FunctionInfo;
 using WPFCaptureSample.API_Hook.FunctionInfo.XInputBaseHooker;
+using WPFCaptureSample.AudioRecorder;
 
 namespace WPFCaptureSample
 {
@@ -65,7 +69,11 @@ namespace WPFCaptureSample
         private ulong StartRecordTime;
         private BasicCapture basicCapture;
         private BitmapHandler bitmapHandler;
+        private uint JSONLastTimeStamp;
+        private object JSON_Lock = new object();
         private JSONHandler json;
+
+        AudioLoopback audioCapture;
         [DllImport("kernel32")]
         extern static UInt64 GetTickCount64();
 
@@ -102,6 +110,7 @@ namespace WPFCaptureSample
         }
         private void AttachHook(Process process)
         {
+            TimeUIRefresh = new Timer(new TimerCallback(Refresh), null, 0, 1);
             StopButton.IsEnabled = true;
             basicCapture = sample.GetBasicCapture();
             basicCapture.proc = process;
@@ -118,18 +127,35 @@ namespace WPFCaptureSample
             ControllerOutputHooker = new ControllerOutputFunctionSet(process);
             remoteAPIHook.Hook(ControllerInputHooker);
             remoteAPIHook.Hook(ControllerOutputHooker);
+            audioCapture.StartRecord(DateStr + @"\");
+            SystemSounds.Asterisk.Play();
         }
         public void _Refresh()
         {
+            if (StopButton.IsEnabled == false)
+                return;
             Label_FPS_Text.Content = ((int)basicCapture.RecordFrameRate).ToString() + " FPS";
+            if (ControllerOutputHooker == null)
+                return;
             bool IsMotorDiff = ControllerOutputHooker.AccessXInputSetState().FetchStateFromRemoteProcess(remoteAPIHook);
+            if (ControllerInputHooker == null)
+                return;
             bool IsInputDiff = ControllerInputHooker.AccessXInputGetState().FetchStateFromRemoteProcess(remoteAPIHook);
             if (IsMotorDiff || IsInputDiff) //Not Output Yet
             {
-                ushort Left, Right;
-                ControllerOutputHooker.AccessXInputSetState().GetData(out Left, out Right);
-                string Output = DirectJSONOutput(ControllerInputHooker.AccessXInputGetState().GetData(), Left, Right);
-                json.AddNew(Output);
+                lock (JSON_Lock)
+                {
+                    ushort Left, Right;
+                    ControllerOutputHooker.AccessXInputSetState().GetData(out Left, out Right);
+                    var Data = ControllerInputHooker.AccessXInputGetState().GetData();
+                    uint Data_index = Data.Index;
+                    string Output = DirectJSONOutput(Data, Left, Right);
+                    if (Data_index > JSONLastTimeStamp)
+                    {
+                        json.AddNew(Output);
+                        JSONLastTimeStamp = Data_index;
+                    }
+                }
             }
         }
         public void Refresh(object state)
@@ -145,7 +171,6 @@ namespace WPFCaptureSample
         {
             var interopWindow = new WindowInteropHelper(this);
             hwnd = interopWindow.Handle;
-            
             var presentationSource = PresentationSource.FromVisual(this);
             double dpiX = 1.0;
             double dpiY = 1.0;
@@ -159,22 +184,26 @@ namespace WPFCaptureSample
             InitComposition(controlsWidth);
             InitWindowList();
             InitMonitorList();
-            TimeUIRefresh = new Timer(new TimerCallback(Refresh), null, 0, 1);
             syncContext = SynchronizationContext.Current;
             if (GetTickCount64() >=  int.MaxValue * 0.9)
                 MessageBox.Show("You had better restart your computer! Poor Computer!", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+            audioCapture = new AudioLoopback();
         }
 
         private void StopButton_Click(object sender, RoutedEventArgs e)
         {
+            SystemSounds.Asterisk.Play();
+            TimeUIRefresh.Dispose();
             Form_MainWindow.Title = "WPF Capture Sample";
             json.ToFile();
             json = null;
             ControllerInputHooker = null;
             ControllerOutputHooker = null;
+            bitmapHandler.IsStart = false;
             bitmapHandler = null;
             StopButton.IsEnabled = false;
             StopCapture();
+            audioCapture.StopRecord();
             WindowComboBox.SelectedIndex = -1;
             MonitorComboBox.SelectedIndex = -1;
         }
