@@ -31,6 +31,7 @@ namespace WPFCaptureSample.API_Hook.FunctionInfo.XInputBaseHooker
            };
         public bool[] wButtonsIsPressed = new bool[wButtonsName.Length];
         public uint Index;
+        public XINPUT_GAMEPAD OffsetObj;
         public ushort wButtons
         {
             get
@@ -56,28 +57,28 @@ namespace WPFCaptureSample.API_Hook.FunctionInfo.XInputBaseHooker
         {
             get
             {
-                return BitConverter.ToInt16(RawData, 4);
+                return (short)(BitConverter.ToInt16(RawData, 4) - (OffsetObj == null ? 0 : OffsetObj.sThumbLX));
             }
         }
         public short sThumbLY
         {
             get
             {
-                return BitConverter.ToInt16(RawData, 6);
+                return (short)(BitConverter.ToInt16(RawData, 6) - (OffsetObj == null ? 0 : OffsetObj.sThumbLY));
             }
         }
         public short sThumbRX
         {
             get
             {
-                return BitConverter.ToInt16(RawData, 8);
+                return (short)(BitConverter.ToInt16(RawData, 8) - (OffsetObj == null ? 0 : OffsetObj.sThumbRX));
             }
         }
         public short sThumbRY
         {
             get
             {
-                return BitConverter.ToInt16(RawData, 10);
+                return (short)(BitConverter.ToInt16(RawData, 10) - (OffsetObj == null ? 0 : OffsetObj.sThumbRY));
             }
         }
         public void FetchFromRawMemory(byte[] MemData)
@@ -129,7 +130,7 @@ namespace WPFCaptureSample.API_Hook.FunctionInfo.XInputBaseHooker
     {
         protected long RemoteDataAddress;
         private byte[] FetchDataStream = new byte[32];
-        private XINPUT_GAMEPAD Old = new XINPUT_GAMEPAD(), New = new XINPUT_GAMEPAD();
+        private XINPUT_GAMEPAD Old = new XINPUT_GAMEPAD(), New = new XINPUT_GAMEPAD(), Offset = null;
         public virtual int GetPriority()
         {
             return 0;
@@ -146,6 +147,12 @@ namespace WPFCaptureSample.API_Hook.FunctionInfo.XInputBaseHooker
         public bool FetchStateFromRemoteProcess(RemoteAPIHook remoteAPIHook)
         {
             remoteAPIHook.RemoteAddressRead((IntPtr)RemoteDataAddress, ref FetchDataStream);
+            if (Offset == null)
+            {
+                Offset = new XINPUT_GAMEPAD();
+                Offset.FetchFromRawMemory(FetchDataStream);
+                Old.OffsetObj = New.OffsetObj = Offset;
+            }
             New.FetchFromRawMemory(FetchDataStream);
             bool IsDiff = New.IsDiff(Old);
             XINPUT_GAMEPAD temp = New;

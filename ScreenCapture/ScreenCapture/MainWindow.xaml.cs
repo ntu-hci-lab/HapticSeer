@@ -63,6 +63,7 @@ namespace WPFCaptureSample
         private ObservableCollection<MonitorInfo> monitors;
         //Add for API Hook
         Timer TimeUIRefresh;
+        private Process TargetProcess;
         private RemoteAPIHook remoteAPIHook;
         private ControllerInputFunctionSet ControllerInputHooker;
         private ControllerOutputFunctionSet ControllerOutputHooker;
@@ -76,6 +77,8 @@ namespace WPFCaptureSample
         AudioLoopback audioCapture;
         [DllImport("kernel32")]
         extern static UInt64 GetTickCount64();
+        [DllImport("user32.dll")]
+        static extern bool SetForegroundWindow(IntPtr hWnd);
 
         //Main Thread Context
         SynchronizationContext syncContext;
@@ -112,7 +115,6 @@ namespace WPFCaptureSample
         {
             TimeUIRefresh = new Timer(new TimerCallback(Refresh), null, 0, 1);
             StopButton.IsEnabled = true;
-            basicCapture = sample.GetBasicCapture();
             basicCapture.proc = process;
             basicCapture.StartRecordTime = StartRecordTime = GetTickCount64();  //Relative Time
             DateTime date = DateTime.Now;   //Absolute Time
@@ -192,18 +194,19 @@ namespace WPFCaptureSample
 
         private void StopButton_Click(object sender, RoutedEventArgs e)
         {
+            StopButton.IsEnabled = false;
             SystemSounds.Asterisk.Play();
             TimeUIRefresh.Dispose();
             Form_MainWindow.Title = "WPF Capture Sample";
-            json.ToFile();
+            json?.ToFile();
             json = null;
             ControllerInputHooker = null;
             ControllerOutputHooker = null;
-            bitmapHandler.IsStart = false;
+            if (bitmapHandler != null)
+                bitmapHandler.IsStart = false;
             bitmapHandler = null;
-            StopButton.IsEnabled = false;
             StopCapture();
-            audioCapture.StopRecord();
+            audioCapture?.StopRecord();
             WindowComboBox.SelectedIndex = -1;
             MonitorComboBox.SelectedIndex = -1;
         }
@@ -228,7 +231,9 @@ namespace WPFCaptureSample
                     processes.Remove(process);
                     comboBox.SelectedIndex = -1;
                 }
-                AttachHook(process);
+                TargetProcess = process;
+                HookButton_Start.IsEnabled = true;
+                basicCapture = sample.GetBasicCapture();
             }
         }
 
@@ -319,7 +324,9 @@ namespace WPFCaptureSample
                 {
                     if (process.MainWindowTitle.Equals(title))
                     {
-                        AttachHook(process);
+                        TargetProcess = process;
+                        HookButton_Start.IsEnabled = true;
+                        basicCapture = sample.GetBasicCapture();
                         break;
                     }
                 }
@@ -361,6 +368,33 @@ namespace WPFCaptureSample
         {
             if (StopButton.IsEnabled)
                 StopButton_Click(StopButton, null);
+            System.Environment.Exit(0);
+        }
+
+        private void HookButton_Stop_Click(object sender, RoutedEventArgs e)
+        {
+            SystemSounds.Asterisk.Play();
+            TimeUIRefresh.Dispose();
+            Form_MainWindow.Title = "WPF Capture Sample";
+            json.ToFile();
+            json = null;
+            ControllerInputHooker = null;
+            ControllerOutputHooker = null;
+            bitmapHandler.IsStart = false;
+            bitmapHandler = null;
+            basicCapture.StartRecordTime = 0;
+            basicCapture.OnBitmapCreate = null;
+            audioCapture.StopRecord();
+            HookButton_Stop.IsEnabled = false;
+            HookButton_Start.IsEnabled = true;
+        }
+
+        private void HookButton_Start_Click(object sender, RoutedEventArgs e)
+        {
+            AttachHook(TargetProcess);
+            SetForegroundWindow(TargetProcess.MainWindowHandle);
+            HookButton_Stop.IsEnabled = true;
+            HookButton_Start.IsEnabled = false;
         }
     }
 }

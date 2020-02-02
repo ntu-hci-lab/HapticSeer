@@ -65,6 +65,8 @@ namespace CaptureSampleCore
         private static extern int GetWindowRect(IntPtr hwnd, out Rect lpRect);
         [DllImport("user32.dll")]
         public static extern bool GetClientRect(IntPtr hwnd, out Rect lpRect);
+        [DllImport("kernel32")]
+        extern static UInt64 GetTickCount64();
         private Rect BorderSize = new Rect();
         private bool BorderSizeInited = false;
 
@@ -144,8 +146,9 @@ namespace CaptureSampleCore
             return compositor.CreateCompositionSurfaceForSwapChain(swapChain);
         }
 
-        private void GetBitmap(Texture2D texture, ulong timestamp)
+        private void GetBitmap(Texture2D texture)
         {
+            ulong timestamp = GetTickCount64() - StartRecordTime;
             // Create texture copy
             var copy = new Texture2D(d3dDevice, new Texture2DDescription
             {
@@ -207,15 +210,13 @@ namespace CaptureSampleCore
             //Ummapped Image
             d3dDevice.ImmediateContext.UnmapSubresource(copy, 0);
             copy.Dispose();
-            if (OnBitmapCreate != null)
-                OnBitmapCreate(bmp, timestamp);
+
+            OnBitmapCreate?.Invoke(bmp, timestamp);
         }
 
 
         private void OnFrameArrived(Direct3D11CaptureFramePool sender, object args)
         {
-            if (StartRecordTime == 0)
-                return;
             var newSize = false;
             using (var frame = sender.TryGetNextFrame())
             {
@@ -249,8 +250,8 @@ namespace CaptureSampleCore
                 using (var bitmap = Direct3D11Helper.CreateSharpDXTexture2D(frame.Surface))
                 {
                     d3dDevice.ImmediateContext.CopyResource(bitmap, backBuffer);
-                    if (!newSize)
-                        GetBitmap(bitmap, (ulong)frame.SystemRelativeTime.Ticks / TimeSpan.TicksPerMillisecond - StartRecordTime);
+                    if (!newSize && StartRecordTime != 0)
+                        GetBitmap(bitmap);
                 }
             } // Retire the frame.
 
