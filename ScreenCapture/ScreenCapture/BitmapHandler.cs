@@ -2,7 +2,9 @@
 using SharpDX.WIC;
 using System;
 using System.Collections.Generic;
+using System.Drawing.Imaging;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,6 +22,7 @@ namespace CaptureSampleCore
             this.timestamp = timestamp;
         }
     }
+
     public class BitmapHandler
     {
         private BufferBlock<BitmapInfo> bufferBlock = new BufferBlock<BitmapInfo>();
@@ -38,6 +41,7 @@ namespace CaptureSampleCore
         {
             BitmapHandler bitmapHandler = bitmapHandlerObj as BitmapHandler;
             ISourceBlock<BitmapInfo> source = bitmapHandler.bufferBlock;
+            byte[] pixelData = null;
             while (await source.OutputAvailableAsync().ConfigureAwait(true))
             {
                 if (bitmapHandler.IsStart)
@@ -45,6 +49,17 @@ namespace CaptureSampleCore
                     BitmapInfo data = source.Receive();
                     Bitmap bitmap = data.bitmap;
                     ulong timestamp = data.timestamp;
+                    int width = bitmap.Size.Width, height = bitmap.Size.Height;
+                    if (pixelData == null || pixelData?.Length != width * height * 4)
+                        pixelData = new byte[width * height * 4];
+                    System.Drawing.Bitmap sysBitmap = new System.Drawing.Bitmap(width, height);
+                    bitmap.CopyPixels(pixelData, width * 4);
+                    var bd = sysBitmap.LockBits(new System.Drawing.Rectangle(0, 0, width, height), ImageLockMode.WriteOnly,
+                        System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
+                    Marshal.Copy(pixelData, 0, bd.Scan0, pixelData.Length);
+                    sysBitmap.UnlockBits(bd);
+                    bitmap.Dispose();
+                    /*
                     var factory = new ImagingFactory();
                     using (var wic = new WICStream(factory, bitmapHandler.OutputPath + timestamp.ToString() + ".jpeg", NativeFileAccess.ReadWrite))
                     using (var encoder = new JpegBitmapEncoder(factory, wic))
@@ -60,6 +75,7 @@ namespace CaptureSampleCore
                     }
                     factory.Dispose();
                     bitmap.Dispose();
+                    */
                 }
             }
         }
