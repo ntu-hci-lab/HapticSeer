@@ -375,17 +375,16 @@ namespace WPFCaptureSample
         {
             SystemSounds.Asterisk.Play();
             TimeUIRefresh.Dispose();
-            bitmapHandler.Done();
             Form_MainWindow.Title = "WPF Capture Sample";
             json.ToFile();
             json = null;
             ControllerInputHooker = null;
             ControllerOutputHooker = null;
-            bitmapHandler.IsStart = false;
-            bitmapHandler = null;
             basicCapture.StartRecordTime = 0;
             basicCapture.OnBitmapCreate = null;
             audioCapture.StopRecord();
+            bitmapHandler.Done();
+            bitmapHandler = null;
             HookButton_Stop.IsEnabled = false;
             HookButton_Start.IsEnabled = true;
         }

@@ -47,10 +47,12 @@ namespace CaptureSampleCore
         {
             Done();
         }
-        public void Done()
+        public async void Done()
         {
-            IsStart = false;
-            bufferBlock.Complete();
+            while (bufferBlock.Count != 0)
+                await Task.Delay(1);
+            if (bufferBlock.Count == 0)
+                bufferBlock.Complete();
         }
         public void PushBuffer(SharpDX.WIC.Bitmap bitmap, ulong timestamp)
         {
@@ -71,11 +73,12 @@ namespace CaptureSampleCore
                     BitmapInfo data = source.Receive();
                     System.Drawing.Bitmap bitmap = data.bitmap;
                     ulong timestamp = data.timestamp;
+                    data.bitmap = null;
                     if (bitmapHandler.writer == null)
                     {
                         VideoFrameRate = (int)Math.Round(bitmapHandler.basicCapture.RecordFrameRate);
                         bitmapHandler.writer = new VideoFileWriter();
-                        bitmapHandler.writer.Open(bitmapHandler.OutputPath + "Video.mp4", bitmap.Width, bitmap.Height, VideoFrameRate, Accord.Video.FFMPEG.VideoCodec.MPEG4, 2147483647);
+                        bitmapHandler.writer.Open(bitmapHandler.OutputPath + "Video.mp4", bitmap.Width, bitmap.Height, VideoFrameRate, Accord.Video.FFMPEG.VideoCodec.MPEG4, 1024*1024*256);
                         oldBitmap = bitmap;
                     }
                     int ThisFramePosition = (int)Math.Round((long)timestamp * VideoFrameRate / 1000f);
@@ -96,7 +99,11 @@ namespace CaptureSampleCore
                         if (oldBitmap != bitmap)
                             oldBitmap.Dispose();
                         oldBitmap = bitmap;
-                        bitmapHandler.writer.Flush();
+                        if (NextFrameInsertPosition % VideoFrameRate == 0)
+                        {
+                            bitmapHandler.writer.Flush();
+                            GC.Collect();
+                        }
                     }
                     catch (Exception e)
                     {
@@ -104,7 +111,9 @@ namespace CaptureSampleCore
                     }
                 }
             }
+            
             bitmapHandler?.writer?.Close();
+            bitmapHandler.writer.Dispose();
         }
         public BitmapHandler(string OutputPath, BasicCapture basicCapture)
         {
