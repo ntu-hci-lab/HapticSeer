@@ -122,7 +122,7 @@ namespace WPFCaptureSample
             json = new JSONHandler(DateStr + @"\");
             Form_MainWindow.Title = "WPF Capture Sample " + DateStr;
             Directory.CreateDirectory(DateStr);
-            bitmapHandler = new BitmapHandler(DateStr + @"\");
+            bitmapHandler = new BitmapHandler(DateStr + @"\", basicCapture);
             basicCapture.OnBitmapCreate = bitmapHandler.PushBuffer;
             remoteAPIHook = new RemoteAPIHook(process);
             ControllerInputHooker = new ControllerInputFunctionSet(process);
@@ -375,6 +375,7 @@ namespace WPFCaptureSample
         {
             SystemSounds.Asterisk.Play();
             TimeUIRefresh.Dispose();
+            bitmapHandler.Done();
             Form_MainWindow.Title = "WPF Capture Sample";
             json.ToFile();
             json = null;

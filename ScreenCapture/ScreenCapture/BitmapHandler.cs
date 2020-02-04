@@ -1,7 +1,11 @@
-﻿using SharpDX.IO;
+﻿using Accord.Video.FFMPEG;
+using SharpAvi;
+using SharpAvi.Output;
+using SharpDX.IO;
 using SharpDX.WIC;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -15,10 +19,18 @@ namespace CaptureSampleCore
     class BitmapInfo
     {
         public ulong timestamp;
-        public Bitmap bitmap;
-        public BitmapInfo(Bitmap bitmap, ulong timestamp)
+        public System.Drawing.Bitmap bitmap;
+        public BitmapInfo(SharpDX.WIC.Bitmap bitmap, ulong timestamp)
         {
-            this.bitmap = bitmap;
+            int width = bitmap.Size.Width, height = bitmap.Size.Height;
+            byte[] pixelData = new byte[width * height * 4];
+            System.Drawing.Bitmap sysBitmap = new System.Drawing.Bitmap(width, height);
+            bitmap.CopyPixels(pixelData, width * 4); 
+            var bd = sysBitmap.LockBits(new System.Drawing.Rectangle(0, 0, width, height), ImageLockMode.WriteOnly, System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
+            Marshal.Copy(pixelData, 0, bd.Scan0, pixelData.Length);
+            sysBitmap.UnlockBits(bd);
+            bitmap.Dispose();
+            this.bitmap = sysBitmap;
             this.timestamp = timestamp;
         }
     }
@@ -28,11 +40,19 @@ namespace CaptureSampleCore
         private BufferBlock<BitmapInfo> bufferBlock = new BufferBlock<BitmapInfo>();
         private string OutputPath;
         public bool IsStart = true;
+        BasicCapture basicCapture; 
+        VideoFileWriter writer = null;
+        
         ~BitmapHandler()
         {
+            Done();
+        }
+        public void Done()
+        {
+            IsStart = false;
             bufferBlock.Complete();
         }
-        public void PushBuffer(Bitmap bitmap, ulong timestamp)
+        public void PushBuffer(SharpDX.WIC.Bitmap bitmap, ulong timestamp)
         {
             BitmapInfo bitmapInfo = new BitmapInfo(bitmap, timestamp);
             bufferBlock.Post(bitmapInfo);
@@ -41,55 +61,60 @@ namespace CaptureSampleCore
         {
             BitmapHandler bitmapHandler = bitmapHandlerObj as BitmapHandler;
             ISourceBlock<BitmapInfo> source = bitmapHandler.bufferBlock;
-            byte[] pixelData = null;
+            System.Drawing.Bitmap oldBitmap = null;
+            int VideoFrameRate = 0;
+            int NextFrameInsertPosition = 0;
             while (await source.OutputAvailableAsync().ConfigureAwait(true))
             {
                 if (bitmapHandler.IsStart)
                 {
                     BitmapInfo data = source.Receive();
-                    Bitmap bitmap = data.bitmap;
+                    System.Drawing.Bitmap bitmap = data.bitmap;
                     ulong timestamp = data.timestamp;
-                    int width = bitmap.Size.Width, height = bitmap.Size.Height;
-                    if (pixelData == null || pixelData?.Length != width * height * 4)
-                        pixelData = new byte[width * height * 4];
-                    System.Drawing.Bitmap sysBitmap = new System.Drawing.Bitmap(width, height);
-                    bitmap.CopyPixels(pixelData, width * 4);
-                    var bd = sysBitmap.LockBits(new System.Drawing.Rectangle(0, 0, width, height), ImageLockMode.WriteOnly,
-                        System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
-                    Marshal.Copy(pixelData, 0, bd.Scan0, pixelData.Length);
-                    sysBitmap.UnlockBits(bd);
-                    bitmap.Dispose();
-                    /*
-                    var factory = new ImagingFactory();
-                    using (var wic = new WICStream(factory, bitmapHandler.OutputPath + timestamp.ToString() + ".jpeg", NativeFileAccess.ReadWrite))
-                    using (var encoder = new JpegBitmapEncoder(factory, wic))
-                    using (var frame = new BitmapFrameEncode(encoder))
+                    if (bitmapHandler.writer == null)
                     {
-                        frame.Initialize();
-                        frame.SetSize(bitmap.Size.Width, bitmap.Size.Height);
-                        Guid format = bitmap.PixelFormat;
-                        frame.SetPixelFormat(ref format);
-                        frame.WriteSource(bitmap);
-                        frame.Commit();
-                        encoder.Commit();
+                        VideoFrameRate = (int)Math.Round(bitmapHandler.basicCapture.RecordFrameRate);
+                        bitmapHandler.writer = new VideoFileWriter();
+                        bitmapHandler.writer.Open(bitmapHandler.OutputPath + "Video.mp4", bitmap.Width, bitmap.Height, VideoFrameRate, Accord.Video.FFMPEG.VideoCodec.MPEG4, 2147483647);
+                        oldBitmap = bitmap;
                     }
-                    factory.Dispose();
-                    bitmap.Dispose();
-                    */
+                    int ThisFramePosition = (int)Math.Round((long)timestamp * VideoFrameRate / 1000f);
+                    if (ThisFramePosition < NextFrameInsertPosition)    //Cannot put at corresponding position
+                        ThisFramePosition++;   //Try to shift one frame
+                    try
+                    {
+                        while (NextFrameInsertPosition < ThisFramePosition)
+                        {
+                            NextFrameInsertPosition++;
+                            bitmapHandler.writer.WriteVideoFrame(oldBitmap);
+                        }
+                        if (NextFrameInsertPosition == ThisFramePosition)
+                        {
+                            NextFrameInsertPosition++;
+                            bitmapHandler.writer.WriteVideoFrame(bitmap);
+                        }
+                        if (oldBitmap != bitmap)
+                            oldBitmap.Dispose();
+                        oldBitmap = bitmap;
+                        bitmapHandler.writer.Flush();
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.ToString());
+                    }
                 }
             }
+            bitmapHandler?.writer?.Close();
         }
-        public BitmapHandler(string OutputPath, int ThreadNums = 2)
+        public BitmapHandler(string OutputPath, BasicCapture basicCapture)
         {
             this.OutputPath = OutputPath;
-            for (int i = 0; i < ThreadNums; ++i)
+            this.basicCapture = basicCapture;
+            ThreadPool.QueueUserWorkItem(new WaitCallback((s)=> 
             {
-                ThreadPool.QueueUserWorkItem(new WaitCallback((s)=> 
-                {
-                    var consumer = ConsumeData(s);
-                    consumer.Wait();
-                }), this);
-            }
+                var consumer = ConsumeData(s);
+                consumer.Wait();
+            }), this);
         }
     }
 }
