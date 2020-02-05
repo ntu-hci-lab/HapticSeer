@@ -89,6 +89,13 @@ namespace CaptureSampleCore
             int TitleBarSize = TotalBorderHeightSize - _BorderSize;
             BorderSize.Left = BorderSize.Right = BorderSize.Bottom = _BorderSize;
             BorderSize.Top = TitleBarSize;
+
+            int Width = WindowsPositionInRef.Right - WindowsPositionInRef.Left - BorderSize.Left - BorderSize.Right,
+                Height = WindowsPositionInRef.Bottom - WindowsPositionInRef.Top - BorderSize.Top - BorderSize.Bottom;
+            if (Width % 2 != 0)
+                BorderSize.Right--;
+            if (Height % 2 != 0)
+                BorderSize.Top++;
         }
         public BasicCapture(IDirect3DDevice d, GraphicsCaptureItem i)
         {

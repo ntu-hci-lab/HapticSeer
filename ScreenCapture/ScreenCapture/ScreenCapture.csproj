@@ -89,10 +89,12 @@
     <Compile Include="API_Hook\FunctionInfo\XInputBaseHooker\XInput9_1_XInputSetState.cs" />
     <Compile Include="API_Hook\FunctionInfo\XInputBaseHooker\XInput1_3_XInputSetState.cs" />
     <Compile Include="API_Hook\RemoteAPIHook.cs" />
+    <Compile Include="API_Hook\UnsupportedModuleException.cs" />
     <Compile Include="AudioRecorder\AudioLoopback.cs" />
     <Compile Include="BitmapHandler.cs" />
     <Compile Include="JSONHandler.cs" />
     <Compile Include="MonitorEnumerationHelper.cs" />
+    <Compile Include="PseudoXInput\PseudoXInput.cs" />
     <Compile Include="WindowEnumerationHelper.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

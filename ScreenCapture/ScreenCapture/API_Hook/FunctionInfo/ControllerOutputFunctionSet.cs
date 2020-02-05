@@ -28,7 +28,7 @@ namespace WPFCaptureSample.API_Hook.FunctionInfo
                     }
                 }
             }
-            throw new Exception("Cannot find any supported controller module!");
+            throw new UnsupportedModuleException();
         }
 
         public Base_XInputSetState AccessXInputSetState()

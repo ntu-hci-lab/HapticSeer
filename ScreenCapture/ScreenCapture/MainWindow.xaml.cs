@@ -70,6 +70,7 @@ namespace WPFCaptureSample
         private ulong StartRecordTime;
         private BasicCapture basicCapture;
         private BitmapHandler bitmapHandler;
+        private PseudoXInput pseudoXInput;
         private uint JSONLastTimeStamp;
         private object JSON_Lock = new object();
         private JSONHandler json;
@@ -124,11 +125,23 @@ namespace WPFCaptureSample
             Directory.CreateDirectory(DateStr);
             bitmapHandler = new BitmapHandler(DateStr + @"\", basicCapture);
             basicCapture.OnBitmapCreate = bitmapHandler.PushBuffer;
-            remoteAPIHook = new RemoteAPIHook(process);
-            ControllerInputHooker = new ControllerInputFunctionSet(process);
-            ControllerOutputHooker = new ControllerOutputFunctionSet(process);
-            remoteAPIHook.Hook(ControllerInputHooker);
-            remoteAPIHook.Hook(ControllerOutputHooker);
+            try
+            {
+                remoteAPIHook = new RemoteAPIHook(process);
+                ControllerInputHooker = new ControllerInputFunctionSet(process);
+                remoteAPIHook.Hook(ControllerInputHooker);
+                ControllerOutputHooker = new ControllerOutputFunctionSet(process);
+                remoteAPIHook.Hook(ControllerOutputHooker);
+            }catch (UnsupportedModuleException e)
+            {
+                MessageBox.Show("Cannot found native XINPUT module!", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                pseudoXInput = new PseudoXInput(); 
+                remoteAPIHook = new RemoteAPIHook(Process.GetCurrentProcess());
+                ControllerInputHooker = new ControllerInputFunctionSet(Process.GetCurrentProcess());
+                remoteAPIHook.Hook(ControllerInputHooker);
+                ControllerOutputHooker = new ControllerOutputFunctionSet(Process.GetCurrentProcess());
+                remoteAPIHook.Hook(ControllerOutputHooker);
+            }
             audioCapture.StartRecord(DateStr + @"\");
             SystemSounds.Asterisk.Play();
         }
@@ -204,6 +217,11 @@ namespace WPFCaptureSample
             ControllerOutputHooker = null;
             if (bitmapHandler != null)
                 bitmapHandler.IsStart = false;
+            if (pseudoXInput != null)
+            {
+                pseudoXInput.IsStart = false;
+                pseudoXInput = null;
+            }
             bitmapHandler = null;
             StopCapture();
             audioCapture?.StopRecord();
