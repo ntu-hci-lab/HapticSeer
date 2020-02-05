@@ -6,8 +6,6 @@ using System.Text;
 using System.Threading;
 using Emgu.CV;
 using Emgu.CV.Structure;
-using AForge.Video.DirectShow;
-using System.Drawing.Bitmap;
 namespace TestPS4Latency
 {
     class Program
@@ -17,9 +15,6 @@ namespace TestPS4Latency
         static Mat frame = new Mat();
         static VideoCapture cap = new VideoCapture();
         static ulong StartRecordTimeStamp = 0;
-        static FilterInfoCollection USB_Webcams = null;
-        static VideoCaptureDevice Cam = null;
-
         static void ProcessFrame(object sender, EventArgs e)
         {
             if (cap != null && cap.Ptr != IntPtr.Zero)
@@ -34,31 +29,10 @@ namespace TestPS4Latency
 
             }
         }
-        static void ForCaptureCard()
-        {
-            USB_Webcams = new FilterInfoCollection(FilterCategory.VideoInputDevice);
-            if (USB_Webcams.Count > 0)  // The quantity of WebCam must be more than 0.
-            {
-                Cam = new VideoCaptureDevice(USB_Webcams[0].MonikerString);
-                Cam.NewFrame += Cam_NewFrame;
-                Cam.Start();
-                Thread.Sleep(100);
-            }
-
-        }
-
-        private static void Cam_NewFrame(object sender, AForge.Video.NewFrameEventArgs eventArgs)
-        {
-            if (StartRecordTimeStamp == 0)
-                return;
-            ulong Timedelta = GetTickCount64() - StartRecordTimeStamp;
-            eventArgs.Frame.Save(Timedelta.ToString() + ".png");
-        }
-
         static void Test()
         {
             HttpListener server = new HttpListener();
-            //server.Prefixes.Add("http://192.168.1.103:2222/");
+            server.Prefixes.Add("http://192.168.1.103:2222/");
             server.Prefixes.Add("http://localhost:2222/");
 
             server.Start();
@@ -78,12 +52,19 @@ namespace TestPS4Latency
                 StringBuilder builder;
                 switch (context.Request.Url.LocalPath)
                 {
+                    case "/":
+                        builder = new StringBuilder("<!DOCTYPE html><html><head><title>測試</title><meta charset=\"utf-8\"></head><body>中文測試</body></html>");
+                        break;
                     case "/timestamp":
                         builder = new StringBuilder(Timedelta.ToString());
                         break;
-                    default:
+                    case "/readTheme":
                         Console.WriteLine(context.Request.QueryString.Get("test"));
                         builder = new StringBuilder("<!DOCTYPE html><html><head><script>function A(){fetch('http://localhost:2222/timestamp').then(function(response) {return response.text()}).then(function(html) {document.body.innerText = html;}).catch(function(err) {console.log('Failed to fetch page: ', err);});}setInterval(\"A()\", 1);</script></head><body></body></html>");
+                        break;
+
+                    default:
+                        builder = new StringBuilder("<!DOCTYPE html><html><head><title>測試</title><meta charset=\"utf-8\"></head><body>中文測試</body></html>");
                         break;
                 }
 
@@ -103,7 +84,7 @@ namespace TestPS4Latency
             cap.Start();
             Thread.Sleep(100);
             StartRecordTimeStamp = GetTickCount64();
-            new Thread(() =>
+            new Thread(() => 
             {
                 Test();
             }).Start();
