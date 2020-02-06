@@ -90,8 +90,8 @@ namespace CaptureSampleCore
             BorderSize.Left = BorderSize.Right = BorderSize.Bottom = _BorderSize;
             BorderSize.Top = TitleBarSize;
 
-            int Width = WindowsPositionInRef.Right - WindowsPositionInRef.Left - BorderSize.Left - BorderSize.Right,
-                Height = WindowsPositionInRef.Bottom - WindowsPositionInRef.Top - BorderSize.Top - BorderSize.Bottom;
+            int Width = WindowsPositionInScreen.Right - WindowsPositionInScreen.Left - BorderSize.Left - BorderSize.Right,
+                Height = WindowsPositionInScreen.Bottom - WindowsPositionInScreen.Top - BorderSize.Top - BorderSize.Bottom;
             if (Width % 2 != 0)
                 BorderSize.Right--;
             if (Height % 2 != 0)
