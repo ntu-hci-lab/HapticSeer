@@ -74,7 +74,10 @@ namespace WPFCaptureSample
         private uint JSONLastTimeStamp;
         private object JSON_Lock = new object();
         private JSONHandler json;
-
+#if CV_TESTING_OUTPUT
+        private string for_cv_logfile = "";
+        private short last_x, last_y;
+#endif
         AudioLoopback audioCapture;
         [DllImport("kernel32")]
         extern static UInt64 GetTickCount64();
@@ -114,17 +117,17 @@ namespace WPFCaptureSample
         }
         private void AttachHook(Process process)
         {
+#if CV_TESTING_OUTPUT
+            for_cv_logfile = "";
+#endif
             TimeUIRefresh = new Timer(new TimerCallback(Refresh), null, 0, 1);
             StopButton.IsEnabled = true;
-            basicCapture.proc = process;
-            basicCapture.StartRecordTime = StartRecordTime = GetTickCount64();  //Relative Time
             DateTime date = DateTime.Now;   //Absolute Time
             string DateStr = date.ToString("yyyyMMdd_HHmmss");
             json = new JSONHandler(DateStr + @"\");
             Form_MainWindow.Title = "WPF Capture Sample " + DateStr;
             Directory.CreateDirectory(DateStr);
             bitmapHandler = new BitmapHandler(DateStr + @"\", basicCapture);
-            basicCapture.OnBitmapCreate = bitmapHandler.PushBuffer;
             try
             {
                 remoteAPIHook = new RemoteAPIHook(process);
@@ -142,6 +145,9 @@ namespace WPFCaptureSample
                 ControllerOutputHooker = new ControllerOutputFunctionSet(Process.GetCurrentProcess());
                 remoteAPIHook.Hook(ControllerOutputHooker);
             }
+            basicCapture.proc = process;
+            basicCapture.StartRecordTime = StartRecordTime = GetTickCount64();  //Relative Time
+            basicCapture.OnBitmapCreate = bitmapHandler.PushBuffer;
             audioCapture.StartRecord(DateStr + @"\");
             SystemSounds.Asterisk.Play();
         }
@@ -170,13 +176,19 @@ namespace WPFCaptureSample
                         json.AddNew(Output);
                         JSONLastTimeStamp = Data_index;
                     }
+#if CV_TESTING_OUTPUT
+                    bool IsAccing = Data.bRightTrigger > 0,
+                        IsRotating = (last_x != Data.sThumbLX) || (last_y != Data.sThumbLY);
+                    IsAccing |= IsRotating;
+                    last_x = Data.sThumbLX;
+                    last_y = Data.sThumbLY;
+                    for_cv_logfile = for_cv_logfile + (GetTickCount64() - StartRecordTime) + "\t" + (IsAccing ? "1" : "0") + "\t" + (IsRotating ? "1" : "0") + "\n";
+#endif
                 }
             }
         }
         public void Refresh(object state)
         {
-            if (ControllerInputHooker == null)
-                return;
             syncContext.Send((s) =>
             {
                 _Refresh();
@@ -405,6 +417,9 @@ namespace WPFCaptureSample
             bitmapHandler = null;
             HookButton_Stop.IsEnabled = false;
             HookButton_Start.IsEnabled = true;
+#if CV_TESTING_OUTPUT
+            File.WriteAllText(@"O:\CV_Log.txt", for_cv_logfile);
+#endif
         }
 
         private void HookButton_Start_Click(object sender, RoutedEventArgs e)

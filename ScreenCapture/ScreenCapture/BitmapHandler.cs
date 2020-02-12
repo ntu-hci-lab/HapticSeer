@@ -42,6 +42,7 @@ namespace CaptureSampleCore
         public bool IsStart = true;
         BasicCapture basicCapture; 
         VideoFileWriter writer = null;
+        const int bps_per_frame = 512 * 1024;   //5kbps per frame
         
         ~BitmapHandler()
         {
@@ -66,7 +67,7 @@ namespace CaptureSampleCore
             System.Drawing.Bitmap oldBitmap = null;
             int VideoFrameRate = 0;
             int NextFrameInsertPosition = 0;
-            while (await source.OutputAvailableAsync().ConfigureAwait(true))
+            while (await source.OutputAvailableAsync().ConfigureAwait(false))
             {
                 if (bitmapHandler.IsStart)
                 {
@@ -78,7 +79,7 @@ namespace CaptureSampleCore
                     {
                         VideoFrameRate = (int)Math.Round(bitmapHandler.basicCapture.RecordFrameRate);
                         bitmapHandler.writer = new VideoFileWriter();
-                        bitmapHandler.writer.Open(bitmapHandler.OutputPath + "Video.mp4", bitmap.Width, bitmap.Height, VideoFrameRate, Accord.Video.FFMPEG.VideoCodec.MPEG4, 1024*1024*256);
+                        bitmapHandler.writer.Open(bitmapHandler.OutputPath + "Video.mp4", bitmap.Width, bitmap.Height, VideoFrameRate, Accord.Video.FFMPEG.VideoCodec.MPEG4, VideoFrameRate * bps_per_frame);
                         oldBitmap = bitmap;
                     }
                     int ThisFramePosition = (int)Math.Round((long)timestamp * VideoFrameRate / 1000f);
@@ -99,7 +100,7 @@ namespace CaptureSampleCore
                         if (oldBitmap != bitmap)
                             oldBitmap.Dispose();
                         oldBitmap = bitmap;
-                        if (NextFrameInsertPosition % VideoFrameRate == 0)
+                        if ((NextFrameInsertPosition & 63) == 0)
                         {
                             bitmapHandler.writer.Flush();
                             GC.Collect();
@@ -111,7 +112,6 @@ namespace CaptureSampleCore
                     }
                 }
             }
-            
             bitmapHandler?.writer?.Close();
             bitmapHandler.writer.Dispose();
         }
