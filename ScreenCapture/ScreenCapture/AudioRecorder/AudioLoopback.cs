@@ -28,7 +28,7 @@ namespace WPFCaptureSample.AudioRecorder
         public void StartRecord(string FilePath)
         {
             waveInIndex = 0;
-            file = new WaveFileWriter(FilePath + "Sound.wmv", waveIn.WaveFormat);
+            file = new WaveFileWriter(FilePath + "Sound.wav", waveIn.WaveFormat);
         }
         public async void StopRecord()
         {

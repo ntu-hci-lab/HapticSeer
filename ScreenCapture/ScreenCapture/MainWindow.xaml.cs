@@ -22,6 +22,7 @@
 //  THE SOFTWARE.
 //  ---------------------------------------------------------------------------------
 
+#define CV_TESTING_OUTPUT
 using CaptureSampleCore;
 using Composition.WindowsRuntimeHelpers;
 using NAudio.CoreAudioApi;
@@ -46,9 +47,8 @@ using WPFCaptureSample.API_Hook;
 using WPFCaptureSample.API_Hook.FunctionInfo;
 using WPFCaptureSample.API_Hook.FunctionInfo.XInputBaseHooker;
 using WPFCaptureSample.AudioRecorder;
-
 namespace WPFCaptureSample
-{
+{ 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
@@ -76,7 +76,9 @@ namespace WPFCaptureSample
         private JSONHandler json;
 #if CV_TESTING_OUTPUT
         private string for_cv_logfile = "";
-        private short last_x, last_y;
+        private short last_x = 0, last_y = 0;
+        private bool old_IsRotate = false, old_IsAcc = false;
+        private ulong last_x_change = 0, last_y_change = 0;
 #endif
         AudioLoopback audioCapture;
         [DllImport("kernel32")]
@@ -156,43 +158,73 @@ namespace WPFCaptureSample
             if (StopButton.IsEnabled == false)
                 return;
             Label_FPS_Text.Content = ((int)basicCapture.RecordFrameRate).ToString() + " FPS";
-            if (ControllerOutputHooker == null)
-                return;
-            bool IsMotorDiff = ControllerOutputHooker.AccessXInputSetState().FetchStateFromRemoteProcess(remoteAPIHook);
-            if (ControllerInputHooker == null)
-                return;
-            bool IsInputDiff = ControllerInputHooker.AccessXInputGetState().FetchStateFromRemoteProcess(remoteAPIHook);
-            if (IsMotorDiff || IsInputDiff) //Not Output Yet
-            {
-                lock (JSON_Lock)
-                {
-                    ushort Left, Right;
-                    ControllerOutputHooker.AccessXInputSetState().GetData(out Left, out Right);
-                    var Data = ControllerInputHooker.AccessXInputGetState().GetData();
-                    uint Data_index = Data.Index;
-                    string Output = DirectJSONOutput(Data, Left, Right);
-                    if (Data_index > JSONLastTimeStamp)
-                    {
-                        json.AddNew(Output);
-                        JSONLastTimeStamp = Data_index;
-                    }
-#if CV_TESTING_OUTPUT
-                    bool IsAccing = Data.bRightTrigger > 0,
-                        IsRotating = (last_x != Data.sThumbLX) || (last_y != Data.sThumbLY);
-                    IsAccing |= IsRotating;
-                    last_x = Data.sThumbLX;
-                    last_y = Data.sThumbLY;
-                    for_cv_logfile = for_cv_logfile + (GetTickCount64() - StartRecordTime) + "\t" + (IsAccing ? "1" : "0") + "\t" + (IsRotating ? "1" : "0") + "\n";
-#endif
-                }
-            }
+            
         }
+        Thread thread;
         public void Refresh(object state)
         {
             syncContext.Send((s) =>
             {
                 _Refresh();
             }, null);
+            if (thread != null)
+                return;
+            thread = new Thread(() =>
+            {
+                while (ControllerOutputHooker == null)
+                    Thread.Sleep(1);
+
+                while (ControllerOutputHooker != null)
+                {
+                    bool IsMotorDiff = ControllerOutputHooker.AccessXInputSetState().FetchStateFromRemoteProcess(remoteAPIHook);
+                    if (ControllerInputHooker == null)
+                        return;
+                    bool IsInputDiff = ControllerInputHooker.AccessXInputGetState().FetchStateFromRemoteProcess(remoteAPIHook);
+                    if (IsMotorDiff || IsInputDiff) //Not Output Yet
+                    {
+                        lock (JSON_Lock)
+                        {
+                            ushort Left, Right;
+                            ControllerOutputHooker.AccessXInputSetState().GetData(out Left, out Right);
+                            var Data = ControllerInputHooker.AccessXInputGetState().GetData();
+                            uint Data_index = Data.Index;
+                            string Output = DirectJSONOutput(Data, Left, Right);
+                            if (Data_index > JSONLastTimeStamp)
+                            {
+                                json.AddNew(Output);
+                                JSONLastTimeStamp = Data_index;
+                            }
+#if CV_TESTING_OUTPUT
+                            bool IsAccing = (Math.Abs(last_y - Data.sThumbLY) > 300),
+                                IsRotating = (Math.Abs(last_x - Data.sThumbLX) > 300);
+                            ulong nowtime = GetTickCount64();
+
+                            if (nowtime - last_y_change > 700 && Math.Abs(Data.sThumbLY) < 3000)
+                                old_IsAcc = false;
+                            if (nowtime - last_x_change > 700 && Math.Abs(Data.sThumbLX) < 3000)
+                                old_IsRotate = false;
+
+                            if (IsAccing)
+                            {
+                                last_y = Data.sThumbLY;
+                                last_y_change = nowtime;
+                                old_IsAcc = IsAccing;
+                            }
+                            if (IsRotating)
+                            {
+                                last_x = Data.sThumbLX;
+                                last_x_change = nowtime;
+                                old_IsRotate = IsRotating;
+                            }
+
+                            for_cv_logfile = for_cv_logfile + (GetTickCount64() - StartRecordTime) + "\t" + (old_IsAcc ? "1" : "0") + "\t" + (old_IsRotate ? "1" : "0") + "\n";
+#endif
+                        }
+                    }
+                    Thread.Sleep(1);
+                }
+            });
+            thread.Start();
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
@@ -406,8 +438,11 @@ namespace WPFCaptureSample
             SystemSounds.Asterisk.Play();
             TimeUIRefresh.Dispose();
             Form_MainWindow.Title = "WPF Capture Sample";
-            json.ToFile();
-            json = null;
+            lock (JSON_Lock)
+            {
+                json.ToFile();
+                json = null;
+            }
             ControllerInputHooker = null;
             ControllerOutputHooker = null;
             basicCapture.StartRecordTime = 0;
