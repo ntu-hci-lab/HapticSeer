@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using System.Drawing;
 using Emgu.CV.Structure;
 using Emgu.CV.Util;
+using Emgu.CV.Features2D;
+
 namespace WPFCaptureSample.ScreenCapture.ImageProcess
 {
     class OpticalFlow : ImageProcessBase
@@ -29,9 +31,19 @@ namespace WPFCaptureSample.ScreenCapture.ImageProcess
         }
         private bool IsStopRunning = false;
         private Mat LastImg = null;
+        private PointF[] LastImgFeatures;
         ~OpticalFlow()
         {
             IsStopRunning = true;
+        }
+
+        private void FastFeatureDetection(Mat img, out PointF[] features)
+        {
+            using (FastFeatureDetector fastFeatureDetector = new FastFeatureDetector(50))
+            {
+                MKeyPoint[] KeyPoints = fastFeatureDetector.Detect(img);
+                features = KeyPoints.Select(x => x.Point).ToArray();
+            }
         }
 
         private void featureTracking(Mat img_1, Mat img_2, ref PointF[] points1, out PointF[] points2, out byte[] status)
@@ -41,24 +53,6 @@ namespace WPFCaptureSample.ScreenCapture.ImageProcess
             Size winSize = new Size(21, 21);
             MCvTermCriteria termcrit = new MCvTermCriteria(30, 0.01);
             CvInvoke.CalcOpticalFlowPyrLK(img_1, img_2, points1, winSize, 3, new MCvTermCriteria(20, 0.03), out points2, out status, out err);
-            //getting rid of points for which the KLT tracking failed or those who have gone outside the frame
-            int indexCorrection = 0;
-            for (int i = 0; i < status.Length; i++)
-            {
-                PointF pt = points2.ElementAt(i - indexCorrection);
-                if ((status.ElementAt(i) == 0) || (pt.X < 0) || (pt.Y < 0))
-                {
-                    if ((pt.X < 0) || (pt.Y < 0))
-                    {
-                        status.SetValue(0, i);
-                    }
-                    points1.At(points1.begin() + (i - indexCorrection));
-                    points2.erase(points2.begin() + (i - indexCorrection));
-                    indexCorrection++;
-                }
-
-            }
-
         }
         protected override void ImageHandler(object args)
         {
@@ -66,14 +60,24 @@ namespace WPFCaptureSample.ScreenCapture.ImageProcess
             {
                 while (!IsProcessingData)
                     Thread.Sleep(1);
+                PointF[] NewImageFeatures = null;
+                byte[] FeatureStatus = null;
                 if (LastImg == null)
                 {
                     LastImg = new Mat(Data.Size, Data.Depth, Data.NumberOfChannels);
                     goto EndOfProcess;
                 }
-                CvInvoke.Imwrite("O:\\Test.png", Data);
-                return;
-                EndOfProcess:
+                else if (!LastImg.Size.Equals(Data.Size))
+                    goto EndOfProcess;
+                if (LastImgFeatures.Length > 100)
+                    featureTracking(LastImg, Data, ref LastImgFeatures, out NewImageFeatures, out FeatureStatus);
+                //https://blog.csdn.net/on2way/article/details/48954159
+
+            EndOfProcess:
+                Mat temp = LastImg; //Swap Mat
+                LastImg = Data;
+                Data = temp;
+                FastFeatureDetection(LastImg, out LastImgFeatures);
                 IsProcessingData = false;
             }
         }

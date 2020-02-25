@@ -86,7 +86,6 @@ namespace WPFCaptureSample.ScreenCapture.ImageProcess
         }
         public static void TryUpdateAllData(Mat rawData)
         {
-            CvInvoke.Imwrite("O:\\TT.png", rawData);
             foreach (ImageProcessBase imgProc in imageProcesses)
                 imgProc.TryUpdateData(rawData);
         }
