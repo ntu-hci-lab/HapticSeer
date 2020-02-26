@@ -25,6 +25,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>x64</PlatformTarget>
@@ -35,6 +36,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -62,6 +64,7 @@
     <Compile Include="ScreenCapture\FrameDispatcher.cs" />
     <Compile Include="ScreenCapture\ImageProcess\ImageProcessBase.cs" />
     <Compile Include="ScreenCapture\ImageProcess\OpticalFlow.cs" />
+    <Compile Include="ScreenCapture\ImageProcess\ScreenClipped.cs" />
     <Compile Include="ScreenCapture\OnFrameArrivedEvent.cs" />
     <Compile Include="WindowEnumerationHelper.cs" />
     <Page Include="MainWindow.xaml">

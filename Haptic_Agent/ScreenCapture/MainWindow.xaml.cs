@@ -54,6 +54,7 @@ namespace WPFCaptureSample
         private BasicSampleApplication sample;
         private GraphicsCaptureItem captureItem;
         private OpticalFlow opticalFlow = new OpticalFlow();
+        private ScreenClipped screenClipped = new ScreenClipped();
         public MainWindow()
         {
             InitializeComponent();
