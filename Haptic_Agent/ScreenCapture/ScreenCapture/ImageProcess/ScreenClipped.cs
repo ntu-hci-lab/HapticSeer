@@ -87,7 +87,7 @@ namespace WPFCaptureSample.ScreenCapture.ImageProcess
                         }
                     }
                 }
-                CvInvoke.Imwrite("O:\\Out.png", BackgroundRemovalImage);
+                //CvInvoke.Imwrite("O:\\Out.png", BackgroundRemovalImage);
                 IsProcessingData = false;
             }
         }
