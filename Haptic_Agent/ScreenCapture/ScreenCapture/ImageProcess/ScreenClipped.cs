@@ -3,6 +3,7 @@ using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -55,8 +56,22 @@ namespace WPFCaptureSample.ScreenCapture.ImageProcess
                 return 1;
             }
         }
-
         private Mat BackgroundRemovalImage = new Mat();
+
+        private static void ElimateBackgroundWithBoundTest(in Mat InputImage, ref Mat OutputImage, in Color[] ItemColor, in Color[] BorderColor, in int BorderSize)
+        {
+            int[,] Label = new int[InputImage.Width, InputImage.Height];
+            if (!InputImage.Size.Equals(OutputImage.Size))
+            {
+                OutputImage.Dispose();
+                OutputImage = new Mat(OutputImage.Size, DepthType.Cv8U, 1);
+            }
+            ItemColor[0].ToArgb
+            unsafe
+            {
+                byte* InputImageColor = (byte*)InputImage.DataPointer;
+            }
+        }
         protected override void ImageHandler(object args)
         {
             MCvScalar scalar = new MCvScalar(0);
