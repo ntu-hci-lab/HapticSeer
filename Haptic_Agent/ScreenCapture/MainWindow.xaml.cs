@@ -56,7 +56,7 @@ namespace WPFCaptureSample
         private OpticalFlow opticalFlow = new OpticalFlow();
         private ScreenClipped screenClipped = new ScreenClipped();
         private RedImpulseDetection bloodBar = new RedImpulseDetection();
-
+        
         public MainWindow()
         {
             InitializeComponent();

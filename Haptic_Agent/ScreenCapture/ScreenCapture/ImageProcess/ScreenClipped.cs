@@ -1,4 +1,6 @@
-﻿using Emgu.CV;
+﻿//#define DEBUG_VR
+#define DEBUG_RACE 
+using Emgu.CV;
 using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
 using System;
@@ -8,7 +10,6 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-
 namespace WPFCaptureSample.ScreenCapture.ImageProcess
 {
     class ScreenClipped : ImageProcessBase
@@ -18,28 +19,48 @@ namespace WPFCaptureSample.ScreenCapture.ImageProcess
         {
             get
             {
+#if DEBUG_VR
                 return 0.269;
+#endif
+#if DEBUG_RACE
+                return 0.905;
+#endif
             }
         }
         protected override double Clipped_Top
         {
             get
             {
+#if DEBUG_VR
                 return 0.774;
+#endif
+#if DEBUG_RACE
+                return 0.905;
+#endif
             }
         }
         protected override double Clipped_Right
         {
             get
             {
+#if DEBUG_VR
                 return 0.298;
+#endif
+#if DEBUG_RACE
+                return 0.924;
+#endif
             }
         }
         protected override double Clipped_Bottom
         {
             get
             {
+#if DEBUG_VR
                 return 0.973;
+#endif
+#if DEBUG_RACE
+                return 0.9249;
+#endif
             }
         }
         protected override double Scale_Width
@@ -179,6 +200,30 @@ namespace WPFCaptureSample.ScreenCapture.ImageProcess
                 }
             }
         }
+        private static unsafe void ElimateBackgroundWithSimilarItemColor(in Mat Ori, ref Mat Out, in Color[] ItemColor, in int errors)
+        {
+            unsafe
+            {
+                byte* InputImageData = (byte*)Ori.DataPointer;
+                byte* OutputImageData = (byte*)Out.DataPointer;
+                for (int i = 0, height = Ori.Size.Height, offset = 0; i < height; ++i)
+                {
+                    for (int j = 0, width = Ori.Size.Width; j < width; ++j)
+                    {
+                        OutputImageData[offset >> 2] = 0;
+                        for (int k = 0; k < ItemColor.Length; ++k)
+                        {
+                            int ColorArgb = ItemColor[k].ToArgb();
+                            int* ColorPtr = &ColorArgb;
+                            if (IsPixelArgbColorSame(&InputImageData[offset], (byte*)ColorPtr, errors))
+                                OutputImageData[offset >> 2] = 255;
+                        }
+                        offset += 4;
+                    }
+                }
+            }
+        }
+        private int index = 0;
         protected override void ImageHandler(object args)
         {
             MCvScalar scalar = new MCvScalar(0);
@@ -193,30 +238,15 @@ namespace WPFCaptureSample.ScreenCapture.ImageProcess
                 }
                 BackgroundRemovalImage.SetTo(scalar);
                 //CvInvoke.Imwrite("O:\\Ori.png", Data);
-
+#if DEBUG_VR
                 ElimateBackgroundWithSolidColor(in Data, ref BackgroundRemovalImage, new Color[] { Color.White, Color.Red }, new int[] { ~0, 0xFF << 16 });
                 Console.WriteLine(BarLengthCalc(BackgroundRemovalImage, 4, true));
-                //CvInvoke.Imwrite("O:\\BackgroundElimation.png", BackgroundRemovalImage);
+#endif
+#if DEBUG_RACE
+                ElimateBackgroundWithSimilarItemColor(in Data, ref BackgroundRemovalImage, new Color[] { Color.White }, 70);
+#endif
+                CvInvoke.Imwrite("O:\\" + index++ + ".png", BackgroundRemovalImage);
                 IsProcessingData = false;
-                continue;
-                //CvInvoke.Imwrite("O:\\Out.png", BackgroundRemovalImage);
-                IsProcessingData = false;
-                unsafe
-                {
-                    byte* InputImageData = (byte*)Data.DataPointer;
-                    byte* OutputImageData = (byte*)BackgroundRemovalImage.DataPointer;
-                    for (int i = 0, height = Data.Size.Height, offset = 0; i < height; ++i)
-                    {
-                        for (int j = 0, width = Data.Size.Width; j < width; ++j)
-                        {
-                            if (InputImageData[offset + 0] > 200 &&
-                                InputImageData[offset + 1] > 200 &&
-                                InputImageData[offset + 2] > 200)
-                                OutputImageData[offset >> 2] = 255;
-                            offset += 4;
-                        }
-                    }
-                }
             }
         }
     }
