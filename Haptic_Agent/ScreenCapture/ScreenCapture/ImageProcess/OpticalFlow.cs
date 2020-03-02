@@ -143,7 +143,7 @@ namespace WPFCaptureSample.ScreenCapture.ImageProcess
                     goto EndOfProcess;
                 if (LastImgFeatures.Length < 20)
                 {
-                    Console.WriteLine("Failed " + LastImgFeatures.Length);
+                    //Console.WriteLine("Failed " + LastImgFeatures.Length);
                     goto EndOfProcess;
                 }
                 featureTracking(LastImg, Data, ref LastImgFeatures, out NewImageFeatures, out FeatureStatus);
@@ -188,6 +188,7 @@ namespace WPFCaptureSample.ScreenCapture.ImageProcess
                     Avg_X_Movement = Total_X_Displacement / X_Counter;
                 else
                     Avg_X_Movement = 0;
+                /*
                 if (IsForward)
                 {
                     if (Avg_X_Movement >= 3)
@@ -197,6 +198,7 @@ namespace WPFCaptureSample.ScreenCapture.ImageProcess
                     else
                         Console.WriteLine("Straight " + LastImgFeatures.Length);
                 }
+                */
             EndOfProcess:
                 Mat temp = LastImg; //Swap Mat
                 LastImg = Data;
