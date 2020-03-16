@@ -245,7 +245,7 @@ namespace WPFCaptureSample.ScreenCapture.ImageProcess
 #if DEBUG_RACE
                 ElimateBackgroundWithSimilarItemColor(in Data, ref BackgroundRemovalImage, new Color[] { Color.White }, 70);
 #endif
-                CvInvoke.Imwrite("O:\\" + index++ + ".png", BackgroundRemovalImage);
+                //CvInvoke.Imwrite("O:\\" + index++ + ".png", BackgroundRemovalImage);
                 IsProcessingData = false;
             }
         }

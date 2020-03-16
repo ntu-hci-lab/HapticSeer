@@ -188,8 +188,8 @@ namespace WPFCaptureSample.ScreenCapture.ImageProcess
                     Avg_X_Movement = Total_X_Displacement / X_Counter;
                 else
                     Avg_X_Movement = 0;
-                if (Avg_X_Movement != 0)
-                    Console.WriteLine(Avg_X_Movement);
+                //if (Avg_X_Movement != 0)
+                //    Console.WriteLine(Avg_X_Movement);
                 if (false &&IsForward)
                 {
                     if (Avg_X_Movement >= 6)
