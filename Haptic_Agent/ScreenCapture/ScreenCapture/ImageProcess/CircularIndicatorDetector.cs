@@ -78,9 +78,14 @@ namespace WPFCaptureSample.ScreenCapture.ImageProcess
             IsStopRunning = true;
         }
 
-        private unsafe bool IsRedImpulse(byte Now, byte Last)
+        private unsafe bool IsRedImpulse(byte* Now, byte* Last)
         {
-            return (Last < 127) && (Now > 200);
+            bool IsRedImpulse = (Last[2] < 127) && (Now[2] > 200);
+            if (!IsRedImpulse)
+                return false;
+            if (Now[0] > 170 || Now[1] > 170)   //Filter White/meaningful color
+                return false;
+            return true;
         }
         private double GetAngleByCircleModel(int x, int y, int Width, int Height)
         {
@@ -95,9 +100,18 @@ namespace WPFCaptureSample.ScreenCapture.ImageProcess
         protected override void ImageHandler(object args)
         {
             Mat LastFrame = new Mat();
+            Mat RedChannelImg = new Mat();
+            Mat Kernel = new Mat(4, 4, Emgu.CV.CvEnum.DepthType.Cv8U, 1);
+            unsafe
+            {
+                byte* KernelPtr = (byte*)Kernel.DataPointer;
+                for (int i = 0; i < 16; ++i)
+                    KernelPtr[i] = 255;
+            }
             int InnerWidth, InnerHeight;
             int InnerStartHeight = 0, InnerStopHeight = 0, InnerStartWidth = 0, InnerStopWidth = 0;
             int[] Counter = new int[360];
+            int DEBUGNUM = 0;
             while (!IsStopRunning)
             {
                 while (!IsProcessingData)
@@ -105,7 +119,9 @@ namespace WPFCaptureSample.ScreenCapture.ImageProcess
                 if (!LastFrame.Size.Equals(Data.Size))
                 {
                     LastFrame.Dispose();
+                    RedChannelImg.Dispose();
                     LastFrame = new Mat(Data.Rows, Data.Cols, Emgu.CV.CvEnum.DepthType.Cv8U, 4);
+                    RedChannelImg = new Mat(Data.Rows, Data.Cols, Emgu.CV.CvEnum.DepthType.Cv8U, 1);
                     InnerWidth = (int)(Data.Width * CircularInnerSizeFractionRelatedToClippedSize);
                     InnerHeight = (int)(Data.Height * CircularInnerSizeFractionRelatedToClippedSize);
                     InnerStartHeight = (Data.Height - InnerHeight) / 2;
@@ -116,32 +132,43 @@ namespace WPFCaptureSample.ScreenCapture.ImageProcess
                     goto WaitForNextFrame;
                 }
                 Array.Clear(Counter, 0, 360);
-                //Image Data -> Data
-                //Data;
+                
                 unsafe
                 {
                     byte* CurrentPtr = (byte*)Data.DataPointer;//ARGB
                     byte* PastPtr = (byte*)LastFrame.DataPointer;
+                    byte* RedImgPtr = (byte*)RedChannelImg.DataPointer;
                     int Offset = 0;
+                    bool DEBUGBOOL = false;
                     for (int y = 0; y < Data.Height; ++y)
                     {
                         for (int x = 0; x < Data.Width; ++x)
                         {
+                            RedImgPtr[Offset >> 2] = 0;
                             if (InnerStartHeight >= y && InnerStopHeight <= y && InnerStartWidth >= x && InnerStopWidth <= x)
                             {
                                 Offset += 4;
                                 continue;
                             }
-                            if (IsRedImpulse(CurrentPtr[Offset + 2], PastPtr[Offset + 2]) && CurrentPtr[Offset + 2] > 240)
+                            if (IsRedImpulse(&CurrentPtr[Offset], &PastPtr[Offset]) && CurrentPtr[Offset + 2] > 200)
                             {
+                                RedImgPtr[Offset >> 2] = 255;   //Set As White
                                 double Angle = GetAngleByCircleModel(x, y, Data.Width, Data.Height);
                                 Angle %= 360;
                                 Counter[(int)Angle]++;
+                                DEBUGBOOL = true;
                             }
                             Offset += 4;
                         }
                     }
+                    if (DEBUGBOOL)
+                    {
+
+                        CvInvoke.MorphologyEx(RedChannelImg, RedChannelImg, Emgu.CV.CvEnum.MorphOp.Open, Kernel, new System.Drawing.Point(0, 0), 2, Emgu.CV.CvEnum.BorderType.Default, new Emgu.CV.Structure.MCvScalar(0, 0, 0));
+                        RedChannelImg.Save("O:\\RedChannel" + DEBUGNUM++ + ".png");
+                    }
                 }
+
                 long AvgAngle = 0, AngleCounter = 0;
                 for (int i = 0; i < 180; ++i)
                 {
