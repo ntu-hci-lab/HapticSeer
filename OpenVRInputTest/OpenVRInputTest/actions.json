@@ -1,0 +1,121 @@
+{
+	"default_bindings": [
+		{
+			"controller_type": "vive_controller",
+			"binding_url": "bindings_vive_controller.json"
+		},
+		{
+			"controller_type": "knuckles",
+			"binding_url": "bindings_knuckles.json"
+		}
+	],
+	"actions": [
+		{
+			"name": "/actions/default/in/chord1",
+			"requirement": "optional",
+			"type": "boolean"
+		},
+		{
+			"name": "/actions/default/in/chord2",
+			"requirement": "optional",
+			"type": "boolean"
+		},
+		{
+			"name": "/actions/default/in/left_B",
+			"requirement": "optional",
+			"type": "boolean"
+		},
+		{
+			"name": "/actions/default/in/right_B",
+			"requirement": "optional",
+			"type": "boolean"
+		},
+		{
+			"name": "/actions/default/in/left_Trigger",
+			"requirement": "optional",
+			"type": "boolean"
+		},
+		{
+			"name": "/actions/default/in/right_Trigger",
+			"requirement": "optional",
+			"type": "boolean"
+		},
+		{
+			"name": "/actions/default/in/left_System",
+			"requirement": "optional",
+			"type": "boolean"
+		},
+		{
+			"name": "/actions/default/in/right_System",
+			"requirement": "optional",
+			"type": "boolean"
+		},
+		{
+			"name": "/actions/default/in/left_Touchpad",
+			"requirement": "optional",
+			"type": "boolean"
+		},
+		{
+			"name": "/actions/default/in/right_Touchpad",
+			"requirement": "optional",
+			"type": "boolean"
+		},
+		{
+			"name": "/actions/default/in/left_ThumbStick",
+			"requirement": "optional",
+			"type": "boolean"
+		},
+		{
+			"name": "/actions/default/in/right_ThumbStick",
+			"requirement": "optional",
+			"type": "boolean"
+		},
+		{
+			"name": "/actions/default/in/left_Grip",
+			"requirement": "optional",
+			"type": "boolean"
+		},
+		{
+			"name": "/actions/default/in/right_Grip",
+			"requirement": "optional",
+			"type": "boolean"
+		},
+		{
+			"name": "/actions/default/in/left_A",
+			"requirement": "optional",
+			"type": "boolean"
+		},
+		{
+			"name": "/actions/default/in/right_A",
+			"requirement": "optional",
+			"type": "boolean"
+		}
+	],
+	"action_sets": [
+		{
+			"name": "/actions/default",
+			"usage": "leftright"
+		}
+	],
+	"localization" : [
+		{
+			"language_tag": "en_US",
+			"/actions/default/in/chord1": "Chord 1",
+			"/actions/default/in/chord2": "Chord 2",
+			"/actions/default/in/left_B": "Left B",
+			"/actions/default/in/right_B": "Right B",
+			"/actions/default/in/left_Trigger": "Left Trigger",
+			"/actions/default/in/right_Trigger": "Right Trigger",
+			"/actions/default/in/left_Touchpad": "Left Touchpad",
+			"/actions/default/in/right_Touchpad": "Right Touchpad",
+			"/actions/default/in/left_System": "Left System",
+			"/actions/default/in/right_System": "Right System",
+			"/actions/default/in/left_ThumbStick": "Left ThumbStick",
+			"/actions/default/in/right_ThumbStick": "Right ThumbStick",
+			"/actions/default/in/left_Grip": "Left Grip",
+			"/actions/default/in/right_Grip": "Right Grip",
+			"/actions/default/in/left_A": "Left A",
+			"/actions/default/in/right_A": "Right A"
+		}
+	]
+}
