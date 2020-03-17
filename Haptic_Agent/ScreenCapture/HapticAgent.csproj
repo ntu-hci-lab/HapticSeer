@@ -62,8 +62,11 @@
     </ApplicationDefinition>
     <Compile Include="MonitorEnumerationHelper.cs" />
     <Compile Include="ScreenCapture\FrameDispatcher.cs" />
+    <Compile Include="ScreenCapture\ImageProcess\CircularIndicatorDetector.cs" />
+    <Compile Include="ScreenCapture\ImageProcess\ExampleImageProcess.cs" />
     <Compile Include="ScreenCapture\ImageProcess\ImageProcessBase.cs" />
     <Compile Include="ScreenCapture\ImageProcess\OpticalFlow.cs" />
+    <Compile Include="ScreenCapture\ImageProcess\RedImpulseDetection.cs" />
     <Compile Include="ScreenCapture\ImageProcess\ScreenClipped.cs" />
     <Compile Include="ScreenCapture\OnFrameArrivedEvent.cs" />
     <Compile Include="WindowEnumerationHelper.cs" />

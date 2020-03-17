@@ -19,45 +19,45 @@ namespace WPFCaptureSample.ScreenCapture.ImageProcess
         {
             get
             {
-                return 0;
+                return 0.3845;
             }
         }
         protected override double Clipped_Top
         {
             get
             {
-                return 0.3f;
+                return 0.45f;
             }
         }
         protected override double Clipped_Right
         {
             get
             {
-                return 1;
+                return 0.655;
             }
         }
         protected override double Clipped_Bottom
         {
             get
             {
-                return 0.8f;
+                return 1f;
             }
         }
         protected override double Scale_Width
         {
             get
             {
-                return 0.5f;
+                return 1f;
             }
         }
         protected override double Scale_Height
         {
             get
             {
-                return 0.5f;
+                return 1f;
             }
         }
-        private double FrameRate = 10;
+        private double FrameRate = 30;
         private bool IsStopRunning = false;
         private Mat LastImg = null;
         private PointF[] LastImgFeatures;
@@ -143,7 +143,7 @@ namespace WPFCaptureSample.ScreenCapture.ImageProcess
                     goto EndOfProcess;
                 if (LastImgFeatures.Length < 20)
                 {
-                    Console.WriteLine("Failed " + LastImgFeatures.Length);
+                    //Console.WriteLine("Failed " + LastImgFeatures.Length);
                     goto EndOfProcess;
                 }
                 featureTracking(LastImg, Data, ref LastImgFeatures, out NewImageFeatures, out FeatureStatus);
@@ -188,15 +188,18 @@ namespace WPFCaptureSample.ScreenCapture.ImageProcess
                     Avg_X_Movement = Total_X_Displacement / X_Counter;
                 else
                     Avg_X_Movement = 0;
-                if (IsForward)
+                //if (Avg_X_Movement != 0)
+                //    Console.WriteLine(Avg_X_Movement);
+                if (false &&IsForward)
                 {
-                    if (Avg_X_Movement >= 3)
+                    if (Avg_X_Movement >= 6)
                         Console.WriteLine("Left " + LastImgFeatures.Length);
-                    else if (Avg_X_Movement <= -3)
+                    else if (Avg_X_Movement <= -6)
                         Console.WriteLine("Right " + LastImgFeatures.Length);
                     else
                         Console.WriteLine("Straight " + LastImgFeatures.Length);
                 }
+                
             EndOfProcess:
                 Mat temp = LastImg; //Swap Mat
                 LastImg = Data;
