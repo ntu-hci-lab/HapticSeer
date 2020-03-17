@@ -11,7 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 namespace WPFCaptureSample.ScreenCapture.ImageProcess
 {
-    class ScreenClipped : ImageProcessBase
+    class BarBloodIndicatorDetector : ImageProcessBase
     {
         private bool IsStopRunning = false;
         protected override double Clipped_Left
@@ -19,13 +19,7 @@ namespace WPFCaptureSample.ScreenCapture.ImageProcess
             get
             {
 #if CS_GO
-                return 0.8922;
-#endif
-#if DEBUG_VR
-                return 0.269;
-#endif
-#if DEBUG_RACE
-                return 0.905;
+                return 0.056;
 #endif
             }
         }
@@ -34,13 +28,7 @@ namespace WPFCaptureSample.ScreenCapture.ImageProcess
             get
             {
 #if CS_GO
-                return 0.9565;
-#endif
-#if DEBUG_VR
-                return 0.774;
-#endif
-#if DEBUG_RACE
-                return 0.905;
+                return 0.9787;
 #endif
             }
         }
@@ -49,13 +37,7 @@ namespace WPFCaptureSample.ScreenCapture.ImageProcess
             get
             {
 #if CS_GO
-                return 0.947;
-#endif
-#if DEBUG_VR
-                return 0.298;
-#endif
-#if DEBUG_RACE
-                return 0.924;
+                return 0.097;
 #endif
             }
         }
@@ -65,12 +47,6 @@ namespace WPFCaptureSample.ScreenCapture.ImageProcess
             {
 #if CS_GO
                 return 0.988;
-#endif
-#if DEBUG_VR
-                return 0.973;
-#endif
-#if DEBUG_RACE
-                return 0.9249;
 #endif
             }
         }
@@ -109,7 +85,8 @@ namespace WPFCaptureSample.ScreenCapture.ImageProcess
                         ++HeightCount;
                 }
                 return HeightCount / (double)Height;
-            }else
+            }
+            else
             {   //Landscape
                 int[] Counter = new int[Width];
                 int Offset = 0;
@@ -142,20 +119,20 @@ namespace WPFCaptureSample.ScreenCapture.ImageProcess
                     return false;
             return true;
         }
-        private static unsafe int FindSimilarColorInList(in byte* Pixel, in int[] ColorList, in int[] ColorMaskList, in int errors)
+        private static unsafe int FindSimilarColorInList(in byte* Pixel, in int[] ColorList, in uint[] ColorMaskList, in int errors)
         {
             //Compare Suitable Color
             for (int i = 0; i < ColorList.Length; ++i)
             {
-                int ColorMask = (ColorMaskList != null && i < ColorMaskList.Length) ? ColorMaskList[i] : ~0;
-                int ColorArgb = ColorList[i] & ColorMask;
-                int PixelColor = (*((int*)Pixel)) & ColorMask;
+                uint ColorMask = (ColorMaskList != null && i < ColorMaskList.Length) ? ColorMaskList[i] : 0xFFFFFFFF;
+                int ColorArgb = (int)(ColorList[i] & ColorMask);
+                int PixelColor = (int)((*((int*)Pixel)) & ColorMask);
                 if (IsPixelArgbColorSame((byte*)&PixelColor, (byte*)&ColorArgb, errors))
                     return i;
             }
             return -1;
         }
-        private static unsafe int IsColorMixedByColor(byte *Pixel, in int[] ColorList, in byte* Color)
+        private static unsafe int IsColorMixedByColor(byte* Pixel, in int[] ColorList, in byte* Color)
         {
             float[] Fraction = new float[3];
             int[] ColorDelta = new int[3];
@@ -178,7 +155,7 @@ namespace WPFCaptureSample.ScreenCapture.ImageProcess
             }
             return -1;
         }
-        private static void ElimateBackgroundWithSolidColor(in Mat InputImage, ref Mat OutputImage, in Color[] ItemColor, in int[] ColorMaskList)
+        private static void ElimateBackgroundWithSolidColor(in Mat InputImage, ref Mat OutputImage, in Color[] ItemColor, in uint[] ColorMaskList)
         {
             if (!InputImage.Size.Equals(OutputImage.Size))
             {
@@ -234,6 +211,7 @@ namespace WPFCaptureSample.ScreenCapture.ImageProcess
                 }
             }
         }
+        private int index = 0;
         protected override void ImageHandler(object args)
         {
             MCvScalar scalar = new MCvScalar(0);
@@ -247,18 +225,13 @@ namespace WPFCaptureSample.ScreenCapture.ImageProcess
                     BackgroundRemovalImage = new Mat(Data.Size, DepthType.Cv8U, 1);
                 }
                 BackgroundRemovalImage.SetTo(scalar);
+                CvInvoke.Imwrite("O:\\BloodBar_Ori.png", Data);
 #if CS_GO
-                CvInvoke.Imwrite("O:\\Bullet_Ori.png", Data);
-                ElimateBackgroundWithSimilarItemColor(in Data, ref BackgroundRemovalImage, new Color[] { Color.FromArgb(197, 188, 165) }, 70);
-                CvInvoke.Imwrite("O:\\Bullet_Out.png", BackgroundRemovalImage);
+                ElimateBackgroundWithSolidColor(in Data, ref BackgroundRemovalImage, new Color[] { Color.FromArgb(155, 153, 122), Color.FromArgb(188, 56, 0) }, new uint[] { 0xC0C0C0C0, 0xC0C0C0C0 });
+                Console.WriteLine(BarLengthCalc(BackgroundRemovalImage, 4, false));
 #endif
-#if DEBUG_VR
-                ElimateBackgroundWithSolidColor(in Data, ref BackgroundRemovalImage, new Color[] { Color.White, Color.Red }, new int[] { ~0, 0xFF << 16 });
-                Console.WriteLine(BarLengthCalc(BackgroundRemovalImage, 4, true));
-#endif
-#if DEBUG_RACE
-                ElimateBackgroundWithSimilarItemColor(in Data, ref BackgroundRemovalImage, new Color[] { Color.White }, 70);
-#endif
+                CvInvoke.Imwrite("O:\\BloodBar_After.png", BackgroundRemovalImage);
+                //CvInvoke.Imwrite("O:\\" + index++ + ".png", BackgroundRemovalImage);
                 IsProcessingData = false;
             }
         }

@@ -57,6 +57,7 @@ namespace WPFCaptureSample
         private ScreenClipped screenClipped = new ScreenClipped();
         private RedImpulseDetection bloodBar = new RedImpulseDetection();
         CircularIndicatorDetector circularIndicatorDetector = new CircularIndicatorDetector(137 / 231f);
+        BarBloodIndicatorDetector barBloodIndicatorDetector = new BarBloodIndicatorDetector();
         public MainWindow()
         {
             InitializeComponent();
