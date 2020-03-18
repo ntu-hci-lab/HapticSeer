@@ -106,8 +106,9 @@ namespace CaptureSampleCore
 
         private void OnFrameArrived(Direct3D11CaptureFramePool sender, object args)
         {
-            var newSize = false;
             return;
+            /*
+            var newSize = false;
             using (var frame = sender.TryGetNextFrame())
             {
                 if (frame.ContentSize.Width != lastSize.Width ||
@@ -144,6 +145,7 @@ namespace CaptureSampleCore
                     2,
                     lastSize);
             }
+            */
         }
     }
 }

@@ -53,9 +53,8 @@ namespace WPFCaptureSample
 
         private BasicSampleApplication sample;
         private GraphicsCaptureItem captureItem;
-        private OpticalFlow opticalFlow = new OpticalFlow();
-        private ScreenClipped screenClipped = new ScreenClipped();
-        private RedImpulseDetection bloodBar = new RedImpulseDetection();
+        private BulletCounter bulletCounter = new BulletCounter();
+        //private RedImpulseDetection bloodBar = new RedImpulseDetection();
         CircularIndicatorDetector circularIndicatorDetector = new CircularIndicatorDetector(137 / 231f);
         BarBloodIndicatorDetector barBloodIndicatorDetector = new BarBloodIndicatorDetector();
         public MainWindow()

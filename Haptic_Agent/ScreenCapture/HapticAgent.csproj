@@ -68,7 +68,7 @@
     <Compile Include="ScreenCapture\ImageProcess\ImageProcessBase.cs" />
     <Compile Include="ScreenCapture\ImageProcess\OpticalFlow.cs" />
     <Compile Include="ScreenCapture\ImageProcess\RedImpulseDetection.cs" />
-    <Compile Include="ScreenCapture\ImageProcess\ScreenClipped.cs" />
+    <Compile Include="ScreenCapture\ImageProcess\BulletCounter.cs" />
     <Compile Include="ScreenCapture\OnFrameArrivedEvent.cs" />
     <Compile Include="WindowEnumerationHelper.cs" />
     <Page Include="MainWindow.xaml">

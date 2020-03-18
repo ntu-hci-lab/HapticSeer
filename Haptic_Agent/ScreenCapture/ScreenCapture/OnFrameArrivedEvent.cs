@@ -43,7 +43,7 @@ namespace WPFCaptureSample.ScreenCapture
         public static extern bool GetClientRect(IntPtr hwnd, out Rect lpRect);
 
         private static Rect BorderLineSize;
-        public static long LastWidthSize, LastHeightSize;
+        public static long LastWidthSize = -1, LastHeightSize = -1;
 
         public static IntPtr TargetHwnd;
 

@@ -1,4 +1,5 @@
 ﻿#define CS_GO
+#define DEBUG_IMG_OUTPUT
 using Emgu.CV;
 using System;
 using System.Collections.Generic;
@@ -19,7 +20,6 @@ namespace WPFCaptureSample.ScreenCapture.ImageProcess
 #if CS_GO
                 return 0.5 - 0.06;
 #endif
-                return 0;
             }
         }
         protected override double Clipped_Top
@@ -29,7 +29,6 @@ namespace WPFCaptureSample.ScreenCapture.ImageProcess
 #if CS_GO
                 return 0.5 - 0.1065;
 #endif
-                return 0;
             }
         }
         protected override double Clipped_Right
@@ -39,7 +38,6 @@ namespace WPFCaptureSample.ScreenCapture.ImageProcess
 #if CS_GO
                 return 0.5 + 0.06;
 #endif
-                return 1;
             }
         }
         protected override double Clipped_Bottom
@@ -49,7 +47,6 @@ namespace WPFCaptureSample.ScreenCapture.ImageProcess
 #if CS_GO
                 return 0.5 + 0.1065;
 #endif
-                return 1f;
             }
         }
         protected override double Scale_Width
@@ -87,31 +84,15 @@ namespace WPFCaptureSample.ScreenCapture.ImageProcess
                 return false;
             return true;
         }
-        private double GetAngleByCircleModel(int x, int y, int Width, int Height)
-        {
-            x -= Width / 2;
-            y -= Height / 2;
-            y *= -1; //Coordinate Changes
-            double Angle = Math.Atan2(y, x) / Math.PI * 180;
-            if (Angle < 0)
-                Angle += 360;
-            return Angle;
-        }
         protected override void ImageHandler(object args)
         {
             Mat LastFrame = new Mat();
             Mat RedChannelImg = new Mat();
-            Mat Kernel = new Mat(4, 4, Emgu.CV.CvEnum.DepthType.Cv8U, 1);
-            unsafe
-            {
-                byte* KernelPtr = (byte*)Kernel.DataPointer;
-                for (int i = 0; i < 16; ++i)
-                    KernelPtr[i] = 255;
-            }
             int InnerWidth, InnerHeight;
             int InnerStartHeight = 0, InnerStopHeight = 0, InnerStartWidth = 0, InnerStopWidth = 0;
-            int[] Counter = new int[360];
-            int DEBUGNUM = 0;
+#if DEBUG_IMG_OUTPUT
+            int ImgCounter = 0;
+#endif
             while (!IsStopRunning)
             {
                 while (!IsProcessingData)
@@ -128,10 +109,8 @@ namespace WPFCaptureSample.ScreenCapture.ImageProcess
                     InnerStartWidth = (Data.Width - InnerWidth) / 2;
                     InnerStopHeight = Data.Height - InnerStartHeight;
                     InnerStopWidth = Data.Width - InnerStartWidth;
-                    Data.Save("O:\\Output.png");
                     goto WaitForNextFrame;
                 }
-                Array.Clear(Counter, 0, 360);
                 
                 unsafe
                 {
@@ -139,7 +118,7 @@ namespace WPFCaptureSample.ScreenCapture.ImageProcess
                     byte* PastPtr = (byte*)LastFrame.DataPointer;
                     byte* RedImgPtr = (byte*)RedChannelImg.DataPointer;
                     int Offset = 0;
-                    bool DEBUGBOOL = false;
+                    bool IsExistImpulse = false;
                     for (int y = 0; y < Data.Height; ++y)
                     {
                         for (int x = 0; x < Data.Width; ++x)
@@ -153,41 +132,36 @@ namespace WPFCaptureSample.ScreenCapture.ImageProcess
                             if (IsRedImpulse(&CurrentPtr[Offset], &PastPtr[Offset]) && CurrentPtr[Offset + 2] > 200)
                             {
                                 RedImgPtr[Offset >> 2] = 255;   //Set As White
-                                double Angle = GetAngleByCircleModel(x, y, Data.Width, Data.Height);
-                                Angle %= 360;
-                                Counter[(int)Angle]++;
-                                DEBUGBOOL = true;
+                                IsExistImpulse = true;
                             }
                             Offset += 4;
                         }
                     }
-                    if (DEBUGBOOL)
+                    if (IsExistImpulse)
                     {
-
-                        CvInvoke.MorphologyEx(RedChannelImg, RedChannelImg, Emgu.CV.CvEnum.MorphOp.Open, Kernel, new System.Drawing.Point(0, 0), 2, Emgu.CV.CvEnum.BorderType.Default, new Emgu.CV.Structure.MCvScalar(0, 0, 0));
-                        RedChannelImg.Save("O:\\RedChannel" + DEBUGNUM++ + ".png");
+                        CvInvoke.MorphologyEx(RedChannelImg, RedChannelImg, Emgu.CV.CvEnum.MorphOp.Open, Kernel_4x4, new System.Drawing.Point(0, 0), 2, Emgu.CV.CvEnum.BorderType.Default, new Emgu.CV.Structure.MCvScalar(0, 0, 0));
+#if DEBUG_IMG_OUTPUT
+                        RedChannelImg.Save("O:\\RedChannel" + ImgCounter++ + ".png");
+#endif
                     }
                 }
-
-                long AvgAngle = 0, AngleCounter = 0;
-                for (int i = 0; i < 180; ++i)
+                unsafe
                 {
-                    if (Counter[i] < 10) continue;
-                    AngleCounter += Counter[i];
-                    AvgAngle += Counter[i] * i;
-                }
-                for (int i = 180; i < 360; ++i)
-                {
-                    if (Counter[i] < 10) continue;
-                    AngleCounter += Counter[i];
-                    AvgAngle += Counter[i] * (i - 360);
-                }
-                if (AngleCounter > 0)
-                {
-                    double _Angle = AvgAngle / (double)AngleCounter;
-                    if (_Angle < 0)
-                        _Angle += 360;
-                    Console.WriteLine("Avg Angle: " + _Angle);
+                    byte* RedChannelPtr = (byte*)RedChannelImg.DataPointer;
+                    int Sum_X = 0, Sum_Y = 0, WhitePixelCounter = 0;
+                    for (int y = 0, Offset = 0; y < RedChannelImg.Height; ++y)
+                        for (int x = 0; x < RedChannelImg.Width; ++x)
+                            if (RedChannelPtr[Offset++] == 255)
+                            {
+                                Sum_Y += y;
+                                Sum_X += x;
+                                WhitePixelCounter++;
+                            }
+                    if (WhitePixelCounter > 16)
+                    {
+                        double Angle = GetAngleByCircleModel(Sum_X / (double)WhitePixelCounter, Sum_Y / (double)WhitePixelCounter, RedChannelImg.Width, RedChannelImg.Height);
+                        Console.WriteLine("Angle: " + Angle);
+                    }
                 }
             WaitForNextFrame:
                 Mat temp = Data;
