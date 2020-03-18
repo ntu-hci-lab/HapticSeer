@@ -48,19 +48,27 @@ namespace OpenVRInputTest
                 rightController
                     .AttachNewEvent(new Button_B_Event())
                     .AttachNewEvent(new Button_A_Event())
-                    .AttachNewEvent(new Button_System_Event())
-                    .AttachNewEvent(new Button_Grip_Event())
-                    .AttachNewEvent(new Button_ThumbStick_Event())
                     .AttachNewEvent(new Button_Trigger_Event())
-                    .AttachNewEvent(new Button_Touchpad_Event());
+                    .AttachNewEvent(new Button_TriggerVector1_Event())
+                    .AttachNewEvent(new Button_Touchpad_Event())
+                    .AttachNewEvent(new Button_TouchpadVector2_Event())
+                    .AttachNewEvent(new Button_System_Event())
+                    .AttachNewEvent(new Button_ThumbStick_Event())
+                    .AttachNewEvent(new Button_ThumbStickVector2_Event())
+                    .AttachNewEvent(new Button_Grip_Event())
+                    .AttachNewEvent(new Button_GripVector1_Event());
                 leftController
                     .AttachNewEvent(new Button_B_Event())
                     .AttachNewEvent(new Button_A_Event())
-                    .AttachNewEvent(new Button_System_Event())
-                    .AttachNewEvent(new Button_Grip_Event())
-                    .AttachNewEvent(new Button_ThumbStick_Event())
                     .AttachNewEvent(new Button_Trigger_Event())
-                    .AttachNewEvent(new Button_Touchpad_Event());
+                    .AttachNewEvent(new Button_TriggerVector1_Event())
+                    .AttachNewEvent(new Button_Touchpad_Event())
+                    .AttachNewEvent(new Button_TouchpadVector2_Event())
+                    .AttachNewEvent(new Button_System_Event())
+                    .AttachNewEvent(new Button_ThumbStick_Event())
+                    .AttachNewEvent(new Button_ThumbStickVector2_Event())
+                    .AttachNewEvent(new Button_Grip_Event())
+                    .AttachNewEvent(new Button_GripVector1_Event());
 
                 // #5 Get action set handle
                 Utils.PrintVerbose("Getting action set handle");
@@ -131,11 +139,8 @@ namespace OpenVRInputTest
                 if (errorUAS != EVRInputError.None) Utils.PrintError($"UpdateActionState Error: {Enum.GetName(typeof(EVRInputError), errorUAS)}");
 
                 // #7 Load input action data
-                
-                foreach(var controllerEvent in leftController.EventList)
-                {
-                    controllerEvent.DigitalFetchEventResult();
-                }
+                leftController.UpdateAllState();
+                rightController.UpdateAllState();
 
                 // Restrict rate
                 Thread.Sleep(1000 / 10);

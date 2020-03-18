@@ -52,6 +52,17 @@ namespace OpenVRInputTest
             return EventTypeEmun.Digital;
         }
     }
+    public class Button_TriggerVector1_Event : ControllerEvent
+    {
+        public override string EventName()
+        {
+            return "TriggerVector1";
+        }
+        public override EventTypeEmun EventType()
+        {
+            return EventTypeEmun.Analog;
+        }
+    }
     public class Button_Touchpad_Event : ControllerEvent
     {
         public override string EventName()
@@ -61,6 +72,17 @@ namespace OpenVRInputTest
         public override EventTypeEmun EventType()
         {
             return EventTypeEmun.Digital;
+        }
+    }
+    public class Button_TouchpadVector2_Event : ControllerEvent
+    {
+        public override string EventName()
+        {
+            return "TouchpadVector2";
+        }
+        public override EventTypeEmun EventType()
+        {
+            return EventTypeEmun.Analog;
         }
     }
     public class Button_ThumbStick_Event : ControllerEvent
@@ -74,6 +96,17 @@ namespace OpenVRInputTest
             return EventTypeEmun.Digital;
         }
     }
+    public class Button_ThumbStickVector2_Event : ControllerEvent
+    {
+        public override string EventName()
+        {
+            return "ThumbStickVector2";
+        }
+        public override EventTypeEmun EventType()
+        {
+            return EventTypeEmun.Analog;
+        }
+    }
     public class Button_Grip_Event : ControllerEvent
     {
         public override string EventName()
@@ -83,6 +116,17 @@ namespace OpenVRInputTest
         public override EventTypeEmun EventType()
         {
             return EventTypeEmun.Digital;
+        }
+    }
+    public class Button_GripVector1_Event : ControllerEvent
+    {
+        public override string EventName()
+        {
+            return "GripVector1";
+        }
+        public override EventTypeEmun EventType()
+        {
+            return EventTypeEmun.Analog;
         }
     }
     public abstract class ControllerEvent
@@ -99,6 +143,9 @@ namespace OpenVRInputTest
         ulong ActionHandle;
         InputDigitalActionData_t Digital;
         InputAnalogActionData_t Analog;
+#if DEBUG
+        float[] xyz;
+#endif
         public ControllerEvent()
         {
             switch (EventType())
@@ -108,6 +155,9 @@ namespace OpenVRInputTest
                     break;
                 case EventTypeEmun.Analog:
                     Analog = new InputAnalogActionData_t();
+#if DEBUG
+                    xyz = new float[3];
+#endif
                     break;
             }
         }
@@ -142,11 +192,15 @@ namespace OpenVRInputTest
 #endif
             OpenVR.Input.GetAnalogActionData(ActionHandle, ref Analog, size, controller.ControllerHandle);
 #if DEBUG
+
             // Result
-            if (Analog.fUpdateTime != LastTimeStamp)
+            if (xyz[0] != Analog.x || xyz[1] != Analog.y || xyz[2] != Analog.z)
             {
                 Utils.PrintInfo($"Action {ActionHandle}, Active: {Analog.bActive}, State: {{{Analog.x}, {Analog.y}, {Analog.x}}} on: {controller.ControllerHandle}");
             }
+            xyz[0] = Analog.x;
+            xyz[1] = Analog.y;
+            xyz[2] = Analog.z;
 #endif
             return Analog;
         }

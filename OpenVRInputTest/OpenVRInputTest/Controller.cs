@@ -27,5 +27,20 @@ namespace OpenVRInputTest
             controllerEvent.AttachToController(this);
             return this;
         }
+        public void UpdateAllState()
+        {
+            foreach (ControllerEvent controllerEvent in EventList)
+            {
+                switch (controllerEvent.EventType())
+                {
+                    case ControllerEvent.EventTypeEmun.Digital:
+                        controllerEvent.DigitalFetchEventResult();
+                        break;
+                    case ControllerEvent.EventTypeEmun.Analog:
+                        controllerEvent.AnalogFetechEventResult();
+                        break;
+                }
+            }
+        }
     }
 }

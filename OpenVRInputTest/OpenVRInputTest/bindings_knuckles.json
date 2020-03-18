@@ -24,42 +24,6 @@
             {
                "inputs" : {
                   "click" : {
-                     "output" : "/actions/default/in/left_trigger"
-                  }
-               },
-               "mode" : "button",
-               "path" : "/user/hand/left/input/trigger"
-            },
-            {
-               "inputs" : {
-                  "click" : {
-                     "output" : "/actions/default/in/right_trigger"
-                  }
-               },
-               "mode" : "button",
-               "path" : "/user/hand/right/input/trigger"
-            },
-            {
-               "inputs" : {
-                  "click" : {
-                     "output" : "/actions/default/in/left_touchpad"
-                  }
-               },
-               "mode" : "button",
-               "path" : "/user/hand/left/input/trackpad"
-            },
-            {
-               "inputs" : {
-                  "click" : {
-                     "output" : "/actions/default/in/right_touchpad"
-                  }
-               },
-               "mode" : "button",
-               "path" : "/user/hand/right/input/trackpad"
-            },
-            {
-               "inputs" : {
-                  "click" : {
                      "output" : "/actions/default/in/left_b"
                   }
                },
@@ -104,29 +68,6 @@
                "path" : "/user/hand/left/input/pinch"
             },
             {
-               "inputs" : {},
-               "mode" : "none",
-               "path" : "/user/hand/left/input/system"
-            },
-            {
-               "inputs" : {
-                  "click" : {
-                     "output" : "/actions/default/in/left_thumbstick"
-                  }
-               },
-               "mode" : "button",
-               "path" : "/user/hand/left/input/thumbstick"
-            },
-            {
-               "inputs" : {
-                  "click" : {
-                     "output" : "/actions/default/in/left_grip"
-                  }
-               },
-               "mode" : "button",
-               "path" : "/user/hand/left/input/grip"
-            },
-            {
                "inputs" : {
                   "click" : {
                      "output" : "/actions/default/in/left_system"
@@ -147,20 +88,98 @@
             {
                "inputs" : {
                   "click" : {
-                     "output" : "/actions/default/in/right_thumbstick"
+                     "output" : "/actions/default/in/left_thumbstick"
+                  },
+                  "position" : {
+                     "output" : "/actions/default/in/left_thumbstickvector2"
                   }
                },
-               "mode" : "button",
-               "path" : "/user/hand/right/input/thumbstick"
+               "mode" : "joystick",
+               "path" : "/user/hand/left/input/thumbstick"
             },
             {
                "inputs" : {
                   "click" : {
+                     "output" : "/actions/default/in/right_thumbstick"
+                  },
+                  "position" : {
+                     "output" : "/actions/default/in/right_thumbstickvector2"
+                  }
+               },
+               "mode" : "joystick",
+               "path" : "/user/hand/right/input/thumbstick"
+            },
+            {
+               "inputs" : {
+                  "position" : {
+                     "output" : "/actions/default/in/left_touchpadvector2"
+                  },
+                  "touch" : {
+                     "output" : "/actions/default/in/left_touchpad"
+                  }
+               },
+               "mode" : "trackpad",
+               "path" : "/user/hand/left/input/trackpad"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/default/in/left_trigger"
+                  },
+                  "pull" : {
+                     "output" : "/actions/default/in/left_triggervector1"
+                  }
+               },
+               "mode" : "trigger",
+               "path" : "/user/hand/left/input/trigger"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/default/in/right_trigger"
+                  },
+                  "pull" : {
+                     "output" : "/actions/default/in/right_triggervector1"
+                  }
+               },
+               "mode" : "trigger",
+               "path" : "/user/hand/right/input/trigger"
+            },
+            {
+               "inputs" : {
+                  "position" : {
+                     "output" : "/actions/default/in/right_touchpadvector2"
+                  },
+                  "touch" : {
+                     "output" : "/actions/default/in/right_touchpad"
+                  }
+               },
+               "mode" : "trackpad",
+               "path" : "/user/hand/right/input/trackpad"
+            },
+            {
+               "inputs" : {
+                  "pull" : {
+                     "output" : "/actions/default/in/right_gripvector1"
+                  },
+                  "touch" : {
                      "output" : "/actions/default/in/right_grip"
                   }
                },
-               "mode" : "button",
+               "mode" : "trigger",
                "path" : "/user/hand/right/input/grip"
+            },
+            {
+               "inputs" : {
+                  "pull" : {
+                     "output" : "/actions/default/in/left_gripvector1"
+                  },
+                  "touch" : {
+                     "output" : "/actions/default/in/left_grip"
+                  }
+               },
+               "mode" : "trigger",
+               "path" : "/user/hand/left/input/grip"
             }
          ]
       }

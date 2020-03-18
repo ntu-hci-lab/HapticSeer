@@ -31,6 +31,16 @@
 			"type": "boolean"
 		},
 		{
+			"name": "/actions/default/in/left_A",
+			"requirement": "optional",
+			"type": "boolean"
+		},
+		{
+			"name": "/actions/default/in/right_A",
+			"requirement": "optional",
+			"type": "boolean"
+		},
+		{
 			"name": "/actions/default/in/left_Trigger",
 			"requirement": "optional",
 			"type": "boolean"
@@ -39,6 +49,16 @@
 			"name": "/actions/default/in/right_Trigger",
 			"requirement": "optional",
 			"type": "boolean"
+		},
+		{
+			"name": "/actions/default/in/left_TriggerVector1",
+			"requirement": "optional",
+			"type": "vector1"
+		},
+		{
+			"name": "/actions/default/in/right_TriggerVector1",
+			"requirement": "optional",
+			"type": "vector1"
 		},
 		{
 			"name": "/actions/default/in/left_System",
@@ -61,6 +81,16 @@
 			"type": "boolean"
 		},
 		{
+			"name": "/actions/default/in/left_TouchpadVector2",
+			"requirement": "optional",
+			"type": "vector2"
+		},
+		{
+			"name": "/actions/default/in/right_TouchpadVector2",
+			"requirement": "optional",
+			"type": "vector2"
+		},
+		{
 			"name": "/actions/default/in/left_ThumbStick",
 			"requirement": "optional",
 			"type": "boolean"
@@ -69,6 +99,16 @@
 			"name": "/actions/default/in/right_ThumbStick",
 			"requirement": "optional",
 			"type": "boolean"
+		},
+		{
+			"name": "/actions/default/in/left_ThumbStickVector2",
+			"requirement": "optional",
+			"type": "vector2"
+		},
+		{
+			"name": "/actions/default/in/right_ThumbStickVector2",
+			"requirement": "optional",
+			"type": "vector2"
 		},
 		{
 			"name": "/actions/default/in/left_Grip",
@@ -81,14 +121,14 @@
 			"type": "boolean"
 		},
 		{
-			"name": "/actions/default/in/left_A",
+			"name": "/actions/default/in/left_GripVector1",
 			"requirement": "optional",
-			"type": "boolean"
+			"type": "vector1"
 		},
 		{
-			"name": "/actions/default/in/right_A",
+			"name": "/actions/default/in/right_GripVector1",
 			"requirement": "optional",
-			"type": "boolean"
+			"type": "vector1"
 		}
 	],
 	"action_sets": [
@@ -104,18 +144,26 @@
 			"/actions/default/in/chord2": "Chord 2",
 			"/actions/default/in/left_B": "Left B",
 			"/actions/default/in/right_B": "Right B",
+			"/actions/default/in/left_A": "Left A",
+			"/actions/default/in/right_A": "Right A",
 			"/actions/default/in/left_Trigger": "Left Trigger",
 			"/actions/default/in/right_Trigger": "Right Trigger",
+			"/actions/default/in/left_TriggerVector1": "Left Trigger Vector",
+			"/actions/default/in/right_TriggerVector1": "Right Trigger Vector",
 			"/actions/default/in/left_Touchpad": "Left Touchpad",
 			"/actions/default/in/right_Touchpad": "Right Touchpad",
+			"/actions/default/in/left_TouchpadVector2": "Left Touchpad Vector",
+			"/actions/default/in/right_TouchpadVector2": "Right Touchpad Vector",
 			"/actions/default/in/left_System": "Left System",
 			"/actions/default/in/right_System": "Right System",
 			"/actions/default/in/left_ThumbStick": "Left ThumbStick",
 			"/actions/default/in/right_ThumbStick": "Right ThumbStick",
+			"/actions/default/in/left_ThumbStickVector2": "Left ThumbStick Vector",
+			"/actions/default/in/right_ThumbStickVector2": "Right ThumbStick Vector",
 			"/actions/default/in/left_Grip": "Left Grip",
 			"/actions/default/in/right_Grip": "Right Grip",
-			"/actions/default/in/left_A": "Left A",
-			"/actions/default/in/right_A": "Right A"
+			"/actions/default/in/left_GripVector1": "Left Grip Vector",
+			"/actions/default/in/right_GripVector1": "Right Grip Vector"
 		}
 	]
 }
