@@ -134,7 +134,8 @@ namespace OpenVRInputTest
         public enum EventTypeEmun
         {
             Digital,
-            Analog
+            Analog,
+            Pose
         }
         public abstract string EventName();
         public abstract EventTypeEmun EventType();
@@ -143,6 +144,8 @@ namespace OpenVRInputTest
         ulong ActionHandle;
         InputDigitalActionData_t Digital;
         InputAnalogActionData_t Analog;
+        InputPoseActionData_t Pose;
+        HmdVector3_t Position;
 #if DEBUG
         float[] xyz;
 #endif
@@ -159,6 +162,11 @@ namespace OpenVRInputTest
                     xyz = new float[3];
 #endif
                     break;
+                case EventTypeEmun.Pose:
+                    Pose = new InputPoseActionData_t();
+                    Position = new HmdVector3_t();
+                    break;
+
             }
         }
         public void AttachToController(Controller controller)
@@ -184,7 +192,7 @@ namespace OpenVRInputTest
 #endif
             return Digital.bState;
         }
-        public InputAnalogActionData_t AnalogFetechEventResult()
+        public InputAnalogActionData_t AnalogFetchEventResult()
         {
             var size = (uint)Marshal.SizeOf(typeof(InputAnalogActionData_t));
 #if DEBUG
@@ -196,7 +204,7 @@ namespace OpenVRInputTest
             // Result
             if (xyz[0] != Analog.x || xyz[1] != Analog.y || xyz[2] != Analog.z)
             {
-                Utils.PrintInfo($"Action {ActionHandle}, Active: {Analog.bActive}, State: {{{Analog.x}, {Analog.y}, {Analog.x}}} on: {controller.ControllerHandle}");
+                Utils.PrintInfo($"Action {ActionHandle}, Active: {Analog.bActive}, State: {{{Analog.x}, {Analog.y}, {Analog.z}}} on: {controller.ControllerHandle}");
             }
             xyz[0] = Analog.x;
             xyz[1] = Analog.y;
@@ -204,5 +212,15 @@ namespace OpenVRInputTest
 #endif
             return Analog;
         }
+        public InputPoseActionData_t PoseFetchEventResult()
+        {
+            var size = (uint)Marshal.SizeOf(typeof(InputPoseActionData_t));
+            OpenVR.Input.GetPoseActionData(ActionHandle, ETrackingUniverseOrigin.TrackingUniverseStanding, 1 / Program.DataFrameRate, ref Pose, size, controller.ControllerHandle);
+            if (Pose.pose.bDeviceIsConnected == true && Pose.pose.bPoseIsValid == true)
+                TrackableDeviceInfo.GetPosition(Pose.pose.mDeviceToAbsoluteTracking, ref Position);
+            return Pose;
+        }
+
+
     }
 }

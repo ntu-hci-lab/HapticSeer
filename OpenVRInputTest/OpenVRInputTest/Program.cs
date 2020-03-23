@@ -12,7 +12,7 @@ namespace OpenVRInputTest
 {
     class Program
     {
-        static float DataFrameRate = 90f;
+        public static float DataFrameRate = 90f;
         static ulong mActionSetHandle;
         //static ulong mActionHandleLeftB, mActionHandleRightB, mActionHandleLeftA, mActionHandleRightA, mActionHandleChord1, mActionHandleChord2;
         static VRActiveActionSet_t[] mActionSetArray;
@@ -101,6 +101,20 @@ namespace OpenVRInputTest
             Thread.CurrentThread.IsBackground = true;
             while (true)
             {
+                TrackableDeviceInfo.UpdateTrackableDevicePosition();
+                HmdVector3_t vector = new HmdVector3_t();
+
+                if (TrackableDeviceInfo.HmdDevicePose.bPoseIsValid)
+                {
+                    TrackableDeviceInfo.GetPosition(TrackableDeviceInfo.HmdDevicePose.mDeviceToAbsoluteTracking, ref vector);
+                    Utils.PrintInfo($"Hmd {{{vector.v0}, {vector.v1}, {vector.v2}}}");
+                }
+                if (TrackableDeviceInfo.LeftControllerPose.bPoseIsValid)
+                {
+                    TrackableDeviceInfo.GetPosition(TrackableDeviceInfo.LeftControllerPose.mDeviceToAbsoluteTracking, ref vector);
+                    Utils.PrintInfo($"Left {{{vector.v0}, {vector.v1}, {vector.v2}}}");
+                }
+
                 // Getting events
                 var vrEvents = new List<VREvent_t>();
                 var vrEvent = new VREvent_t();
@@ -122,7 +136,10 @@ namespace OpenVRInputTest
                     var pid = e.data.process.pid;
                     if (e.eventType == (uint)EVREventType.VREvent_Input_HapticVibration)
                     {
-                        e.data.hapticVibration.fAmplitude;
+                        ETrackedControllerRole DeviceType = OpenVR.System.GetControllerRoleForTrackedDeviceIndex(e.data.process.pid);
+                        if (DeviceType != ETrackedControllerRole.LeftHand && DeviceType != ETrackedControllerRole.RightHand)
+                            continue;
+                        //e.data.hapticVibration.fAmplitude;
                     }
 #if DEBUG
                     if ((EVREventType)vrEvent.eventType != EVREventType.VREvent_None)

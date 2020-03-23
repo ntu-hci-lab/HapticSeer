@@ -37,7 +37,10 @@ namespace OpenVRInputTest
                         controllerEvent.DigitalFetchEventResult();
                         break;
                     case ControllerEvent.EventTypeEmun.Analog:
-                        controllerEvent.AnalogFetechEventResult();
+                        controllerEvent.AnalogFetchEventResult();
+                        break;
+                    case ControllerEvent.EventTypeEmun.Pose:
+                        controllerEvent.PoseFetchEventResult();
                         break;
                 }
             }
