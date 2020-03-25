@@ -23,13 +23,36 @@ namespace OpenVRInputTest
 
         public static void UpdateTrackableDevicePosition()
         {
-            OpenVR.System.GetDeviceToAbsoluteTrackingPose(ETrackingUniverseOrigin.TrackingUniverseStanding, 1 / Program.DataFrameRate, TrackedDevicePose_t);
             VRControllerState_t controllerState = new VRControllerState_t();
             var size = (uint)Marshal.SizeOf(typeof(VRControllerState_t));
+            HmdVector3_t position = new HmdVector3_t();
+            HmdQuaternion_t quaternion = new HmdQuaternion_t();
             uint LeftControllerIndex = OpenVR.System.GetTrackedDeviceIndexForControllerRole(ETrackedControllerRole.LeftHand),
                 RightControllerIndex = OpenVR.System.GetTrackedDeviceIndexForControllerRole(ETrackedControllerRole.RightHand);
+
+            OpenVR.System.GetDeviceToAbsoluteTrackingPose(ETrackingUniverseOrigin.TrackingUniverseStanding, 1 / Program.DataFrameRate, TrackedDevicePose_t);
+            if (TrackedDevicePose_t[0].bPoseIsValid)
+            {
+                GetPosition(TrackedDevicePose_t[0].mDeviceToAbsoluteTracking, ref position);
+                GetRotation(TrackedDevicePose_t[0].mDeviceToAbsoluteTracking, ref quaternion);
+                VREventCallback.NewPoseEvent(VREventCallback.DeviceType.HMD, position, quaternion);
+            }
+
             OpenVR.System.GetControllerStateWithPose(ETrackingUniverseOrigin.TrackingUniverseStanding, LeftControllerIndex, ref controllerState, size, ref LeftControllerPose);
+            if (LeftControllerPose.bPoseIsValid)
+            {
+                GetPosition(LeftControllerPose.mDeviceToAbsoluteTracking, ref position);
+                GetRotation(LeftControllerPose.mDeviceToAbsoluteTracking, ref quaternion);
+                VREventCallback.NewPoseEvent(VREventCallback.DeviceType.LeftController, position, quaternion);
+            }
             OpenVR.System.GetControllerStateWithPose(ETrackingUniverseOrigin.TrackingUniverseStanding, RightControllerIndex, ref controllerState, size, ref RightControllerPose);
+            if (RightControllerPose.bPoseIsValid)
+            {
+                GetPosition(RightControllerPose.mDeviceToAbsoluteTracking, ref position);
+                GetRotation(RightControllerPose.mDeviceToAbsoluteTracking, ref quaternion);
+                VREventCallback.NewPoseEvent(VREventCallback.DeviceType.RightController, position, quaternion);
+            }
+
         }
         public static double CSharpCopySign(in double x, in double y)
         {

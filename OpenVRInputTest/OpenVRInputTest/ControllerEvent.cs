@@ -8,126 +8,61 @@ using Valve.VR;
 
 namespace OpenVRInputTest
 {
-    public class Button_B_Event : ControllerEvent
+    public class Button_B_Event : DigitalControllerEvent
     {
-        public override string EventName()
-        {
-            return "B";
-        }
-        public override EventTypeEmun EventType()
-        {
-            return EventTypeEmun.Digital;
-        }
+        public override string EventName() { return "B"; }
     }
-    public class Button_A_Event : ControllerEvent
+    public class Button_A_Event : DigitalControllerEvent
     {
-        public override string EventName()
-        {
-            return "A";
-        }
-        public override EventTypeEmun EventType()
-        {
-            return EventTypeEmun.Digital;
-        }
+        public override string EventName() { return "A"; }
     }
-    public class Button_System_Event : ControllerEvent
+    public class Button_System_Event : DigitalControllerEvent
     {
-        public override string EventName()
-        {
-            return "System";
-        }
-        public override EventTypeEmun EventType()
-        {
-            return EventTypeEmun.Digital;
-        }
+        public override string EventName() { return "System"; }
     }
-    public class Button_Trigger_Event : ControllerEvent
+    public class Button_Trigger_Event : DigitalControllerEvent
     {
-        public override string EventName()
-        {
-            return "Trigger";
-        }
-        public override EventTypeEmun EventType()
-        {
-            return EventTypeEmun.Digital;
-        }
+        public override string EventName() { return "Trigger"; }
     }
-    public class Button_TriggerVector1_Event : ControllerEvent
+    public class Button_TriggerVector1_Event : AnalogControllerEvent
     {
-        public override string EventName()
-        {
-            return "TriggerVector1";
-        }
-        public override EventTypeEmun EventType()
-        {
-            return EventTypeEmun.Analog;
-        }
+        public override string EventName() { return "TriggerVector1"; }
     }
-    public class Button_Touchpad_Event : ControllerEvent
+    public class Button_Touchpad_Event : DigitalControllerEvent
     {
-        public override string EventName()
-        {
-            return "Touchpad";
-        }
-        public override EventTypeEmun EventType()
-        {
-            return EventTypeEmun.Digital;
-        }
+        public override string EventName() { return "Touchpad"; }
     }
-    public class Button_TouchpadVector2_Event : ControllerEvent
+    public class Button_TouchpadVector2_Event : AnalogControllerEvent
     {
-        public override string EventName()
-        {
-            return "TouchpadVector2";
-        }
-        public override EventTypeEmun EventType()
-        {
-            return EventTypeEmun.Analog;
-        }
+        public override string EventName() { return "TouchpadVector2"; }
     }
-    public class Button_ThumbStick_Event : ControllerEvent
+    public class Button_ThumbStick_Event : DigitalControllerEvent
     {
-        public override string EventName()
-        {
-            return "ThumbStick";
-        }
-        public override EventTypeEmun EventType()
-        {
-            return EventTypeEmun.Digital;
-        }
+        public override string EventName() { return "ThumbStick"; }
     }
-    public class Button_ThumbStickVector2_Event : ControllerEvent
+    public class Button_ThumbStickVector2_Event : AnalogControllerEvent
     {
-        public override string EventName()
-        {
-            return "ThumbStickVector2";
-        }
-        public override EventTypeEmun EventType()
-        {
-            return EventTypeEmun.Analog;
-        }
+        public override string EventName() { return "ThumbStickVector2"; }
     }
-    public class Button_Grip_Event : ControllerEvent
+    public class Button_Grip_Event : DigitalControllerEvent
     {
-        public override string EventName()
-        {
-            return "Grip";
-        }
-        public override EventTypeEmun EventType()
-        {
-            return EventTypeEmun.Digital;
-        }
+        public override string EventName() { return "Grip"; }
     }
-    public class Button_GripVector1_Event : ControllerEvent
+    public class Button_GripVector1_Event : AnalogControllerEvent
     {
-        public override string EventName()
-        {
-            return "GripVector1";
-        }
-        public override EventTypeEmun EventType()
-        {
-            return EventTypeEmun.Analog;
-        }
+        public override string EventName() { return "GripVector1"; }
+    }
+    public abstract class AnalogControllerEvent : ControllerEvent
+    {
+        public override EventTypeEmun EventType() { return EventTypeEmun.Analog; }
+    }
+    public abstract class DigitalControllerEvent : ControllerEvent
+    {
+        public override EventTypeEmun EventType() { return EventTypeEmun.Digital; }
+    }
+    public abstract class PoseControllerEvent : ControllerEvent
+    {
+        public override EventTypeEmun EventType() { return EventTypeEmun.Pose; }
     }
     public abstract class ControllerEvent
     {
@@ -146,9 +81,6 @@ namespace OpenVRInputTest
         InputAnalogActionData_t Analog;
         InputPoseActionData_t Pose;
         HmdVector3_t Position;
-#if DEBUG
-        float[] xyz;
-#endif
         public ControllerEvent()
         {
             switch (EventType())
@@ -158,9 +90,6 @@ namespace OpenVRInputTest
                     break;
                 case EventTypeEmun.Analog:
                     Analog = new InputAnalogActionData_t();
-#if DEBUG
-                    xyz = new float[3];
-#endif
                     break;
                 case EventTypeEmun.Pose:
                     Pose = new InputPoseActionData_t();
@@ -183,33 +112,22 @@ namespace OpenVRInputTest
         {
             var size = (uint)Marshal.SizeOf(typeof(InputDigitalActionData_t));
             OpenVR.Input.GetDigitalActionData(ActionHandle, ref Digital, size, controller.ControllerHandle);
-#if DEBUG
             // Result
             if (Digital.bChanged)
             {
-                Utils.PrintInfo($"Action {ActionHandle}, Active: {Digital.bActive}, State: {Digital.bState} on: {controller.ControllerHandle}");
+                VREventCallback.NewDigitalEvent(controller.ControllerType, (DigitalControllerEvent)this, Digital.bState);
             }
-#endif
             return Digital.bState;
         }
         public InputAnalogActionData_t AnalogFetchEventResult()
         {
             var size = (uint)Marshal.SizeOf(typeof(InputAnalogActionData_t));
-#if DEBUG
-            var LastTimeStamp = Analog.fUpdateTime;
-#endif
             OpenVR.Input.GetAnalogActionData(ActionHandle, ref Analog, size, controller.ControllerHandle);
-#if DEBUG
-
             // Result
-            if (xyz[0] != Analog.x || xyz[1] != Analog.y || xyz[2] != Analog.z)
+            if (Analog.deltaX != 0 || Analog.deltaY != 0 || Analog.deltaZ != 0)
             {
-                Utils.PrintInfo($"Action {ActionHandle}, Active: {Analog.bActive}, State: {{{Analog.x}, {Analog.y}, {Analog.z}}} on: {controller.ControllerHandle}");
+                VREventCallback.NewAnalogEvent(controller.ControllerType, (AnalogControllerEvent)this, Analog);
             }
-            xyz[0] = Analog.x;
-            xyz[1] = Analog.y;
-            xyz[2] = Analog.z;
-#endif
             return Analog;
         }
         public InputPoseActionData_t PoseFetchEventResult()
@@ -217,10 +135,14 @@ namespace OpenVRInputTest
             var size = (uint)Marshal.SizeOf(typeof(InputPoseActionData_t));
             OpenVR.Input.GetPoseActionData(ActionHandle, ETrackingUniverseOrigin.TrackingUniverseStanding, 1 / Program.DataFrameRate, ref Pose, size, controller.ControllerHandle);
             if (Pose.pose.bDeviceIsConnected == true && Pose.pose.bPoseIsValid == true)
-                TrackableDeviceInfo.GetPosition(Pose.pose.mDeviceToAbsoluteTracking, ref Position);
+            {
+                HmdVector3_t position = new HmdVector3_t();
+                HmdQuaternion_t quaternion = new HmdQuaternion_t();
+                TrackableDeviceInfo.GetPosition(Pose.pose.mDeviceToAbsoluteTracking, ref position);
+                TrackableDeviceInfo.GetRotation(Pose.pose.mDeviceToAbsoluteTracking, ref quaternion);
+                VREventCallback.NewPoseEvent(controller.ControllerType, (PoseControllerEvent)this, position, quaternion);
+            }
             return Pose;
         }
-
-
     }
 }

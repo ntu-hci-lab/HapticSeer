@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Valve.VR;
+using static OpenVRInputTest.VREventCallback;
 
 namespace OpenVRInputTest
 {
@@ -13,8 +14,17 @@ namespace OpenVRInputTest
         public string ControllerName = "LeftController";
         public ulong ControllerHandle = 0;
         public List<ControllerEvent> EventList = new List<ControllerEvent>();
-        public Controller(string ControllerName, string ControllerHandlePath, string ActionHandleBasePath)
+        DeviceType _ControllerType;
+        public DeviceType ControllerType
         {
+            get
+            {
+                return _ControllerType;
+            }
+        }
+        public Controller(DeviceType ControllerType, string ControllerName, string ControllerHandlePath, string ActionHandleBasePath)
+        {
+            this._ControllerType = ControllerType;
             this.ControllerName = ControllerName;
             this.ActionHandleBasePath = ActionHandleBasePath;
             OpenVR.Input.GetInputSourceHandle(ControllerHandlePath, ref ControllerHandle);

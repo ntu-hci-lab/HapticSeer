@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using Valve.VR;
+using static OpenVRInputTest.VREventCallback;
 //Sources: https://github.com/BOLL7708/OpenVRInputTest
 namespace OpenVRInputTest
 {
@@ -50,7 +51,7 @@ namespace OpenVRInputTest
                 // #4 Get action handles
                 Utils.PrintVerbose("Getting action handles");
                 rightController = 
-                    new Controller("RightController", "/user/hand/right", "/actions/default/in/right_")
+                    new Controller(DeviceType.RightController, "RightController", "/user/hand/right", "/actions/default/in/right_")
                     .AttachNewEvent(new Button_B_Event())
                     .AttachNewEvent(new Button_A_Event())
                     .AttachNewEvent(new Button_Trigger_Event())
@@ -64,7 +65,7 @@ namespace OpenVRInputTest
                     .AttachNewEvent(new Button_GripVector1_Event());
 
                 leftController = 
-                    new Controller("LeftController", "/user/hand/left", "/actions/default/in/left_")
+                    new Controller(DeviceType.LeftController, "LeftController", "/user/hand/left", "/actions/default/in/left_")
                     .AttachNewEvent(new Button_B_Event())
                     .AttachNewEvent(new Button_A_Event())
                     .AttachNewEvent(new Button_Trigger_Event())
@@ -102,18 +103,6 @@ namespace OpenVRInputTest
             while (true)
             {
                 TrackableDeviceInfo.UpdateTrackableDevicePosition();
-                HmdVector3_t vector = new HmdVector3_t();
-
-                if (TrackableDeviceInfo.HmdDevicePose.bPoseIsValid)
-                {
-                    TrackableDeviceInfo.GetPosition(TrackableDeviceInfo.HmdDevicePose.mDeviceToAbsoluteTracking, ref vector);
-                    Utils.PrintInfo($"Hmd {{{vector.v0}, {vector.v1}, {vector.v2}}}");
-                }
-                if (TrackableDeviceInfo.LeftControllerPose.bPoseIsValid)
-                {
-                    TrackableDeviceInfo.GetPosition(TrackableDeviceInfo.LeftControllerPose.mDeviceToAbsoluteTracking, ref vector);
-                    Utils.PrintInfo($"Left {{{vector.v0}, {vector.v1}, {vector.v2}}}");
-                }
 
                 // Getting events
                 var vrEvents = new List<VREvent_t>();
@@ -139,7 +128,7 @@ namespace OpenVRInputTest
                         ETrackedControllerRole DeviceType = OpenVR.System.GetControllerRoleForTrackedDeviceIndex(e.data.process.pid);
                         if (DeviceType != ETrackedControllerRole.LeftHand && DeviceType != ETrackedControllerRole.RightHand)
                             continue;
-                        //e.data.hapticVibration.fAmplitude;
+                        NewVibrationEvent(DeviceType, e.data.hapticVibration);
                     }
 #if DEBUG
                     if ((EVREventType)vrEvent.eventType != EVREventType.VREvent_None)
