@@ -187,7 +187,7 @@
    "category" : "steamvr_input",
    "controller_type" : "knuckles",
    "description" : "Attempt 2 Index Controller bindings",
-   "name" : "為 Index Controller 儲存的 OpenVR Input Test 配置",
+   "name" : "Index Controller OpenVR Input Test Setting",
    "options" : {},
    "simulated_actions" : []
 }
