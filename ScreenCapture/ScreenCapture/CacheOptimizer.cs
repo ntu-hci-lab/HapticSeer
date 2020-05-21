@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Management;
+using System.Threading;
+
 public static class CacheOptimizer
 {
     static bool IsRyzen_3950X = false;
@@ -20,13 +22,14 @@ public static class CacheOptimizer
             break;
         }
     }
-    public static void ResetAffinity()
+    public static void ResetAllAffinity(int TaretCCX_ID = TargetCCX_ID)
     {
+        if (!IsRyzen_3950X)
+            return;
         ProcessThreadCollection threads;
         IntPtr Affinity = (IntPtr)(255 << (TargetCCX_ID * 8));
         threads = Process.GetCurrentProcess().Threads;
         foreach (ProcessThread thread in threads)
             thread.ProcessorAffinity = Affinity;
     }
-
 }

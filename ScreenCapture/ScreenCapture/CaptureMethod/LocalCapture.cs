@@ -11,7 +11,7 @@ namespace ScreenCapture
     public class LocalCapture : CaptureMethod
     {
         /*Const Variable*/
-        const int BitmapCount = 30;
+        const int PreCreateBitmapCount = 30;
         /*Const Variable*/
 
         /*Screen Capture Variable*/
@@ -73,7 +73,7 @@ namespace ScreenCapture
             duplicatedOutput = output1.DuplicateOutput(device);
 
             //Create enough UnusedBitmap
-            for (int i = 0; i < BitmapCount; ++i)
+            for (int i = 0; i < PreCreateBitmapCount; ++i)
                 bitmapBuffer.PushUnusedBitmap(CreateSuitableBitmap());
             this.bitmapBuffer = bitmapBuffer;
         }
@@ -86,6 +86,7 @@ namespace ScreenCapture
             ThreadStopSignal?.Cancel();
             ThreadStopSignal = new CancellationTokenSource();
             new Thread(WorkerThread).Start();
+            CacheOptimizer.ResetAllAffinity();
         }
         public void Stop()
         {
