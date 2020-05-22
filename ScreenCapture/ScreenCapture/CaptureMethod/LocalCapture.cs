@@ -32,8 +32,12 @@ namespace ScreenCapture
         BitmapBuffer bitmapBuffer;
         /*Multi-Thread Variable*/
 
-
+        /// <summary>
+        /// Create LocalCapture to capture screen (by DXGI.)
+        /// </summary>
+        /// <param name="bitmapBuffer">Communication pipe with other threads. It stores some processing Bitmap and some unused Bitmap</param>
         /// <param name="numOutput"># of output device (i.e. monitor).</param>
+        /// <param name="numAdapter"># of output adapter (i.e. iGPU). </param>
         public LocalCapture(BitmapBuffer bitmapBuffer, int numOutput = 0, int numAdapter = 0)
         {
             // Create DXGI Factory1
@@ -75,12 +79,21 @@ namespace ScreenCapture
             //Create enough UnusedBitmap
             for (int i = 0; i < PreCreateBitmapCount; ++i)
                 bitmapBuffer.PushUnusedBitmap(CreateSuitableBitmap());
+
+            //Save the buffer
             this.bitmapBuffer = bitmapBuffer;
         }
+        /// <summary>
+        /// Pre-create Bitmap for image processing.
+        /// Pre-create helps allocate continuous memory address, which is cache-friendly.
+        /// </summary> 
         private System.Drawing.Bitmap CreateSuitableBitmap()
         {
-            return new System.Drawing.Bitmap(width, height, PixelFormat.Format32bppArgb);
+            return new System.Drawing.Bitmap(width, height, PixelFormat.Format32bppRgb);
         }
+        /// <summary>
+        /// Call Start to activate image capture.
+        /// </summary>
         public void Start()
         {
             ThreadStopSignal?.Cancel();
@@ -88,6 +101,9 @@ namespace ScreenCapture
             new Thread(WorkerThread).Start();
             CacheOptimizer.ResetAllAffinity();
         }
+        /// <summary>
+        /// Call Stop to deactivate image capture.
+        /// </summary>
         public void Stop()
         {
             ThreadStopSignal?.Cancel();
