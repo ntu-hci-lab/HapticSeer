@@ -1,4 +1,7 @@
 ﻿using Accord.Video.DirectShow;
+using Emgu.CV;
+using Emgu.CV.CvEnum;
+using ImageProcessModule;
 using System;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -9,7 +12,7 @@ namespace ScreenCapture
     public class CardCapture : CaptureMethod
     {
         /*Const Variable*/
-        const int PreCreateBitmapCount = 30;
+        const int PreCreateMatCount = 30;
         /*Const Variable*/
 
         /*Screen Capture Variable*/
@@ -25,7 +28,7 @@ namespace ScreenCapture
         /// <summary>
         /// Create CardCapture to communicate with Capture Card (by DirectShow.)
         /// </summary>
-        /// <param name="bitmapBuffer">Communication pipe with other threads. It stores some processing Bitmap and some unused Bitmap</param>
+        /// <param name="bitmapBuffer">Communication pipe with other threads. It stores some processing Mat and some unused Mat</param>
         /// <param name="DeviceID">The DeviceID of Capture Card.</param>
         public CardCapture(BitmapBuffer bitmapBuffer, int DeviceID = 0)
         {
@@ -43,7 +46,7 @@ namespace ScreenCapture
             //Cache Optimized for Ryzen-based 16 Core CPU
             CacheOptimizer.ResetAllAffinity();
 
-            //Store Bitmap Buffer
+            //Store Mat Buffer
             this.bitmapBuffer = bitmapBuffer;
         }
 
@@ -59,9 +62,9 @@ namespace ScreenCapture
             {
                 width = eventArgs.Frame.Width;
                 height = eventArgs.Frame.Height;
-                //Create enough UnusedBitmap
-                for (int i = 0; i < PreCreateBitmapCount; ++i)
-                    bitmapBuffer.PushUnusedBitmap(CreateSuitableBitmap());
+                //Create enough UnusedMat
+                for (int i = 0; i < PreCreateMatCount; ++i)
+                    bitmapBuffer.PushUnusedMat(CreateSuitableMat());
                 Thread.CurrentThread.Priority = ThreadPriority.Highest; //Set ThreadPriority of Accord.Video.DirectShow
             }
 
@@ -69,13 +72,15 @@ namespace ScreenCapture
                 return;
 
             Bitmap SrcBitmap = eventArgs.Frame; //Get Frame from Capture Card
-            Bitmap ProcessingBitmap = bitmapBuffer.GetUnusedBitmap();   //Get Bitmap from Buffer
-            
+            Mat ProcessingMat = bitmapBuffer.GetUnusedMat();   //Get Mat from Buffer
+
+            if (ProcessingMat == null)
+                ProcessingMat = CreateSuitableMat();
+
             //Unlock Bitmap & Get actual pointer
             BitmapData SrcBitmapData = SrcBitmap.LockBits(new Rectangle(new Point(0, 0), SrcBitmap.Size), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
-            BitmapData ProcessingBitmapData = ProcessingBitmap.LockBits(new Rectangle(new Point(0, 0), ProcessingBitmap.Size), ImageLockMode.WriteOnly, PixelFormat.Format32bppRgb);
             IntPtr SrcBitmapDataPointer = SrcBitmapData.Scan0;
-            IntPtr DstBitmapDataPointer = ProcessingBitmapData.Scan0;
+            IntPtr DstBitmapDataPointer = ProcessingMat.DataPointer;
 
             if ((SrcBitmapData.Stride % 4) != 0)    //Source Image should align 32-bit
                 throw new Exception("Error! Source Image Not Align 32-bit!");
@@ -104,18 +109,17 @@ namespace ScreenCapture
                 }
             }
             //Release Locks
-            ProcessingBitmap.UnlockBits(ProcessingBitmapData);
             SrcBitmap.UnlockBits(SrcBitmapData);
             //Push to buffer
-            bitmapBuffer.PushProcessingBitmap(ProcessingBitmap);
+            bitmapBuffer.PushProcessingMat(ProcessingMat);
         }
         /// <summary>
-        /// Pre-create Bitmap for image processing.
+        /// Pre-create Mat for image processing.
         /// Pre-create helps allocate continuous memory address, which is cache-friendly.
         /// </summary> 
-        private Bitmap CreateSuitableBitmap()
+        private Mat CreateSuitableMat()
         {
-            return new Bitmap(width, height, PixelFormat.Format32bppRgb);   
+            return new Mat(height, width, DepthType.Cv8U, 4);
         }
         /// <summary>
         /// Call Start to activate image capture.
