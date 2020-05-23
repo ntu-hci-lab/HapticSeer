@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Management;
-using System.Threading;
 
 public static class CacheOptimizer
 {
     static bool IsRyzen_3950X = false;
     const int TargetCCX_ID = 3;
+    /// <summary>
+    /// Check is the computer using Ryzen 3950X
+    /// </summary>
     public static void Init()
     {
         ManagementObjectSearcher mos =
@@ -22,14 +24,22 @@ public static class CacheOptimizer
             break;
         }
     }
+    /// <summary>
+    /// Set the affinity of all threads in this process.
+    /// All threads will work in the same CCX.
+    /// It helps reduce the latency of Crossing-CCX-L3-Cache-Accessing.
+    /// </summary>
+    /// <param name="TaretCCX_ID">For 3950X, there are four CCX in 3950X. Set all threads in the same ccx helps performance improvement.</param>
     public static void ResetAllAffinity(int TaretCCX_ID = TargetCCX_ID)
     {
-        if (!IsRyzen_3950X)
-            return;
+        if (!IsRyzen_3950X) //If it is not 3950X
+            return; //Do to optimize that
+
+        IntPtr Affinity = (IntPtr)(255 << (TargetCCX_ID * 8));  //4 Core, 8 Threads in one CCX. Set Affinity as 2^8 - 1
+        
         ProcessThreadCollection threads;
-        IntPtr Affinity = (IntPtr)(255 << (TargetCCX_ID * 8));
-        threads = Process.GetCurrentProcess().Threads;
+        threads = Process.GetCurrentProcess().Threads;  //Get all threads in this process
         foreach (ProcessThread thread in threads)
-            thread.ProcessorAffinity = Affinity;
+            thread.ProcessorAffinity = Affinity;    //Set the affinity
     }
 }

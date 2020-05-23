@@ -1,6 +1,8 @@
 ﻿using System;
-using System.Drawing.Imaging;
 using System.Threading;
+using Emgu.CV;
+using Emgu.CV.CvEnum;
+using ImageProcessModule;
 using SharpDX;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
@@ -11,7 +13,7 @@ namespace ScreenCapture
     public class LocalCapture : CaptureMethod
     {
         /*Const Variable*/
-        const int PreCreateBitmapCount = 30;
+        const int PreCreateMatCount = 30;
         /*Const Variable*/
 
         /*Screen Capture Variable*/
@@ -32,8 +34,12 @@ namespace ScreenCapture
         BitmapBuffer bitmapBuffer;
         /*Multi-Thread Variable*/
 
-
+        /// <summary>
+        /// Create LocalCapture to capture screen (by DXGI.)
+        /// </summary>
+        /// <param name="bitmapBuffer">Communication pipe with other threads. It stores some processing Mat and some unused Mat</param>
         /// <param name="numOutput"># of output device (i.e. monitor).</param>
+        /// <param name="numAdapter"># of output adapter (i.e. iGPU). </param>
         public LocalCapture(BitmapBuffer bitmapBuffer, int numOutput = 0, int numAdapter = 0)
         {
             // Create DXGI Factory1
@@ -72,15 +78,24 @@ namespace ScreenCapture
             // Duplicate the output
             duplicatedOutput = output1.DuplicateOutput(device);
 
-            //Create enough UnusedBitmap
-            for (int i = 0; i < PreCreateBitmapCount; ++i)
-                bitmapBuffer.PushUnusedBitmap(CreateSuitableBitmap());
+            //Create enough UnusedMat
+            for (int i = 0; i < PreCreateMatCount; ++i)
+                bitmapBuffer.PushUnusedMat(CreateSuitableMat());
+
+            //Save the buffer
             this.bitmapBuffer = bitmapBuffer;
         }
-        private System.Drawing.Bitmap CreateSuitableBitmap()
+        /// <summary>
+        /// Pre-create Mat for image processing.
+        /// Pre-create helps allocate continuous memory address, which is cache-friendly.
+        /// </summary> 
+        private Mat CreateSuitableMat()
         {
-            return new System.Drawing.Bitmap(width, height, PixelFormat.Format32bppArgb);
+            return new Mat(height, width, DepthType.Cv8U, 4);
         }
+        /// <summary>
+        /// Call Start to activate image capture.
+        /// </summary>
         public void Start()
         {
             ThreadStopSignal?.Cancel();
@@ -88,6 +103,9 @@ namespace ScreenCapture
             new Thread(WorkerThread).Start();
             CacheOptimizer.ResetAllAffinity();
         }
+        /// <summary>
+        /// Call Stop to deactivate image capture.
+        /// </summary>
         public void Stop()
         {
             ThreadStopSignal?.Cancel();
@@ -116,15 +134,14 @@ namespace ScreenCapture
                     // Get the desktop capture texture
                     var mapSource = device.ImmediateContext.MapSubresource(screenTexture, 0, MapMode.Read, MapFlags.None);
 
-                    // Create Drawing.Bitmap
-                    var bitmap = bitmapBuffer.GetUnusedBitmap();
-                    if (bitmap == null)
-                        bitmap = CreateSuitableBitmap();
+                    // Create Mat
+                    var NewMat = bitmapBuffer.GetUnusedMat();
+                    if (NewMat == null)
+                        NewMat = CreateSuitableMat();
 
                     // Copy pixels from screen capture Texture to GDI bitmap
-                    var mapDest = bitmap.LockBits(boundsRect, ImageLockMode.WriteOnly, bitmap.PixelFormat);
+                    var destPtr = NewMat.DataPointer;
                     var sourcePtr = mapSource.DataPointer;
-                    var destPtr = mapDest.Scan0;
                     for (int y = 0; y < height; y++)
                     {
                         // Copy a single line 
@@ -132,13 +149,10 @@ namespace ScreenCapture
 
                         // Advance pointers
                         sourcePtr = IntPtr.Add(sourcePtr, mapSource.RowPitch);
-                        destPtr = IntPtr.Add(destPtr, mapDest.Stride);
+                        destPtr = IntPtr.Add(destPtr, width * 4);
                     }
-
-                    // Release Bitmap lock
-                    bitmap.UnlockBits(mapDest);
                     // Send to buffer
-                    bitmapBuffer.PushProcessingBitmap(bitmap);
+                    bitmapBuffer.PushProcessingMat(NewMat);
 
                     //Release source lock
                     device.ImmediateContext.UnmapSubresource(screenTexture, 0);
