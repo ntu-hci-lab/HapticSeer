@@ -52,6 +52,10 @@
     <Compile Include="BitmapBuffer.cs" />
     <Compile Include="ImageProcessBase.cs" />
     <Compile Include="ImageProcessBase_StaticFunc.cs" />
+    <Compile Include="ProcessingClass\BarBloodIndicatorDetector.cs" />
+    <Compile Include="ProcessingClass\BulletCounter.cs" />
+    <Compile Include="ProcessingClass\CircularIndicatorDetector.cs" />
+    <Compile Include="ProcessingClass\OpticalFlow.cs" />
     <Compile Include="ProcessingClass\RedImpulseDetection.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

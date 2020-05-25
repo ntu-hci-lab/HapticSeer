@@ -3,7 +3,7 @@ using System.Threading;
 
 namespace ImageProcessModule
 {
-    class RedImpulseDetection : ImageProcessBase
+    public class RedImpulseDetection : ImageProcessBase
     {
         protected override double Clipped_Left
         {
