@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // 組件的一般資訊是由下列的屬性集控制。
 // 變更這些屬性的值即可修改組件的相關
 // 資訊。
-[assembly: AssemblyTitle("DirectShowTest")]
+[assembly: AssemblyTitle("ImageProcessModule")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("DirectShowTest")]
+[assembly: AssemblyProduct("ImageProcessModule")]
 [assembly: AssemblyCopyright("Copyright ©  2020")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // 下列 GUID 為專案公開 (Expose) 至 COM 時所要使用的 typelib ID
-[assembly: Guid("4f72a88b-da46-47b7-a1a8-e6eb88a7f5a6")]
+[assembly: Guid("aae057e7-e415-4d7c-b4e2-859772fa4b96")]
 
 // 組件的版本資訊由下列四個值所組成: 
 //

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ImageProcessModule;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -40,6 +41,7 @@ namespace ScreenCapture
             if (captureMethod == null)
                 return;
             captureMethod.Start();
+            bitmapBuffer.StartDispatchToImageProcessBase();
             CacheOptimizer.ResetAllAffinity();
         }
 
