@@ -25,6 +25,7 @@ namespace ScreenCapture
         BitmapBuffer bitmapBuffer;
         bool IsStartCapturing = false;
         /*Multi-Thread Variable*/
+
         /// <summary>
         /// Create CardCapture to communicate with Capture Card (by DirectShow.)
         /// </summary>
@@ -32,21 +33,19 @@ namespace ScreenCapture
         /// <param name="DeviceID">The DeviceID of Capture Card.</param>
         public CardCapture(BitmapBuffer bitmapBuffer, int DeviceID = 0)
         {
-            //Search all video devices
+            // Search all video devices
             videoDevices = new FilterInfoCollection(FilterCategory.VideoInputDevice);
-            //Check DeviceID
+            // Check DeviceID
             if (DeviceID < videoDevices.Count)
                 device = new VideoCaptureDevice(videoDevices[DeviceID].MonikerString, PixelFormat.Format24bppRgb);
             else
                 throw new ArgumentException("No this device exists!");
-            //Register the callback function when frame is arrived
+            // Register the callback function when frame is arrived
             device.NewFrame += NewFrameArrived;
-            //Start the DirectShow
+            // Start the DirectShow
             device.Start();
-            //Cache Optimized for Ryzen-based 16 Core CPU
-            CacheOptimizer.ResetAllAffinity();
 
-            //Store Mat Buffer
+            // Store Mat Buffer
             this.bitmapBuffer = bitmapBuffer;
         }
 
@@ -58,38 +57,70 @@ namespace ScreenCapture
         /// </summary>
         private void NewFrameArrived(object sender, Accord.Video.NewFrameEventArgs eventArgs)
         {
-            if (width == 0) //Is initialized
+            if (width == 0) // Is initialized
             {
                 width = eventArgs.Frame.Width;
                 height = eventArgs.Frame.Height;
-                //Create enough UnusedMat
+
+                // Create enough UnusedMat
                 for (int i = 0; i < PreCreateMatCount; ++i)
                     bitmapBuffer.PushUnusedMat(CreateSuitableMat());
-                Thread.CurrentThread.Priority = ThreadPriority.Highest; //Set ThreadPriority of Accord.Video.DirectShow
+
+                // Set ThreadPriority of Accord.Video.DirectShow
+                Thread.CurrentThread.Priority = ThreadPriority.Highest; 
             }
 
-            if (!IsStartCapturing)  //Is Start Capturing
+            // Is Start Capturing
+            if (!IsStartCapturing)  
                 return;
 
-            Bitmap SrcBitmap = eventArgs.Frame; //Get Frame from Capture Card
-            Mat ProcessingMat = bitmapBuffer.GetUnusedMat();   //Get Mat from Buffer
+            // Get Frame from Capture Card
+            Bitmap SrcBitmap = eventArgs.Frame;
 
+            // Get Mat from Buffer
+            Mat ProcessingMat = bitmapBuffer.GetUnusedMat();
             if (ProcessingMat == null)
                 ProcessingMat = CreateSuitableMat();
 
-            //Unlock Bitmap & Get actual pointer
+            // Copy Frame to Processing Mat
+            Copy_24bppRgb_BitmapTo_32Argb_Mat(in SrcBitmap, in ProcessingMat);
+
+            // Push to buffer
+            bitmapBuffer.PushProcessingMat(ProcessingMat);
+        }
+        /// <summary>
+        /// Pre-create Mat for image processing.
+        /// Pre-create helps allocate continuous memory address, which is cache-friendly.
+        /// </summary> 
+        private Mat CreateSuitableMat()
+        {
+            return new Mat(height, width, DepthType.Cv8U, 4);
+        }
+        /// <summary>
+        /// This function will copy the data from Bitmap (24bppRgb) to CV.Mat (4 Channel with ARGB).
+        /// Be aware that the DestinationMat should be initialized. The width and height of Mat should fit the size in Bitmap.
+        /// </summary>
+        /// <param name="SrcBitmap">Source. Data will not be changed in this function.</param>
+        /// <param name="DestinationMat">Destination. Data should be fully initialized. DestinationMat will be changed in this funtion.</param>
+        private unsafe void Copy_24bppRgb_BitmapTo_32Argb_Mat(in Bitmap SrcBitmap, in Mat DestinationMat)
+        {
+            // Check Size
+            if (SrcBitmap.Width != DestinationMat.Width || SrcBitmap.Height != DestinationMat.Height)
+                throw new Exception("Error! The size of SrcBitmap and DestinationMat is not equal.");
+
+            // Unlock Bitmap & Get actual pointer
             BitmapData SrcBitmapData = SrcBitmap.LockBits(new Rectangle(new Point(0, 0), SrcBitmap.Size), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
             IntPtr SrcBitmapDataPointer = SrcBitmapData.Scan0;
-            IntPtr DstBitmapDataPointer = ProcessingMat.DataPointer;
+            IntPtr DstBitmapDataPointer = DestinationMat.DataPointer;
 
             if ((SrcBitmapData.Stride % 4) != 0)    //Source Image should align 32-bit
                 throw new Exception("Error! Source Image Not Align 32-bit!");
 
             int TotalLength = height * width;
 
-            //Fast 24-bit -> 32-bit for High-Throughput Read/Write/Shuffle CPU Architecture
-            //According to https://gmplib.org/~tege/x86-timing.pdf
-            //Throughput of shl: 4
+            // Fast 24-bit -> 32-bit for High-Throughput Read/Write/Shuffle CPU Architecture
+            // According to https://gmplib.org/~tege/x86-timing.pdf
+            // Throughput of shl: 4 in Zen2 Arch 
             unsafe
             {
                 uint* src = (uint*)SrcBitmapDataPointer;
@@ -108,18 +139,8 @@ namespace ScreenCapture
                     src += 3;
                 }
             }
-            //Release Locks
+            // Release Locks
             SrcBitmap.UnlockBits(SrcBitmapData);
-            //Push to buffer
-            bitmapBuffer.PushProcessingMat(ProcessingMat);
-        }
-        /// <summary>
-        /// Pre-create Mat for image processing.
-        /// Pre-create helps allocate continuous memory address, which is cache-friendly.
-        /// </summary> 
-        private Mat CreateSuitableMat()
-        {
-            return new Mat(height, width, DepthType.Cv8U, 4);
         }
         /// <summary>
         /// Call Start to activate image capture.

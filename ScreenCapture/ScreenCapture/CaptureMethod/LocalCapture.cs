@@ -72,7 +72,6 @@ namespace ScreenCapture
                 SampleDescription = { Count = 1, Quality = 0 },
                 Usage = ResourceUsage.Staging
             };
-
             screenTexture = new Texture2D(device, textureDesc);
 
             // Duplicate the output
@@ -101,7 +100,6 @@ namespace ScreenCapture
             ThreadStopSignal?.Cancel();
             ThreadStopSignal = new CancellationTokenSource();
             new Thread(WorkerThread).Start();
-            CacheOptimizer.ResetAllAffinity();
         }
         /// <summary>
         /// Call Stop to deactivate image capture.
@@ -115,7 +113,6 @@ namespace ScreenCapture
         {
             Thread.CurrentThread.Priority = ThreadPriority.Highest;
             CancellationTokenSource cancellation = ThreadStopSignal;
-            var boundsRect = new System.Drawing.Rectangle(0, 0, width, height);
             while (!cancellation.IsCancellationRequested)
             {
                 try
@@ -139,22 +136,13 @@ namespace ScreenCapture
                     if (NewMat == null)
                         NewMat = CreateSuitableMat();
 
-                    // Copy pixels from screen capture Texture to GDI bitmap
-                    var destPtr = NewMat.DataPointer;
-                    var sourcePtr = mapSource.DataPointer;
-                    for (int y = 0; y < height; y++)
-                    {
-                        // Copy a single line 
-                        Utilities.CopyMemory(destPtr, sourcePtr, width * 4);
+                    // Copy Image to Mat
+                    Copy_32Argb_ImageTo_32Argb_Mat(in mapSource, in NewMat);
 
-                        // Advance pointers
-                        sourcePtr = IntPtr.Add(sourcePtr, mapSource.RowPitch);
-                        destPtr = IntPtr.Add(destPtr, width * 4);
-                    }
                     // Send to buffer
                     bitmapBuffer.PushProcessingMat(NewMat);
 
-                    //Release source lock
+                    // Release source lock
                     device.ImmediateContext.UnmapSubresource(screenTexture, 0);
                     screenResource.Dispose();
                     duplicatedOutput.ReleaseFrame();
@@ -166,6 +154,27 @@ namespace ScreenCapture
                         throw em;
                     }
                 }
+            }
+        }
+        /// <summary>
+        /// Copy Image from Texture2D to Mat.
+        /// Be aware that the DestinationMat should be initialized. The width and height of Mat should fit the size in Bitmap.
+        /// </summary>
+        /// <param name="SrcImagePtr">Source. Data will not be changed in this function.</param>
+        /// <param name="DestinationMat">Destination. Data should be fully initialized. DestinationMat will be changed in this funtion.</param>
+        private void Copy_32Argb_ImageTo_32Argb_Mat(in DataBox SrcImagePtr, in Mat DestinationMat)
+        {
+            // Copy pixels from screen capture Texture to GDI bitmap
+            var destPtr = SrcImagePtr.DataPointer;
+            var sourcePtr = DestinationMat.DataPointer;
+            for (int y = 0; y < height; y++)
+            {
+                // Copy a single line 
+                Utilities.CopyMemory(destPtr, sourcePtr, width * 4);
+
+                // Advance pointers
+                sourcePtr = IntPtr.Add(sourcePtr, SrcImagePtr.RowPitch);
+                destPtr = IntPtr.Add(destPtr, width * 4);
             }
         }
     }
