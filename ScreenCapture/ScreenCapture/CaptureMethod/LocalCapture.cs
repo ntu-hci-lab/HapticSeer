@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing.Imaging;
 using System.Threading;
 using Emgu.CV;
 using Emgu.CV.CvEnum;
@@ -165,8 +166,8 @@ namespace ScreenCapture
         private void Copy_32Argb_ImageTo_32Argb_Mat(in DataBox SrcImagePtr, in Mat DestinationMat)
         {
             // Copy pixels from screen capture Texture to GDI bitmap
-            var destPtr = SrcImagePtr.DataPointer;
-            var sourcePtr = DestinationMat.DataPointer;
+            var destPtr = DestinationMat.DataPointer;
+            var sourcePtr = SrcImagePtr.DataPointer;
             for (int y = 0; y < height; y++)
             {
                 // Copy a single line 
