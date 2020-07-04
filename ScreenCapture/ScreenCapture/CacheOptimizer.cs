@@ -31,9 +31,10 @@ public static class CacheOptimizer
     /// </summary>
     /// <param name="TaretCCX_ID">For 3950X, there are four CCX in 3950X. Set all threads in the same ccx helps performance improvement.</param>
     public static void ResetAllAffinity(int TaretCCX_ID = TargetCCX_ID)
-    {
-        if (!IsRyzen_3950X) //If it is not 3950X
-            return; //Do to optimize that
+    { 
+        // If it is not 3950X
+        if (!IsRyzen_3950X)
+            return; //Do not optimize
 
         IntPtr Affinity = (IntPtr)(255 << (TargetCCX_ID * 8));  //4 Core, 8 Threads in one CCX. Set Affinity as 2^8 - 1
         

@@ -17,7 +17,7 @@ namespace ScreenCapture
         /// <summary>
         /// Parse Argument to get the Capture Method
         /// </summary>
-        /// <param name="args"></param>
+        /// <param name="args">Args from Main</param>
         static void ArgumentParser(string[] args)
         {
             if (String.Compare(args[0], "Local", StringComparison.OrdinalIgnoreCase) == 0)
@@ -60,14 +60,15 @@ namespace ScreenCapture
             // Start dispatch frames
             bitmapBuffer.StartDispatchToImageProcessBase();
 
-            // Do Cache Optimizer
-            CacheOptimizer.Init();
-            CacheOptimizer.ResetAllAffinity();
             ImageProcess imageProcess = new ImageProcess(0.5);
             imageProcess.NewFrameArrivedEvent += new ImageProcess.NewFrameArrived((mat) =>
             {
                 mat.Save("O:\\p.png");
             });
+            
+            // Do Cache Optimizer
+            CacheOptimizer.Init();
+            CacheOptimizer.ResetAllAffinity();
         }
 
     }
