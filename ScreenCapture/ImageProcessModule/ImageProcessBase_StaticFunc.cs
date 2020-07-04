@@ -223,29 +223,13 @@ namespace ImageProcessModule
             }
             return -1;
         }
-        public static unsafe int IsColorMixedByColor(byte* Pixel, in int[] ColorList, in byte* Color)
-        {
-            float[] Fraction = new float[3];
-            int[] ColorDelta = new int[3];
-            for (int c = 0; c < 3; c++)
-            {
-                ColorDelta[c] = ((int)Pixel[c] - Color[c]);
-            }
-            for (int i = 0; i < ColorList.Length; ++i)
-            {
-                fixed (int* ColorArgbPtr = &ColorList[i])
-                {
-                    byte* ColorArgbBytePtr = (byte*)ColorArgbPtr;
-                    for (int c = 0; c < 3; c++)
-                    {
-                        Fraction[c] = ColorDelta[c] / (float)((int)ColorArgbPtr[c] - (int)Color[c]);
-                    }
-                    if (Math.Abs(Fraction[0] - Fraction[1]) < 0.02 && Math.Abs(Fraction[2] - Fraction[1]) < 0.02 && Math.Abs(Fraction[0] - Fraction[2]) < 0.02)
-                        return i;
-                }
-            }
-            return -1;
-        }
+        /// <summary>
+        /// Get the length of bar (binary) image
+        /// </summary>
+        /// <param name="BinaryImage">One channel image.</param>
+        /// <param name="WidthRequest">The threshold of bar width</param>
+        /// <param name="IsPortrait">The attitude of bar.</param>
+        /// <returns>The friction of bar.</returns>
         public static unsafe double BarLengthCalc(in Mat BinaryImage, in int WidthRequest, in bool IsPortrait)
         {
             byte* ImgPtr = (byte*)BinaryImage.DataPointer;
@@ -268,7 +252,7 @@ namespace ImageProcessModule
                 return HeightCount / (double)Height;
             }
             else
-            {   //Landscape
+            {   // Landscape
                 int[] Counter = new int[Width];
                 int Offset = 0;
                 for (int y = 0; y < Height; ++y)
