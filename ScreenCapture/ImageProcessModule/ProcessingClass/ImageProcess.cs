@@ -92,6 +92,13 @@ namespace ImageProcessModule.ProcessingClass
         public ImageProcess(double Fraction_Left = 0, double Fraction_Right = 1, double Fraction_Top = 0, double Fraction_Bottom = 1, ImageScaleType ImageScale = ImageScaleType.OriginalSize, int FrameRate = 1)
             :base()
         {
+            /*Assertion*/
+            Trace.Assert(Fraction_Left >= 0 && Fraction_Left <= 1, "Border Fraction should belongs to [0, 1].");
+            Trace.Assert(Fraction_Right >= 0 && Fraction_Right <= 1, "Border Fraction should belongs to [0, 1].");
+            Trace.Assert(Fraction_Top >= 0 && Fraction_Top <= 1, "Border Fraction should belongs to [0, 1].");
+            Trace.Assert(Fraction_Bottom >= 0 && Fraction_Bottom <= 1, "Border Fraction should belongs to [0, 1].");
+            /*Assertion*/
+
             this.Fraction_Left = Fraction_Left;
             this.Fraction_Right = Fraction_Right;
             this.Fraction_Top = Fraction_Top;

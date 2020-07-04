@@ -2,6 +2,7 @@
 using Emgu.CV.CvEnum;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -106,41 +107,75 @@ namespace ImageProcessModule
             }
         }
 
-        public static void ElimateBackgroundWithSolidColor(in Mat InputImage, ref Mat OutputImage, in Color[] ItemColor, in uint[] ColorMaskList)
+        public enum ElimateColorApproach
         {
+            RemoveSimilarColor_ReserveDifferentColor,
+            ReserveSimilarColor_RemoveDifferentColor
+        }
+        /// <summary>
+        /// Only keeps/removes specific colors in Input Image (with Bitwise Mask)
+        /// </summary>
+        /// <param name="InputImage">Source Image</param>
+        /// <param name="OutputImage">Output Target. One channel image.</param>
+        /// <param name="ItemColor">A list that stores all colors that should be reserve.</param>
+        /// <param name="ColorMaskList">A list that stores all masks for color. For example, 0x00FFFFFF means ignore Alpha channel.</param>
+        /// <param name="RemoveApproach">The approach to remove color.</param>
+        /// <param name="ColorErrorsInOneChannel">The tolerance of color in one channel.</param>
+        public static void ElimateBackgroundWithSearchingSimilarColor(in Mat InputImage, ref Mat OutputImage, in Color[] ItemColor, in uint[] ColorMaskList, ElimateColorApproach RemoveApproach, int ColorErrorsInOneChannel = 6)
+        {
+            /*Assertion*/
+            Trace.Assert(ItemColor != null, "ItemColor is null!");
+            Trace.Assert(ColorMaskList != null, "ColorMaskList is null!");
+            Trace.Assert(ItemColor.Length == ColorMaskList.Length, "Length of ItemColor is not equal to mask count in ColorMaskList!");
+            /*Assertion*/
+
             if (!InputImage.Size.Equals(OutputImage.Size))
             {
                 OutputImage.Dispose();
                 OutputImage = new Mat(OutputImage.Size, DepthType.Cv8U, 1);
             }
 
-            int[] ItemColorArgb;
-            if (ItemColor != null && ItemColor.Length > 0)
-                ItemColorArgb = ItemColor.Select(c => c.ToArgb()).ToArray();
-            else
-                throw new Exception("No Item Color Infomation");
-
+            int[] ItemColorArgb = ItemColor.Select(c => c.ToArgb()).ToArray();
+            bool IsRemoveSimilarColor = RemoveApproach.Equals(ElimateColorApproach.RemoveSimilarColor_ReserveDifferentColor);
             unsafe
             {
                 byte* InputImageColor = (byte*)InputImage.DataPointer;
                 byte* OutputImageColor = (byte*)OutputImage.DataPointer;
                 int Offset = 0;
+                // Scan the whole image
                 for (int y = 0; y < InputImage.Height; ++y)
                 {
                     for (int x = 0; x < InputImage.Width; ++x)
                     {
-                        int SimilarItemColorID = FindSimilarColorInList(&InputImageColor[Offset * 4], ItemColorArgb, ColorMaskList, 6);
-                        if (SimilarItemColorID >= 0)
-                            OutputImageColor[Offset] = 255; //Item Set as White
+                        // Is there any similar color in wanna-reserve color list
+                        int SimilarItemColorID = FindSimilarColorInList(&InputImageColor[Offset * 4], ItemColorArgb, ColorMaskList, ColorErrorsInOneChannel);
+                        bool IsColorSimilar = SimilarItemColorID >= 0;
+
+                        if (IsColorSimilar && IsRemoveSimilarColor || !IsColorSimilar && !IsRemoveSimilarColor)
+                            OutputImageColor[Offset] = 0; // Background Set as Black
                         else
-                            OutputImageColor[Offset] = 0; //Background Set as Black
+                            OutputImageColor[Offset] = 255; // Item Set as White
+
                         Offset++;
                     }
                 }
             }
         }
-        public static unsafe bool IsPixelArgbColorSame(in byte* Src1, in byte* Src2, in int errors)
+        /// <summary>
+        /// Check are the two color the same with a tolerance value.
+        /// </summary>
+        /// <param name="Src1">Pointer of Color 1</param>
+        /// <param name="Src2">Pointer of Color 2</param>
+        /// <param name="ColorErrorsInOneChannel">The tolerance of color in one channel.</param>
+        /// <returns></returns>
+        public static unsafe bool IsPixelArgbColorSame(in byte* Src1, in byte* Src2, in int ColorErrorsInOneChannel)
         {
+            /*Assertion*/
+            Trace.Assert(Src1 != null, "Src1 is null!");
+            Trace.Assert(Src2 != null, "Src2 is null!");
+            /*Assertion*/
+
+            // Compute Color Difference in each channel
             int[] ColorDiff =
             {
                 Math.Abs(Src1[0] - Src2[0]),    //B
@@ -148,20 +183,42 @@ namespace ImageProcessModule
                 Math.Abs(Src1[2] - Src2[2]),    //R
                 Math.Abs(Src1[3] - Src2[3]),    //A
             };
-            for (int i = 0; i < 4; ++i)
-                if (ColorDiff[i] > errors)
+
+            // Check errors in each channel 
+            foreach (int OneChannelDiff in ColorDiff)
+                // If any channel has an error bigger than tolerance
+                if (OneChannelDiff > ColorErrorsInOneChannel)
                     return false;
             return true;
         }
-        private static unsafe int FindSimilarColorInList(in byte* Pixel, in int[] ColorList, in uint[] ColorMaskList, in int errors)
+        /// <summary>
+        /// Check is there any similar color in ColorList.
+        /// </summary>
+        /// <param name="Pixel">Compared Color</param>
+        /// <param name="ColorList">Candidate Color</param>
+        /// <param name="ColorMaskList">Mask of Candidate Color</param>
+        /// <param name="errors">The tolerance of color in one channel</param>
+        /// <returns>The index of similar color in ColorList. Return -1 if no similar color.</returns>
+        private static unsafe int FindSimilarColorInList(in byte* Pixel, in int[] ColorList, in uint[] ColorMaskList, in int ColorErrorsInOneChannel)
         {
+            /*Assertion*/
+            Trace.Assert(ColorList != null, "ItemColor is null!");
+            Trace.Assert(ColorMaskList != null, "ColorMaskList is null!");
+            Trace.Assert(ColorList.Length == ColorMaskList.Length, "Length of ColorList is not equal to mask count in ColorMaskList!");
+            /*Assertion*/
+
+            // Get Color Argb
+            int PixelColorArgb = *(int*)Pixel;
             //Compare Suitable Color
             for (int i = 0; i < ColorList.Length; ++i)
             {
-                uint ColorMask = (ColorMaskList != null && i < ColorMaskList.Length) ? ColorMaskList[i] : 0xFFFFFFFF;
-                int ColorArgb = (int)(ColorList[i] & ColorMask);
-                int PixelColor = (int)((*((int*)Pixel)) & ColorMask);
-                if (IsPixelArgbColorSame((byte*)&PixelColor, (byte*)&ColorArgb, errors))
+                // Get Color Mask
+                uint ColorMask = ColorMaskList[i];
+                // Do Mask Compute
+                int MaskedColorArgb = (int)(ColorList[i] & ColorMask);
+                int MaskedPixelColorArgb = (int)(PixelColorArgb & ColorMask);
+                // Compare Color
+                if (IsPixelArgbColorSame((byte*)&PixelColorArgb, (byte*)&MaskedPixelColorArgb, ColorErrorsInOneChannel))
                     return i;
             }
             return -1;
@@ -188,30 +245,6 @@ namespace ImageProcessModule
                 }
             }
             return -1;
-        }
-
-        public static unsafe void ElimateBackgroundWithSimilarItemColor(in Mat Ori, ref Mat Out, in Color[] ItemColor, in int errors)
-        {
-            unsafe
-            {
-                byte* InputImageData = (byte*)Ori.DataPointer;
-                byte* OutputImageData = (byte*)Out.DataPointer;
-                for (int i = 0, height = Ori.Size.Height, offset = 0; i < height; ++i)
-                {
-                    for (int j = 0, width = Ori.Size.Width; j < width; ++j)
-                    {
-                        OutputImageData[offset >> 2] = 0;
-                        for (int k = 0; k < ItemColor.Length; ++k)
-                        {
-                            int ColorArgb = ItemColor[k].ToArgb();
-                            int* ColorPtr = &ColorArgb;
-                            if (IsPixelArgbColorSame(&InputImageData[offset], (byte*)ColorPtr, errors))
-                                OutputImageData[offset >> 2] = 255;
-                        }
-                        offset += 4;
-                    }
-                }
-            }
         }
         public static unsafe double BarLengthCalc(in Mat BinaryImage, in int WidthRequest, in bool IsPortrait)
         {
@@ -253,7 +286,14 @@ namespace ImageProcessModule
                 return WidthCount / (double)Width;
             }
         }
-
+        /// <summary>
+        /// Get the angle of a point from the center of screen
+        /// </summary>
+        /// <param name="x">Position x of the point</param>
+        /// <param name="y">Position y of the point</param>
+        /// <param name="Width">Screen Width</param>
+        /// <param name="Height">Screen Height</param>
+        /// <returns>Angle in deg</returns>
         public static double GetAngleByCircleModel(double x, double y, double Width, double Height)
         {
             x -= Width / 2;
