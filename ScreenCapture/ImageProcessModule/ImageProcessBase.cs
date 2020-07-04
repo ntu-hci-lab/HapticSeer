@@ -116,56 +116,67 @@ namespace ImageProcessModule
             if (IsCreateNewThread)
                 ThreadPool.QueueUserWorkItem(new WaitCallback(ImageHandler));
         }
+        /// <summary>
+        /// Automatic clip the resized image to the correspond image
+        /// </summary>
+        /// <param name="ResizedData">Resized Image. Won't be modified in this function.</param>
         public unsafe void TryUpdateData(in Mat ResizedData)
         {
-            if (IsProcessingData)   //If the worker thread is still computing
+            if (IsProcessingData)   // If the worker thread is still computing
                 return;
-            else if (IsUpdatingData)    //If it is updating image
+            else if (IsUpdatingData)    // If another thread is updating the image
                 return;
             else
                 IsUpdatingData = true;  //Set the data is updating
 
-            if (!IsImageClip)   //Does image need to be clipped
+            // Compute the border of image
+            int ImageLeft = (int)(ResizedData.Cols * Clipped_Left),
+                ImageRight = (int)(ResizedData.Cols * Clipped_Right),
+                ImageTop = (int)(ResizedData.Rows * Clipped_Top),
+                ImageBottom = (int)(ResizedData.Rows * Clipped_Bottom);
+            int Data_Width = (IsImageClip ? ImageRight - ImageLeft : ResizedData.Cols),
+                Data_Height = (IsImageClip ? ImageBottom - ImageTop : ResizedData.Rows);
+
+            // Check output size is correct
+            if (Data.Rows != Data_Height || Data.Cols != Data_Width)
             {
-                if (Data.Rows != ResizedData.Rows || Data.Cols != ResizedData.Cols) //Check output size is correct
-                {
-                    Data?.Dispose();    //Release old Data memory
-                    Data = new Mat(ResizedData.Rows, ResizedData.Cols, DepthType.Cv8U, 4);
-                }
-                long TotalSize = ResizedData.Rows * ResizedData.Cols * 4;   //Copy the total size directly
+                Data?.Dispose();    // Release old Data memory
+                Data = new Mat(Data_Height, Data_Width, DepthType.Cv8U, 4);
+            }
+
+            // Does image need to be clipped
+            if (!IsImageClip)
+            {
+                // Copy entire data
+                long TotalSize = ResizedData.Rows * ResizedData.Cols * 4;
                 Buffer.MemoryCopy(ResizedData.DataPointer.ToPointer(), Data.DataPointer.ToPointer(), TotalSize, TotalSize);
             }
             else
             {   
-                //The image need to be clipped
-                int ImageLeft = (int)(ResizedData.Cols * Clipped_Left),
-                    ImageRight = (int)(ResizedData.Cols * Clipped_Right),
-                    ImageTop = (int)(ResizedData.Rows * Clipped_Top),
-                    ImageBottom = (int)(ResizedData.Rows * Clipped_Bottom);
-                int Data_Width = ImageRight - ImageLeft,
-                    Data_Height = ImageBottom - ImageTop;
-
-                if (Data.Rows != Data_Height || Data.Cols != Data_Width)    //Check output size is correct
-                {
-                    Data?.Dispose();    //Release old Data memory
-                    Data = new Mat(Data_Height, Data_Width, DepthType.Cv8U, 4);
-                }
+                // The image need to be clipped
                 int RawDataOffset =
-                    +4 * ImageTop * ResizedData.Cols  //Skip Top Pixel
-                    + 4 * ImageLeft;    //Skip Left Pixel
-                int Length = 4 * Data_Width;    //Copy the size of new width per row
+                    +4 * ImageTop * ResizedData.Cols  // Skip Top Pixel
+                    + 4 * ImageLeft;    // Skip Left Pixel
+
+                int Length = 4 * Data_Width;    // Copy the size of new width per row
 
                 for (int i = 0; i < Data_Height; ++i)
                 {
-                    int OutputDataOffset = (4 * i * Data_Width);    //4 Bytes * Data_Width * ith rows
+                    // 4 Bytes * Data_Width * i-th rows
+                    int OutputDataOffset = (4 * i * Data_Width);    
+
+                    // Compute pointer
                     IntPtr DstPointer = Data.DataPointer + OutputDataOffset,
                         SrcPointer = ResizedData.DataPointer + RawDataOffset;
+
                     Buffer.MemoryCopy(SrcPointer.ToPointer(), DstPointer.ToPointer(), Length, Length);
                     RawDataOffset += 4 * ResizedData.Cols;
                 }
-            }
-            IsUpdatingData = false; //Update done flage
-            IsProcessingData = true;    //Tell worker thread that it can be process now
+            } 
+            // Update done flag
+            IsUpdatingData = false;
+            // Tell worker thread that it can be process now
+            IsProcessingData = true;
         }
     }
 }

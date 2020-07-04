@@ -66,31 +66,31 @@ namespace ImageProcessModule
         /// <param name="rawData">New frame</param>
         public static void TryUpdateAllData(in Mat rawData)
         {
-            //Enumerate all possible scale
+            // Enumerate all possible scale
             foreach (ImageScaleType imageScale in Enum.GetValues(typeof(ImageScaleType)))
             {
-                //Check is the scale used 
+                // Check is the scale used 
                 if (IsImageScaleUsed[(int)imageScale] != true)
-                    continue;   //Not used
-                //Check scale
+                    continue;   // Not used
+                // Check scale
                 switch (imageScale)
                 {
                     case ImageScaleType.Half:
-                        if (ResizedHalfData == null)    //If not created yet, create new one
+                        if (ResizedHalfData == null)    // If not created yet, create new one
                             ResizedHalfData = new Mat(rawData.Rows / 2, rawData.Cols / 2, DepthType.Cv8U, 4);
                         CvInvoke.Resize(rawData, ResizedHalfData, ResizedHalfData.Size);
                         break;
                     case ImageScaleType.Quarter:
-                        if (ResizedQuarterData == null)    //If not created yet, create new one
+                        if (ResizedQuarterData == null)    // If not created yet, create new one
                             ResizedQuarterData = new Mat(rawData.Rows / 4, rawData.Cols / 4, DepthType.Cv8U, 4); 
                         CvInvoke.Resize(rawData, ResizedQuarterData, ResizedQuarterData.Size);
                         break;
                 }
             }
-            //Enumerate all objects devided from ImageProcessBase
+            // Enumerate all objects devided from ImageProcessBase
             foreach (ImageProcessBase imgProc in imageProcesses)
             {
-                //Check scale & send the corresponding scale image 
+                // Check scale & send the corresponding scale image 
                 switch (imgProc.ImageScale)
                 {
                     case ImageScaleType.OriginalSize:
