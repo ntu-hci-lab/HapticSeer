@@ -218,7 +218,7 @@ namespace ImageProcessModule
                 int MaskedColorArgb = (int)(ColorList[i] & ColorMask);
                 int MaskedPixelColorArgb = (int)(PixelColorArgb & ColorMask);
                 // Compare Color
-                if (IsPixelArgbColorSame((byte*)&PixelColorArgb, (byte*)&MaskedPixelColorArgb, ColorErrorsInOneChannel))
+                if (IsPixelArgbColorSame((byte*)&MaskedColorArgb, (byte*)&MaskedPixelColorArgb, ColorErrorsInOneChannel))
                     return i;
             }
             return -1;
@@ -232,8 +232,10 @@ namespace ImageProcessModule
         /// <returns>The friction of bar.</returns>
         public static unsafe double BarLengthCalc(in Mat BinaryImage, in int WidthRequest, in bool IsPortrait)
         {
+            // Get the raw data of Binary Image
             byte* ImgPtr = (byte*)BinaryImage.DataPointer;
             int Width = BinaryImage.Width, Height = BinaryImage.Height;
+
             if (IsPortrait)
             {
                 int HeightCount = 0;
@@ -241,11 +243,11 @@ namespace ImageProcessModule
                 for (int y = 0; y < Height; ++y)
                 {
                     int DetectedCount = 0;
+                    // Count all white pixel in this row
                     for (int x = 0; x < Width; ++x)
-                    {
                         if (ImgPtr[Offset++] > 0)
                             DetectedCount++;
-                    }
+                    // Compare to the width threshold
                     if (DetectedCount >= WidthRequest)
                         ++HeightCount;
                 }
@@ -253,17 +255,18 @@ namespace ImageProcessModule
             }
             else
             {   // Landscape
+                // Store the count of white pixel in the same col
                 int[] Counter = new int[Width];
                 int Offset = 0;
+                
+                // Search all pixels in Img
                 for (int y = 0; y < Height; ++y)
-                {
                     for (int x = 0; x < Width; ++x)
-                    {
                         if (ImgPtr[Offset++] > 0)
                             Counter[x]++;
-                    }
-                }
+
                 int WidthCount = 0;
+                // Check is the count of white pixel exceed the threshold
                 for (int x = 0; x < Width; ++x)
                     if (Counter[x] >= WidthRequest)
                         WidthCount++;

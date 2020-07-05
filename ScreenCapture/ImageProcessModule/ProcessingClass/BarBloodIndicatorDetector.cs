@@ -1,6 +1,7 @@
 ﻿using Emgu.CV;
 using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
+using System.Drawing;
 using System.Threading;
 
 namespace ImageProcessModule.ProcessingClass
@@ -12,28 +13,28 @@ namespace ImageProcessModule.ProcessingClass
         {
             get
             {
-                return 0.056;
+                return 120 / 1920f;
             }
         }
         protected override double Clipped_Top
         {
             get
             {
-                return 0.9787;
+                return 1052 / 1080f;
             }
         }
         protected override double Clipped_Right
         {
             get
             {
-                return 0.097;
+                return 202 / 1920f;
             }
         }
         protected override double Clipped_Bottom
         {
             get
             {
-                return 0.988;
+                return 1062 / 1080f;
             }
         }
         protected override ImageScaleType ImageScale
@@ -48,20 +49,28 @@ namespace ImageProcessModule.ProcessingClass
         protected override void ImageHandler(object args)
         {
             MCvScalar scalar = new MCvScalar(0);
+            // Check is the class still alive
             while (!IsStopRunning)
             {
+                // Check is data updating
                 while (!IsProcessingData)
                     Thread.Sleep(1);
+
+                // Check the size of binary image is equal to Data.Size 
                 if (!BackgroundRemovalImage.Size.Equals(Data.Size))
                 {
                     BackgroundRemovalImage.Dispose();
                     BackgroundRemovalImage = new Mat(Data.Size, DepthType.Cv8U, 1);
                 }
+                // Clean all data in BackgroundRemovalImage
                 BackgroundRemovalImage.SetTo(scalar);
-#if CS_GO
-                ElimateBackgroundWithSolidColor(in Data, ref BackgroundRemovalImage, new Color[] { Color.FromArgb(155, 153, 122), Color.FromArgb(188, 56, 0) }, new uint[] { 0xC0C0C0C0, 0xC0C0C0C0 });
-                Console.WriteLine(BarLengthCalc(BackgroundRemovalImage, 4, false));
-#endif
+
+                ElimateBackgroundWithSearchingSimilarColor(in Data, ref BackgroundRemovalImage, new Color[] { Color.FromArgb(235, 235, 235), Color.FromArgb(188, 56, 0) }, new uint[] { 0x00FFFFFF, 0x00FFFFFF }, ElimateColorApproach.ReserveSimilarColor_RemoveDifferentColor, 8);
+                //Data.Save("O:\\Raw.png");
+                //BackgroundRemovalImage.Save("O:\\Test.png");
+                double BarLength = BarLengthCalc(BackgroundRemovalImage, 4, false);
+                //Console.WriteLine(BarLengthCalc(BackgroundRemovalImage, 4, false));
+
                 IsProcessingData = false;
             }
         }

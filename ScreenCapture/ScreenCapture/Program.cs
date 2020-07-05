@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Management;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ScreenCapture
@@ -39,6 +40,7 @@ namespace ScreenCapture
         }
         static void Main(string[] args)
         {
+            Thread.Sleep(5000);
             Console.CancelKeyPress +=
                 new ConsoleCancelEventHandler((o, t) =>
                 {
@@ -65,7 +67,8 @@ namespace ScreenCapture
             {
                 mat.Save("O:\\p.png");
             });
-            
+            BarBloodIndicatorDetector barBloodIndicatorDetector = new BarBloodIndicatorDetector();
+
             // Do Cache Optimizer
             CacheOptimizer.Init();
             CacheOptimizer.ResetAllAffinity();
