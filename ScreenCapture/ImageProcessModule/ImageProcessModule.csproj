@@ -28,7 +28,8 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>
+    </DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -50,12 +51,7 @@
     <Compile Include="BitmapBuffer.cs" />
     <Compile Include="ImageProcessBase.cs" />
     <Compile Include="ImageProcessBase_StaticFunc.cs" />
-    <Compile Include="ProcessingClass\BarBloodIndicatorDetector.cs" />
-    <Compile Include="ProcessingClass\BulletCounter.cs" />
-    <Compile Include="ProcessingClass\CircularIndicatorDetector.cs" />
     <Compile Include="ProcessingClass\ImageProcess.cs" />
-    <Compile Include="ProcessingClass\OpticalFlow.cs" />
-    <Compile Include="ProcessingClass\RedImpulseDetection.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
