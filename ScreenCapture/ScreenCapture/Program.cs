@@ -81,7 +81,7 @@ namespace ScreenCapture
             {
                 LastImg = sender.Variable["LastImg"] as Mat;
                 AvailableImg = sender.Variable["AvailableImg"] as Mat;
-            } else
+            }else
             {
                 LastImg = new Mat(mat.Rows, mat.Cols, DepthType.Cv8U, 1);
                 AvailableImg = new Mat(mat.Rows, mat.Cols, DepthType.Cv8U, 1);
@@ -105,19 +105,20 @@ namespace ScreenCapture
                         if (Diff <= 180)
                             LastImage[Offset / 4] = 0;
                         else
-                            LastImage[Offset / 4] = (byte)(255 - LastImage[Offset / 4]);
+                            LastImage[Offset / 4] = (byte)(Diff - LastImage[Offset / 4]);
+                        Offset += 4; 
                     }
                 }
 
                 double angle;
+                //Console.Clear();
                 if (GetHitAngle(LastImg, out angle))
                     Console.WriteLine(angle);
-                else
-                    Console.WriteLine("false");
+                //else
+                //    Console.WriteLine("false");
                 CvInvoke.Blur(AvailableImg, AvailableImg, new Size(5, 5), new Point(0, 0));
                 sender.Variable["LastImg"] = AvailableImg;
                 sender.Variable["AvailableImg"] = LastImg;
-
             }
         }
         private static bool GetHitAngle(Mat OneChannelImg, out double Angle)
@@ -130,11 +131,11 @@ namespace ScreenCapture
                 byte* OneChannelImgByteArray = (byte*)OneChannelImg.DataPointer;
                 int Offset = 0;
                 for (int y = 0; y < OneChannelImg.Height; ++y)
-                {
+                {                        
+                    int _y = CenterY - y;
                     for (int x = 0; x < OneChannelImg.Width; ++x)
                     {
                         uint Value = OneChannelImgByteArray[Offset++];
-                        int _y = y - CenterY;
                         int _x = x - CenterX;
                         Sum_X += Value * _x;
                         Sum_Y += Value * _y;
