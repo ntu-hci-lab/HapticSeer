@@ -47,7 +47,7 @@ namespace ImageProcessModule
 
         private volatile bool IsStopRunning = false;
         public CircularIndicatorDetector(double CircularInnerSizeFractionRelatedToClippedSize)
-            : base(true, true)
+            : base(ImageScaleType.OriginalSize, true, true)
         {
             this.CircularInnerSizeFractionRelatedToClippedSize = CircularInnerSizeFractionRelatedToClippedSize;
         }

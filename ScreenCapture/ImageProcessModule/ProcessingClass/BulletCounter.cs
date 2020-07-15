@@ -44,6 +44,11 @@ namespace ImageProcessModule
             }
         }
         private Mat BackgroundRemovalImage = new Mat();
+        public BulletCounter()
+            :base(ImageScaleType.OriginalSize)
+        {
+
+        }
         protected override void ImageHandler(object args)
         {
             MCvScalar scalar = new MCvScalar(0);

@@ -44,6 +44,13 @@ namespace ImageProcessModule
         private const int RecordHistorySize = 60;
         private double[,] HistoryColorAvg = new double[RecordHistorySize, 3];
         private int HistoryIndex = 0;
+        public RedImpulseDetection()
+            :base(ImageScaleType.Half)
+
+        {
+
+        }
+
         ~RedImpulseDetection()
         {
             IsStopRunning = true;

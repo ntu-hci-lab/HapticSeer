@@ -51,6 +51,10 @@ namespace ImageProcessModule
         private bool IsStopRunning = false;
         private Mat LastImg = null;
         private PointF[] LastImgFeatures;
+        public OpticalFlow():base(ImageScaleType.Half)
+        {
+
+        }
         ~OpticalFlow()
         {
             IsStopRunning = true;

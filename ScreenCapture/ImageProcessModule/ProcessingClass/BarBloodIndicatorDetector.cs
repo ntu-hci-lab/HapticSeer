@@ -45,7 +45,11 @@ namespace ImageProcessModule.ProcessingClass
             }
         }
         private Mat BackgroundRemovalImage = new Mat();
+        public BarBloodIndicatorDetector()
+            :base(ImageScaleType.OriginalSize)
+        {
 
+        }
         protected override void ImageHandler(object args)
         {
             MCvScalar scalar = new MCvScalar(0);
