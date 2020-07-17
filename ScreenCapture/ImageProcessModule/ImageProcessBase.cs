@@ -106,7 +106,7 @@ namespace ImageProcessModule
         /// </summary>
         /// <param name="IsAddImageProcessList">The object will be added to a list that stores all objects whose class is devided from ImageProcessBase. Only when this is true, the object will continuously receive new frame.</param>
         /// <param name="IsCreateNewThread">A new thread will be created for computing. If it is false, then it is necessary to call ImageHandler.</param>
-        public ImageProcessBase(bool IsAddImageProcessList = true, bool IsCreateNewThread = true)
+        public ImageProcessBase(ImageScaleType ImageScale, bool IsAddImageProcessList = true, bool IsCreateNewThread = true)
         {
             if (IsAddImageProcessList)
             {
