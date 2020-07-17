@@ -23,7 +23,7 @@ namespace ScreenCapture
         static CaptureMethod captureMethod;
         /// Initialize Tesseract object
         /// Remember to add tessdata directory
-        static TesseractEngine ocr = new TesseractEngine("./tessdata", "eng", EngineMode.Default);
+        static TesseractEngine ocr = new TesseractEngine(Path.GetFullPath(@"..\..\"), "eng", EngineMode.Default);
         static KalmanFilter filter = new KalmanFilter(1, 1, 0.05, 1, 0.1, speed);
         static int speed = 0; // current speed
         static int preSpeed = 0; // previous speed

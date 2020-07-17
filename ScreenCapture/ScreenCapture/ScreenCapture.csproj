@@ -117,9 +117,11 @@
       <ErrorText>此專案參考這部電腦上所缺少的 NuGet 套件。請啟用 NuGet 套件還原，以下載該套件。如需詳細資訊，請參閱 http://go.microsoft.com/fwlink/?LinkID=322105。缺少的檔案是 {0}。</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\Accord.3.8.0\build\Accord.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Accord.3.8.0\build\Accord.targets'))" />
-    <Error Condition="!Exists('..\packages\Tesseract_463.3.3.0.1\build\Tesseract_463.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Tesseract_463.3.3.0.1\build\Tesseract_463.targets'))" />
     <Error Condition="!Exists('..\packages\Emgu.CV.runtime.windows.4.3.0.3890\build\Emgu.CV.runtime.windows.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Emgu.CV.runtime.windows.4.3.0.3890\build\Emgu.CV.runtime.windows.targets'))" />
+    <Error Condition="!Exists('..\packages\Genesis.Tesseract4.4.0.2.11\build\Genesis.Tesseract4.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Genesis.Tesseract4.4.0.2.11\build\Genesis.Tesseract4.targets'))" />
+    <Error Condition="!Exists('..\packages\Tesseract_463.3.3.0.1\build\Tesseract_463.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Tesseract_463.3.3.0.1\build\Tesseract_463.targets'))" />
   </Target>
-  <Import Project="..\packages\Tesseract_463.3.3.0.1\build\Tesseract_463.targets" Condition="Exists('..\packages\Tesseract_463.3.3.0.1\build\Tesseract_463.targets')" />
   <Import Project="..\packages\Emgu.CV.runtime.windows.4.3.0.3890\build\Emgu.CV.runtime.windows.targets" Condition="Exists('..\packages\Emgu.CV.runtime.windows.4.3.0.3890\build\Emgu.CV.runtime.windows.targets')" />
+  <Import Project="..\packages\Genesis.Tesseract4.4.0.2.11\build\Genesis.Tesseract4.targets" Condition="Exists('..\packages\Genesis.Tesseract4.4.0.2.11\build\Genesis.Tesseract4.targets')" />
+  <Import Project="..\packages\Tesseract_463.3.3.0.1\build\Tesseract_463.targets" Condition="Exists('..\packages\Tesseract_463.3.3.0.1\build\Tesseract_463.targets')" />
 </Project>
