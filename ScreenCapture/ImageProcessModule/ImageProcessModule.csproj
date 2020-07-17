@@ -56,7 +56,10 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Emgu.CV">
-      <Version>4.2.0.3662</Version>
+      <Version>4.3.0.3890</Version>
+    </PackageReference>
+    <PackageReference Include="Emgu.CV.runtime.windows">
+      <Version>4.3.0.3890</Version>
     </PackageReference>
     <PackageReference Include="System.Threading.Tasks.Dataflow">
       <Version>4.11.1</Version>
