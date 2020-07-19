@@ -100,12 +100,12 @@ namespace ScreenCapture
                     ImageProcesses.Add(SpeedDetection);
                     break;
                 case GameType.BF1:
-                    //ImageProcess DamageIndicatorDetection = new ImageProcess(0, 1, 0, 1, ImageProcessBase.ImageScaleType.Quarter);
-                    //DamageIndicatorDetection.NewFrameArrivedEvent += DamageIndicatorDetection_NewFrameArrivedEvent;
+                    ImageProcess DamageIndicatorDetection = new ImageProcess(0, 1, 0, 1, ImageProcessBase.ImageScaleType.Quarter);
+                    DamageIndicatorDetection.NewFrameArrivedEvent += DamageIndicatorDetection_NewFrameArrivedEvent;
 
                     ImageProcess BloodDetector_BF1 = new ImageProcess(1520 / 1728f, 1682 / 1728f, 1028 / 1080f, 1029 / 1080f, ImageScaleType.OriginalSize, FrameRate: 15);
                     BloodDetector_BF1.NewFrameArrivedEvent += BloodDetector_BF1_NewFrameArrivedEvent;
-                    // 6ImageProcesses.Add(DamageIndicatorDetection);
+                    ImageProcesses.Add(DamageIndicatorDetection);
                     ImageProcesses.Add(BloodDetector_BF1);
                     break;
             }
