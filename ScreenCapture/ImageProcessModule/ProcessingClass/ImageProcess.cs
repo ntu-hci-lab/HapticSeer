@@ -131,7 +131,11 @@ namespace ImageProcessModule.ProcessingClass
 
                 // Check FrameRate
                 if (PreferFrameRate >= 0 && CalcFrameRate(NewFrameCount, stopwatch.ElapsedMilliseconds) >= PreferFrameRate)
-                    return;
+                {
+                    IsProcessingData = false;
+                    continue;
+                }
+
                 // Invoke Event
                 NewFrameArrivedEvent?.Invoke(this, Data);
 
