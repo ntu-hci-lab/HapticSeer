@@ -14,6 +14,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Tesseract;
+using static ImageProcessModule.ImageProcessBase;
 
 namespace ScreenCapture
 {
@@ -88,7 +89,9 @@ namespace ScreenCapture
             switch (RunningGameType)
             {
                 case GameType.HL_A:
-                    ImageProcess BloodDetector = new ImageProcess();
+                    ImageProcess BloodDetector_HLA = new ImageProcess(64 / 1920f, 302 / 1920f, 956 / 1080f, 1015 / 1080f, ImageScaleType.OriginalSize, FrameRate: 10);
+                    BloodDetector_HLA.NewFrameArrivedEvent += BloodDetector_HLA_NewFrameArrivedEvent;
+                    ImageProcesses.Add(BloodDetector_HLA);
                     break;
                 case GameType.Project_Cars:
                     // Speed detection
@@ -105,6 +108,48 @@ namespace ScreenCapture
             // Do Cache Optimizer
             CacheOptimizer.Init();
             CacheOptimizer.ResetAllAffinity();
+        }
+
+        private static void BloodDetector_HLA_NewFrameArrivedEvent(ImageProcess sender, Mat mat)
+        {
+            if (!sender.Variable.ContainsKey("BinaryImage"))
+                sender.Variable.Add("BinaryImage", new Mat(mat.Size, DepthType.Cv8U, 1));
+
+            if (!sender.Variable.ContainsKey("LowPassFilter_Blood"))
+                sender.Variable.Add("LowPassFilter_Blood", (double)1);
+
+            if (!sender.Variable.ContainsKey("BloodArea"))
+            {
+                double _BloodArea = mat.Height * mat.Width * 0.343;
+                //double _BloodArea = mat.Height * mat.Width * 0.3164556962025316;
+                sender.Variable.Add("BloodArea", _BloodArea);
+            }
+            Mat BinaryImg = sender.Variable["BinaryImage"] as Mat;
+            double LowPassFilter_Blood = (double)sender.Variable["LowPassFilter_Blood"];
+            double BloodArea = (double)sender.Variable["BloodArea"];
+            //ImageProcess.ElimateBackgroundWithSearchingSimilarColor(in mat, ref BinaryImg, new Color[] { Color.FromArgb(235, 189, 0), Color.FromArgb(190, 189, 0), Color.FromArgb(220, 0, 0) }, new uint[] { 0x00FFFF00, 0x00FFFF00, 0x00FF0000 }, ElimateColorApproach.ReserveSimilarColor_RemoveDifferentColor, 20);
+            ImageProcess.ElimateBackgroundWithSearchingSimilarColor(in mat, ref BinaryImg, new Color[] { Color.FromArgb(250, 0, 0) }, new uint[] { 0x00FF0000 }, ElimateColorApproach.ReserveSimilarColor_RemoveDifferentColor, 70);
+            double NowBlood;
+            unsafe
+            {
+                byte* BinaryImageByteArray = (byte*)BinaryImg.DataPointer;
+                int Offset = 0;
+                int Area = 0;
+                for (int y = 0; y < mat.Height; ++y)
+                {
+                    for (int x = 0; x < mat.Width; ++x)
+                    {
+                        if (BinaryImageByteArray[Offset++] > 0)
+                            Area++;
+                    }
+                }
+                NowBlood = Area / BloodArea;
+            }
+            double EstimatedBlood = NowBlood * 0.2 + LowPassFilter_Blood * 0.8;
+#if DEBUG
+            Console.WriteLine($"Actual: {NowBlood.ToString("0.000")}\t Filted: {EstimatedBlood.ToString("0.000")}");
+#endif
+            sender.Variable["LowPassFilter_Blood"] = EstimatedBlood;
         }
 
         private static void SpeedDetection_NewFrameArrivedEvent(ImageProcess sender, Mat mat)
