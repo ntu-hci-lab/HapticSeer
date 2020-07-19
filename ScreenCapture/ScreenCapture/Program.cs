@@ -19,6 +19,16 @@ namespace ScreenCapture
 {
     class Program
     {
+        /// <summary>
+        /// Specify the scenario that the program runs
+        /// </summary>
+        public enum GameType
+        {
+            HL_A,
+            Project_Cars,
+            BF1
+        }
+        static GameType RunningGameType = GameType.HL_A;
         static BitmapBuffer bitmapBuffer = new BitmapBuffer();
         static CaptureMethod captureMethod;
         /// Initialize Tesseract object
@@ -73,15 +83,25 @@ namespace ScreenCapture
 
             // Start dispatch frames
             bitmapBuffer.StartDispatchToImageProcessBase();
-            ImageProcess DamageIndicatorDetection = new ImageProcess(0, 1, 0, 1, ImageProcessBase.ImageScaleType.Quarter);
-            DamageIndicatorDetection.NewFrameArrivedEvent += DamageIndicatorDetection_NewFrameArrivedEvent;
 
-            //BarBloodIndicatorDetector barBloodIndicatorDetector = new BarBloodIndicatorDetector();
-
-            // Speed detection
-            ImageProcess SpeedDetection = new ImageProcess(0, 1, 0, 1, ImageProcessBase.ImageScaleType.OriginalSize);
-            SpeedDetection.NewFrameArrivedEvent += SpeedDetection_NewFrameArrivedEvent;
-
+            List<ImageProcess> ImageProcesses = new List<ImageProcess>();
+            switch (RunningGameType)
+            {
+                case GameType.HL_A:
+                    ImageProcess BloodDetector = new ImageProcess();
+                    break;
+                case GameType.Project_Cars:
+                    // Speed detection
+                    ImageProcess SpeedDetection = new ImageProcess(0, 1, 0, 1, ImageProcessBase.ImageScaleType.OriginalSize);
+                    SpeedDetection.NewFrameArrivedEvent += SpeedDetection_NewFrameArrivedEvent;
+                    ImageProcesses.Add(SpeedDetection);
+                    break;
+                case GameType.BF1:
+                    ImageProcess DamageIndicatorDetection = new ImageProcess(0, 1, 0, 1, ImageProcessBase.ImageScaleType.Quarter);
+                    DamageIndicatorDetection.NewFrameArrivedEvent += DamageIndicatorDetection_NewFrameArrivedEvent;
+                    ImageProcesses.Add(DamageIndicatorDetection);
+                    break;
+            }
             // Do Cache Optimizer
             CacheOptimizer.Init();
             CacheOptimizer.ResetAllAffinity();
