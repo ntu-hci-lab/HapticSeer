@@ -25,6 +25,7 @@ namespace ScreenCapture
         /// </summary>
         public enum GameType
         {
+            None,
             HL_A,
             Project_Cars,
             BF1
@@ -88,6 +89,8 @@ namespace ScreenCapture
             List<ImageProcess> ImageProcesses = new List<ImageProcess>();
             switch (RunningGameType)
             {
+                case GameType.None:
+                    break;
                 case GameType.HL_A:
                     ImageProcess BloodDetector_HLA = new ImageProcess(64 / 1920f, 302 / 1920f, 956 / 1080f, 1015 / 1080f, ImageScaleType.OriginalSize, FrameRate: 10);
                     BloodDetector_HLA.NewFrameArrivedEvent += BloodDetector_HLA_NewFrameArrivedEvent;
@@ -132,6 +135,7 @@ namespace ScreenCapture
                 sender.Variable.Add("BinaryImage", new Mat(mat.Size, DepthType.Cv8U, 1));
             Mat BinaryImg = sender.Variable["BinaryImage"] as Mat;
             ImageProcess.ElimateBackgroundWithSearchingSimilarColor(in mat, ref BinaryImg, new Color[] { Color.FromArgb(220, 220, 220) }, new uint[] { 0x00FF0000 }, ElimateColorApproach.ReserveSimilarColor_RemoveDifferentColor, 50);
+            // TODO OCR to BinaryImg
         }
 
         private static void BulletCount_BF1_NewFrameArrivedEvent(ImageProcess sender, Mat mat)
@@ -140,6 +144,7 @@ namespace ScreenCapture
                 sender.Variable.Add("BinaryImage", new Mat(mat.Size, DepthType.Cv8U, 1));
             Mat BinaryImg = sender.Variable["BinaryImage"] as Mat;
             ImageProcess.ElimateBackgroundWithSearchingSimilarColor(in mat, ref BinaryImg, new Color[] { Color.FromArgb(220, 220, 220) }, new uint[] { 0x00FF0000 }, ElimateColorApproach.ReserveSimilarColor_RemoveDifferentColor, 50);
+            // TODO OCR to BinaryImg
         }
 
         private static void BulletInBackpack_HLA_NewFrameArrivedEvent(ImageProcess sender, Mat mat)
