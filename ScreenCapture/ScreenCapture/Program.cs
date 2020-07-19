@@ -111,13 +111,35 @@ namespace ScreenCapture
 
                     ImageProcess BloodDetector_BF1 = new ImageProcess(1500 / 1728f, 1700 / 1728f, 1028 / 1080f, 1029 / 1080f, ImageScaleType.OriginalSize, FrameRate: 15);
                     BloodDetector_BF1.NewFrameArrivedEvent += BloodDetector_BF1_NewFrameArrivedEvent;
+                    ImageProcess BulletCount_BF1 = new ImageProcess(1526 / 1728f, 1594 / 1728f, 948 / 1080f, 988 / 1080f, ImageScaleType.OriginalSize, FrameRate: 3);
+                    BulletCount_BF1.NewFrameArrivedEvent += BulletCount_BF1_NewFrameArrivedEvent;
+                    ImageProcess GrenadeCount_BF1 = new ImageProcess(1598 / 1728f, 1628 / 1728f, 978 / 1080f, 998 / 1080f, ImageScaleType.OriginalSize, FrameRate: 3);
+                    GrenadeCount_BF1.NewFrameArrivedEvent += GrenadeCount_BF1_NewFrameArrivedEvent;
                     ImageProcesses.Add(DamageIndicatorDetection);
                     ImageProcesses.Add(BloodDetector_BF1);
+                    ImageProcesses.Add(BulletCount_BF1);
+                    ImageProcesses.Add(GrenadeCount_BF1);
                     break;
             }
             // Do Cache Optimizer
             CacheOptimizer.Init();
             CacheOptimizer.ResetAllAffinity();
+        }
+
+        private static void GrenadeCount_BF1_NewFrameArrivedEvent(ImageProcess sender, Mat mat)
+        {
+            if (!sender.Variable.ContainsKey("BinaryImage"))
+                sender.Variable.Add("BinaryImage", new Mat(mat.Size, DepthType.Cv8U, 1));
+            Mat BinaryImg = sender.Variable["BinaryImage"] as Mat;
+            ImageProcess.ElimateBackgroundWithSearchingSimilarColor(in mat, ref BinaryImg, new Color[] { Color.FromArgb(220, 220, 220) }, new uint[] { 0x00FF0000 }, ElimateColorApproach.ReserveSimilarColor_RemoveDifferentColor, 50);
+        }
+
+        private static void BulletCount_BF1_NewFrameArrivedEvent(ImageProcess sender, Mat mat)
+        {
+            if (!sender.Variable.ContainsKey("BinaryImage"))
+                sender.Variable.Add("BinaryImage", new Mat(mat.Size, DepthType.Cv8U, 1));
+            Mat BinaryImg = sender.Variable["BinaryImage"] as Mat;
+            ImageProcess.ElimateBackgroundWithSearchingSimilarColor(in mat, ref BinaryImg, new Color[] { Color.FromArgb(220, 220, 220) }, new uint[] { 0x00FF0000 }, ElimateColorApproach.ReserveSimilarColor_RemoveDifferentColor, 50);
         }
 
         private static void BulletInBackpack_HLA_NewFrameArrivedEvent(ImageProcess sender, Mat mat)
