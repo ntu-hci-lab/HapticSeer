@@ -100,14 +100,55 @@ namespace ScreenCapture
                     ImageProcesses.Add(SpeedDetection);
                     break;
                 case GameType.BF1:
-                    ImageProcess DamageIndicatorDetection = new ImageProcess(0, 1, 0, 1, ImageProcessBase.ImageScaleType.Quarter);
-                    DamageIndicatorDetection.NewFrameArrivedEvent += DamageIndicatorDetection_NewFrameArrivedEvent;
-                    ImageProcesses.Add(DamageIndicatorDetection);
+                    //ImageProcess DamageIndicatorDetection = new ImageProcess(0, 1, 0, 1, ImageProcessBase.ImageScaleType.Quarter);
+                    //DamageIndicatorDetection.NewFrameArrivedEvent += DamageIndicatorDetection_NewFrameArrivedEvent;
+
+                    ImageProcess BloodDetector_BF1 = new ImageProcess(1520 / 1728f, 1682 / 1728f, 1028 / 1080f, 1029 / 1080f, ImageScaleType.OriginalSize, FrameRate: 15);
+                    BloodDetector_BF1.NewFrameArrivedEvent += BloodDetector_BF1_NewFrameArrivedEvent;
+                    // 6ImageProcesses.Add(DamageIndicatorDetection);
+                    ImageProcesses.Add(BloodDetector_BF1);
                     break;
             }
             // Do Cache Optimizer
             CacheOptimizer.Init();
             CacheOptimizer.ResetAllAffinity();
+        }
+
+        private static void BloodDetector_BF1_NewFrameArrivedEvent(ImageProcess sender, Mat mat)
+        {
+            double BloodValue;
+            bool IsRedImpluse = false;
+            unsafe
+            {
+                byte* OriginalImageByteArray = (byte*)mat.DataPointer;
+
+                int Offset = 0;
+                int Area = 0;
+                //Only read the first row
+                for (int x = 0; x < mat.Width; ++x)
+                {
+                    //White
+                    if (OriginalImageByteArray[Offset + 2] > 180 && OriginalImageByteArray[Offset] > 180)
+                        Area++;
+
+                    //Red
+                    else if (OriginalImageByteArray[Offset + 2] > 120)
+                    {
+                        //Is Leftmost?
+                        if (x != 4)
+                            Area++;
+                        else if (x == 4)//Left shouldn't be red. It must be impluse
+                            IsRedImpluse = true;
+                    }
+                    Offset += 4;
+                }
+                BloodValue = Area / (double)(mat.Width);
+            }
+
+#if DEBUG
+            if (!IsRedImpluse)
+                Console.WriteLine($"Actual: {BloodValue.ToString("0.000")}");
+#endif
         }
 
         private static void BloodDetector_HLA_NewFrameArrivedEvent(ImageProcess sender, Mat mat)
