@@ -91,7 +91,13 @@ namespace ScreenCapture
                 case GameType.HL_A:
                     ImageProcess BloodDetector_HLA = new ImageProcess(64 / 1920f, 302 / 1920f, 956 / 1080f, 1015 / 1080f, ImageScaleType.OriginalSize, FrameRate: 10);
                     BloodDetector_HLA.NewFrameArrivedEvent += BloodDetector_HLA_NewFrameArrivedEvent;
+                    ImageProcess BulletInGun_HLA = new ImageProcess(1700 / 1920f, 1777 / 1920f, 955 / 1080f, 1015 / 1080f, ImageScaleType.OriginalSize, FrameRate: 3);
+                    BulletInGun_HLA.NewFrameArrivedEvent += BulletInGun_HLA_NewFrameArrivedEvent;
+                    ImageProcess BulletInBackpack_HLA = new ImageProcess(1796 / 1920f, 1859 / 1920f, 986 / 1080f, 1015 / 1080f, ImageScaleType.OriginalSize, FrameRate: 3);
+                    BulletInBackpack_HLA.NewFrameArrivedEvent += BulletInBackpack_HLA_NewFrameArrivedEvent;
                     ImageProcesses.Add(BloodDetector_HLA);
+                    ImageProcesses.Add(BulletInGun_HLA);
+                    ImageProcesses.Add(BulletInBackpack_HLA);
                     break;
                 case GameType.Project_Cars:
                     // Speed detection
@@ -103,7 +109,7 @@ namespace ScreenCapture
                     ImageProcess DamageIndicatorDetection = new ImageProcess(0, 1, 0, 1, ImageProcessBase.ImageScaleType.Quarter);
                     DamageIndicatorDetection.NewFrameArrivedEvent += DamageIndicatorDetection_NewFrameArrivedEvent;
 
-                    ImageProcess BloodDetector_BF1 = new ImageProcess(1520 / 1728f, 1682 / 1728f, 1028 / 1080f, 1029 / 1080f, ImageScaleType.OriginalSize, FrameRate: 15);
+                    ImageProcess BloodDetector_BF1 = new ImageProcess(1500 / 1728f, 1700 / 1728f, 1028 / 1080f, 1029 / 1080f, ImageScaleType.OriginalSize, FrameRate: 15);
                     BloodDetector_BF1.NewFrameArrivedEvent += BloodDetector_BF1_NewFrameArrivedEvent;
                     ImageProcesses.Add(DamageIndicatorDetection);
                     ImageProcesses.Add(BloodDetector_BF1);
@@ -112,6 +118,26 @@ namespace ScreenCapture
             // Do Cache Optimizer
             CacheOptimizer.Init();
             CacheOptimizer.ResetAllAffinity();
+        }
+
+        private static void BulletInBackpack_HLA_NewFrameArrivedEvent(ImageProcess sender, Mat mat)
+        {
+            if (!sender.Variable.ContainsKey("BinaryImage"))
+                sender.Variable.Add("BinaryImage", new Mat(mat.Size, DepthType.Cv8U, 1));
+
+            Mat BinaryImg = sender.Variable["BinaryImage"] as Mat;
+            ImageProcess.ElimateBackgroundWithSearchingSimilarColor(in mat, ref BinaryImg, new Color[] { Color.FromArgb(250, 0, 0) }, new uint[] { 0x00FF0000 }, ElimateColorApproach.ReserveSimilarColor_RemoveDifferentColor, 70);
+            // TODO OCR to BinaryImg
+        }
+
+        private static void BulletInGun_HLA_NewFrameArrivedEvent(ImageProcess sender, Mat mat)
+        {
+            if (!sender.Variable.ContainsKey("BinaryImage"))
+                sender.Variable.Add("BinaryImage", new Mat(mat.Size, DepthType.Cv8U, 1));
+
+            Mat BinaryImg = sender.Variable["BinaryImage"] as Mat;
+            ImageProcess.ElimateBackgroundWithSearchingSimilarColor(in mat, ref BinaryImg, new Color[] { Color.FromArgb(250, 0, 0) }, new uint[] { 0x00FF0000 }, ElimateColorApproach.ReserveSimilarColor_RemoveDifferentColor, 70);
+            // TODO OCR to BinaryImg
         }
 
         private static void BloodDetector_BF1_NewFrameArrivedEvent(ImageProcess sender, Mat mat)
