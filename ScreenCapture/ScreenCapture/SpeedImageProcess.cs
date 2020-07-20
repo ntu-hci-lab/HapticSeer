@@ -7,6 +7,61 @@ namespace ScreenCapture
 {
     class SpeedImageProcess
     {
+        private Bitmap destImage;
+        private Rectangle destRect;
+
+
+        public SpeedImageProcess()
+        {
+            destImage = new Bitmap(120, 76);
+            destRect = new Rectangle(0, 0, 120, 76);
+        }
+
+        // 照片去背轉黑白
+        public Bitmap ToBlackWhite(Bitmap bmp)
+        {
+            int w = bmp.Width;
+            int h = bmp.Height;
+            try
+            {
+                byte newColor = 0;
+                BitmapData srcData = bmp.LockBits(new Rectangle(0, 0, w, h), ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+
+                unsafe
+                {
+                    byte* p = (byte*)srcData.Scan0.ToPointer();
+                    for (int y = 0; y < h; y++)
+                    {
+                        for (int x = 0; x < w; x++)
+                        {
+                            newColor = (byte)((float)p[0] * 0.114f + (float)p[1] * 0.587f + (float)p[2] * 0.299f);
+                            if (newColor > 200)
+                            {
+                                p[0] = 255;
+                                p[1] = 255;
+                                p[2] = 255;
+                            }
+                            else
+                            {
+                                p[0] = 0;
+                                p[1] = 0;
+                                p[2] = 0;
+                            }
+
+                            p += 3;
+                        }
+                        p += srcData.Stride - w * 3;
+                    }
+                    bmp.UnlockBits(srcData);
+                    return bmp;
+                }
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
         // 將圖片轉換成負片效果
         public Bitmap NegativePicture(Bitmap image)
         {
@@ -43,9 +98,6 @@ namespace ScreenCapture
         // 改變圖片size
         public Bitmap ResizeImage(Image image, int width, int height)
         {
-            var destRect = new Rectangle(0, 0, width, height);
-            var destImage = new Bitmap(width, height);
-
             destImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
 
             using (var graphics = Graphics.FromImage(destImage))
