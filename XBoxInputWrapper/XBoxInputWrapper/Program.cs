@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Threading;
 using XBoxInputWrapper.API_Hook;
 using XBoxInputWrapper.API_Hook.FunctionInfo;
+using RedisEndpoint;
 
 namespace XBoxInputWrapper
 {
@@ -30,29 +31,30 @@ namespace XBoxInputWrapper
         static bool IsProcessKeepRunning = true;
         static Thread ControllerInputThread = new Thread(BackgroundGetControllerInput);
         static Thread ControllerOutputThread;
+        static Publisher publisher = new Publisher("localhost", 6380);
+
         static void Main(string[] args)
         {
             Console.CancelKeyPress += (s, e) => { IsProcessKeepRunning = false; };
-            if (args.Length == 1)
-            {
-                int RemotePID = int.Parse(args[0]);
-                Process process = Process.GetProcessById(RemotePID);
-                bool IsRemoteProcessOnWoW64,
-                    IsSelfProcessOnWoW64 = (IntPtr.Size == 4);
-                IsWow64Process(process.Handle, out IsRemoteProcessOnWoW64);
-                if (IsRemoteProcessOnWoW64 != IsSelfProcessOnWoW64)
-                    throw new NotImplementedException();
-                ControllerOutputThread = new Thread(BackgroundGetControllerOutput);
-                ControllerOutputThread.Start(process);
-            }
-            else if (args.Length > 1)
-                throw new Exception("Args more than 1!");
+            //string ProcessName = "pCARS2AVX";
+            //var Processes = Process.GetProcessesByName(ProcessName);
+            // if (Processes.Length < 1)
+            //    throw new Exception($"Process {ProcessName} Not Found");
+            Process process = Process.GetCurrentProcess();
+            bool IsRemoteProcessOnWoW64,
+                IsSelfProcessOnWoW64 = (IntPtr.Size == 4);
+            IsWow64Process(process.Handle, out IsRemoteProcessOnWoW64);
+            if (IsRemoteProcessOnWoW64 != IsSelfProcessOnWoW64)
+                throw new NotImplementedException();
+            ControllerOutputThread = new Thread(BackgroundGetControllerOutput);
+            ControllerOutputThread.Start(process);
 
             ControllerInputThread.Start();
             Thread.Sleep(-1);
         }
         static void EventSender(EventType SourceEvent, string EventInfo)
         {
+            publisher.Publish("XINPUT", $"{SourceEvent.ToString()}|{EventInfo}");
             Console.WriteLine(SourceEvent.ToString() + "\t" + EventInfo);
         }
         static void BackgroundGetControllerOutput(object process)
