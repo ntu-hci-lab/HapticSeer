@@ -3,6 +3,7 @@ using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
 using ImageProcessModule;
 using ImageProcessModule.ProcessingClass;
+using SharpDX.DXGI;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -37,6 +38,7 @@ namespace ScreenCapture
         /// Remember to add tessdata directory
         static TesseractEngine ocr = new TesseractEngine(Path.GetFullPath(@"..\..\"), "eng", EngineMode.Default);
         static KalmanFilter filter = new KalmanFilter(1, 1, 0.05, 1, 0.1, speed);
+        static SpeedImageProcess speedImageProcess = new SpeedImageProcess();
         static int speed = 0; // current speed
         static int preSpeed = 0; // previous speed
         /// <summary>
@@ -104,7 +106,7 @@ namespace ScreenCapture
                     break;
                 case GameType.Project_Cars:
                     // Speed detection
-                    ImageProcess SpeedDetection = new ImageProcess(0, 1, 0, 1, ImageProcessBase.ImageScaleType.OriginalSize);
+                    ImageProcess SpeedDetection = new ImageProcess(1541 / 1720f, 1601 / 1720f, 865d / 1080, 903d / 1080, ImageProcessBase.ImageScaleType.OriginalSize);
                     SpeedDetection.NewFrameArrivedEvent += SpeedDetection_NewFrameArrivedEvent;
                     ImageProcesses.Add(SpeedDetection);
                     break;
@@ -245,37 +247,28 @@ namespace ScreenCapture
 #endif
             sender.Variable["LowPassFilter_Blood"] = EstimatedBlood;
         }
-
+        
         private static void SpeedDetection_NewFrameArrivedEvent(ImageProcess sender, Mat mat)
         {
             /* declare variables for Tesseract */
-            string speedStr;
             Pix pixImage;
             Page page;
-            double leftPosition = (1541d / 1720) * mat.Cols;
-            double topPosition = (865d / 1080) * mat.Rows;
-            double widthBound = (60d / 1720) * mat.Cols;
-            double heightBound = (38d / 1080) * mat.Rows;
-
-            /* declare variables*/
-            Rectangle cropArea = new Rectangle((int)leftPosition, (int)topPosition, (int)widthBound, (int)heightBound);
-            SpeedImageProcess speedImageProcess = new SpeedImageProcess();
-            
 
             try
             {
-                Bitmap BitmapFrame = Crop_frame(mat, cropArea).ToBitmap();
+                Bitmap BitmapFrame = mat.ToBitmap();
                 /* image processing */
+                speedImageProcess.ToBlackWhite(BitmapFrame); // grayscale(black and white)
                 // BitmapFrame = speedImageProcess.NegativePicture(BitmapFrame); //turn into negative image
-                BitmapFrame = speedImageProcess.ResizeImage(BitmapFrame, 120, 76); // enlarge image(x2)
-
+                speedImageProcess.ResizeImage(BitmapFrame, 120, 76); // enlarge image(x2)
 
                 pixImage = PixConverter.ToPix(BitmapFrame); // PixConverter is unable to work at Tesseract 3.3.0
                 page = ocr.Process(pixImage);
-                speedStr = page.GetText(); // Recognized result
+                string speedStr = page.GetText(); // Recognized result
                 page.Dispose();
+                pixImage.Dispose();
 
-                /* Parse str to int */
+                ///* Parse str to int */
                 bool isParsable = Int32.TryParse(speedStr, out speed);
                 if (!isParsable)
                 {
@@ -297,16 +290,6 @@ namespace ScreenCapture
             /* Filtering(denoise) */
             speed = (int)filter.Output(speed);
             Console.WriteLine("  -Smoothed speed: " + speed + " mph\n");
-        }
-
-        static Image<Bgr, Byte> Crop_frame(Mat input, Rectangle crop_region)
-        {
-            Image<Bgr, Byte> buffer_im = input.ToImage<Bgr, Byte>();
-            buffer_im.ROI = crop_region;
-            Image<Bgr, Byte> cropped_im = buffer_im.Copy();
-            buffer_im.Dispose();
-
-            return cropped_im;
         }
 
         private static void DamageIndicatorDetection_NewFrameArrivedEvent(ImageProcess sender, Mat mat)
