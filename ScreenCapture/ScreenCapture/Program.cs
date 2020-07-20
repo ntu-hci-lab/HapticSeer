@@ -1,20 +1,14 @@
 ﻿using Emgu.CV;
 using Emgu.CV.CvEnum;
-using Emgu.CV.Structure;
 using ImageProcessModule;
 using ImageProcessModule.ProcessingClass;
-using SharpDX.DXGI;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Management;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using Tesseract;
+using RedisEndpoint;
 using static ImageProcessModule.ImageProcessBase;
 
 namespace ScreenCapture
@@ -31,9 +25,14 @@ namespace ScreenCapture
             Project_Cars,
             BF1
         }
-        static GameType RunningGameType = GameType.HL_A;
+        static GameType RunningGameType = GameType.Project_Cars;
         static BitmapBuffer bitmapBuffer = new BitmapBuffer();
         static CaptureMethod captureMethod;
+
+        /// Initialize RedisEndpoint
+        static Publisher publisher = new Publisher("localhost", 6380);
+        
+
         /// Initialize Tesseract object
         /// Remember to add tessdata directory
         static TesseractEngine ocr = new TesseractEngine(Path.GetFullPath(@"..\..\"), "eng", EngineMode.Default);
@@ -72,7 +71,7 @@ namespace ScreenCapture
                 {
                     captureMethod.Stop();   //Stop Capturing
                 });
-
+            //args = new string[] { "CaptureCard" };
             // Check the Capture Method from args
             if (args.Length == 0)
                 captureMethod = new LocalCapture(bitmapBuffer); // Default: Local Capture
@@ -289,6 +288,7 @@ namespace ScreenCapture
 
             /* Filtering(denoise) */
             speed = (int)filter.Output(speed);
+            publisher.Publish("SPEED", $"SMOOTHED|{speed}\n");
             Console.WriteLine("  -Smoothed speed: " + speed + " mph\n");
         }
 
