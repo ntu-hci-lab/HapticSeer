@@ -27,3 +27,11 @@ C:\Users\yuhsi\source\repos\GameAgent\RedisEndpoint_dotnetFramework\RedisEndPoin
 C:\Users\yuhsi\source\repos\GameAgent\RedisEndpoint_dotnetFramework\RedisEndPoint_dotnetFramework\obj\Release\RedisEndPoint_dotnetFramework.exe
 C:\Users\yuhsi\source\repos\GameAgent\RedisEndpoint_dotnetFramework\RedisEndPoint_dotnetFramework\obj\Release\RedisEndPoint_dotnetFramework.pdb
 C:\Users\yuhsi\source\repos\GameAgent\RedisEndpoint_dotnetFramework\RedisEndPoint_dotnetFramework\obj\Release\RedisEndpoint_dotnetFramework.csprojAssemblyReference.cache
+C:\Users\yuhsi\source\repos\GameAgent\RedisEndpoint_dotnetFramework\bin\Release\RedisEndPoint_dotnetFramework.exe.config
+C:\Users\yuhsi\source\repos\GameAgent\RedisEndpoint_dotnetFramework\bin\Release\RedisEndPoint_dotnetFramework.exe
+C:\Users\yuhsi\source\repos\GameAgent\RedisEndpoint_dotnetFramework\bin\Release\RedisEndPoint_dotnetFramework.pdb
+C:\Users\yuhsi\source\repos\GameAgent\RedisEndpoint_dotnetFramework\bin\Release\System.Buffers.dll
+C:\Users\yuhsi\source\repos\GameAgent\RedisEndpoint_dotnetFramework\bin\Release\System.Memory.dll
+C:\Users\yuhsi\source\repos\GameAgent\RedisEndpoint_dotnetFramework\obj\Release\RedisEndpoint_dotnetFramework.csproj.CopyComplete
+C:\Users\yuhsi\source\repos\GameAgent\RedisEndpoint_dotnetFramework\obj\Release\RedisEndPoint_dotnetFramework.exe
+C:\Users\yuhsi\source\repos\GameAgent\RedisEndpoint_dotnetFramework\obj\Release\RedisEndPoint_dotnetFramework.pdb
