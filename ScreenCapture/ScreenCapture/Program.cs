@@ -105,7 +105,7 @@ namespace ScreenCapture
                     break;
                 case GameType.Project_Cars:
                     // Speed detection
-                    ImageProcess SpeedDetection = new ImageProcess(1541 / 1720f, 1601 / 1720f, 865d / 1080, 903d / 1080, ImageProcessBase.ImageScaleType.OriginalSize);
+                    ImageProcess SpeedDetection = new ImageProcess(1541 / 1720f, 1601 / 1720f, 962d / 1080, 1002d / 1080, ImageProcessBase.ImageScaleType.OriginalSize);
                     SpeedDetection.NewFrameArrivedEvent += SpeedDetection_NewFrameArrivedEvent;
                     ImageProcesses.Add(SpeedDetection);
                     break;
@@ -260,7 +260,7 @@ namespace ScreenCapture
                 speedImageProcess.ToBlackWhite(BitmapFrame); // grayscale(black and white)
                 // BitmapFrame = speedImageProcess.NegativePicture(BitmapFrame); //turn into negative image
                 speedImageProcess.ResizeImage(BitmapFrame, 120, 76); // enlarge image(x2)
-
+                BitmapFrame.Save("Test.bmp");
                 pixImage = PixConverter.ToPix(BitmapFrame); // PixConverter is unable to work at Tesseract 3.3.0
                 page = ocr.Process(pixImage);
                 string speedStr = page.GetText(); // Recognized result
