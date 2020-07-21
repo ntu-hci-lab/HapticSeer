@@ -3,6 +3,7 @@ using Emgu.CV.CvEnum;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -177,6 +178,15 @@ namespace ImageProcessModule
             IsUpdatingData = false;
             // Tell worker thread that it can be process now
             IsProcessingData = true;
+        }
+
+        // Save image to "/cropImage"
+        public static void Save(Mat img, string filename)
+        {
+            var bitmapImage = img.ToBitmap();
+            filename = Directory.GetCurrentDirectory() + "/cropImage/" + filename + ".png";
+            Console.WriteLine(filename);
+            bitmapImage.Save(filename, System.Drawing.Imaging.ImageFormat.Png);
         }
     }
 }
