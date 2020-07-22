@@ -1,20 +1,14 @@
 using Emgu.CV;
 using Emgu.CV.CvEnum;
-using Emgu.CV.Structure;
 using ImageProcessModule;
 using ImageProcessModule.ProcessingClass;
-using SharpDX.DXGI;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Management;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using Tesseract;
+using RedisEndpoint;
 using static ImageProcessModule.ImageProcessBase;
 
 namespace ScreenCapture
@@ -31,9 +25,14 @@ namespace ScreenCapture
             Project_Cars,
             BF1
         }
-        static GameType RunningGameType = GameType.Project_Cars;
+        static GameType RunningGameType = GameType.BF1;
         static BitmapBuffer bitmapBuffer = new BitmapBuffer();
         static CaptureMethod captureMethod;
+
+        /// Initialize RedisEndpoint
+        static Publisher publisher = new Publisher("localhost", 6380);
+        
+
         /// Initialize Tesseract object
         /// Remember to add tessdata directory
         static TesseractEngine ocr = new TesseractEngine(Path.GetFullPath(@"..\..\"), "eng", EngineMode.Default);
@@ -72,7 +71,7 @@ namespace ScreenCapture
                 {
                     captureMethod.Stop();   //Stop Capturing
                 });
-
+            //args = new string[] { "CaptureCard" };
             // Check the Capture Method from args
             if (args.Length == 0)
                 captureMethod = new LocalCapture(bitmapBuffer); // Default: Local Capture
@@ -106,7 +105,7 @@ namespace ScreenCapture
                     break;
                 case GameType.Project_Cars:
                     // Speed detection
-                    ImageProcess SpeedDetection = new ImageProcess(1541 / 1720f, 1601 / 1720f, 865d / 1080, 903d / 1080, ImageProcessBase.ImageScaleType.OriginalSize);
+                    ImageProcess SpeedDetection = new ImageProcess(1541 / 1720f, 1601 / 1720f, 962d / 1080, 1002d / 1080, ImageProcessBase.ImageScaleType.OriginalSize);
                     SpeedDetection.NewFrameArrivedEvent += SpeedDetection_NewFrameArrivedEvent;
                     ImageProcesses.Add(SpeedDetection);
                     break;
@@ -114,10 +113,10 @@ namespace ScreenCapture
                     ImageProcess DamageIndicatorDetection = new ImageProcess(0, 1, 0, 1, ImageProcessBase.ImageScaleType.Quarter);
                     DamageIndicatorDetection.NewFrameArrivedEvent += DamageIndicatorDetection_NewFrameArrivedEvent;
 
-                    ImageProcess BloodDetector_BF1 = new ImageProcess(1500 / 1728f, 1700 / 1728f, 1028 / 1080f, 1029 / 1080f, ImageScaleType.OriginalSize, FrameRate: 15);
+                    ImageProcess BloodDetector_BF1 = new ImageProcess(1689 / 1920f, 1867 / 1920f, 1018 / 1080f, 1020 / 1080f, ImageScaleType.OriginalSize, FrameRate: 15);
                     BloodDetector_BF1.NewFrameArrivedEvent += BloodDetector_BF1_NewFrameArrivedEvent;
                     //ImageProcess BulletCount_BF1 = new ImageProcess(1526 / 1728f, 1594 / 1728f, 948 / 1080f, 988 / 1080f, ImageScaleType.OriginalSize, FrameRate: 3);
-                    ImageProcess BulletCount_BF1 = new ImageProcess(0.89, 0.922, 0.865, 0.93, ImageScaleType.OriginalSize, FrameRate: 1); // 1920*1080
+                    ImageProcess BulletCount_BF1 = new ImageProcess(0.89, 0.922, 0.865, 0.93, ImageScaleType.OriginalSize, FrameRate: 30); // 1920*1080
                     BulletCount_BF1.NewFrameArrivedEvent += BulletCount_BF1_NewFrameArrivedEvent;
                     //ImageProcess GrenadeCount_BF1 = new ImageProcess(1598 / 1728f, 1628 / 1728f, 978 / 1080f, 998 / 1080f, ImageScaleType.OriginalSize, FrameRate: 3);
                     //GrenadeCount_BF1.NewFrameArrivedEvent += GrenadeCount_BF1_NewFrameArrivedEvent;
@@ -158,10 +157,9 @@ namespace ScreenCapture
                 ocr.DefaultPageSegMode = PageSegMode.SingleBlock;
                 page = ocr.Process(pixImage);
                 var bulletStr = page.GetText(); // 識別後的內容
-
                 if (!string.IsNullOrEmpty(bulletStr))
                 {
-                    Save(BinaryImg, DateTime.Now.Ticks.ToString());
+                    //Save(BinaryImg, DateTime.Now.Ticks.ToString());
 
                     if (Int32.TryParse(bulletStr, out int num))
                     {
@@ -290,7 +288,6 @@ namespace ScreenCapture
                 speedImageProcess.ToBlackWhite(BitmapFrame); // grayscale(black and white)
                 // BitmapFrame = speedImageProcess.NegativePicture(BitmapFrame); //turn into negative image
                 speedImageProcess.ResizeImage(BitmapFrame, 120, 76); // enlarge image(x2)
-
                 pixImage = PixConverter.ToPix(BitmapFrame); // PixConverter is unable to work at Tesseract 3.3.0
                 page = ocr.Process(pixImage, PageSegMode.SingleBlock);
                 string speedStr = page.GetText(); // Recognized result
@@ -318,6 +315,7 @@ namespace ScreenCapture
 
             /* Filtering(denoise) */
             speed = (int)filter.Output(speed);
+            publisher.Publish("SPEED", $"SMOOTHED|{speed}\n");
             Console.WriteLine("  -Smoothed speed: " + speed + " mph\n");
         }
 
@@ -359,8 +357,8 @@ namespace ScreenCapture
 
                 double angle;
                 //Console.Clear();
-                if (GetHitAngle(LastImg, out angle))
-                    Console.WriteLine(angle);
+                //if (GetHitAngle(LastImg, out angle))
+                //    Console.WriteLine(angle);
                 //else
                 //    Console.WriteLine("false");
                 CvInvoke.Blur(AvailableImg, AvailableImg, new Size(5, 5), new Point(0, 0));
