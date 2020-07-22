@@ -260,7 +260,6 @@ namespace ScreenCapture
                 speedImageProcess.ToBlackWhite(BitmapFrame); // grayscale(black and white)
                 // BitmapFrame = speedImageProcess.NegativePicture(BitmapFrame); //turn into negative image
                 speedImageProcess.ResizeImage(BitmapFrame, 120, 76); // enlarge image(x2)
-                BitmapFrame.Save("Test.bmp");
                 pixImage = PixConverter.ToPix(BitmapFrame); // PixConverter is unable to work at Tesseract 3.3.0
                 page = ocr.Process(pixImage);
                 string speedStr = page.GetText(); // Recognized result
