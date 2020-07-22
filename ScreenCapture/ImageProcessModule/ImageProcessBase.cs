@@ -184,7 +184,7 @@ namespace ImageProcessModule
         public static void Save(Mat img, string filename)
         {
             var bitmapImage = img.ToBitmap();
-            filename = Directory.GetCurrentDirectory() + "/cropImage/" + filename + ".png";
+            filename = Directory.GetCurrentDirectory() + "\\cropImage\\" + filename + ".png";
             Console.WriteLine(filename);
             bitmapImage.Save(filename, System.Drawing.Imaging.ImageFormat.Png);
         }

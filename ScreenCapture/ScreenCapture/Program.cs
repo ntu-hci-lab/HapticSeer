@@ -25,7 +25,7 @@ namespace ScreenCapture
             Project_Cars,
             BF1
         }
-        static GameType RunningGameType = GameType.Project_Cars;
+        static GameType RunningGameType = GameType.BF1;
         static BitmapBuffer bitmapBuffer = new BitmapBuffer();
         static CaptureMethod captureMethod;
 
@@ -113,10 +113,10 @@ namespace ScreenCapture
                     ImageProcess DamageIndicatorDetection = new ImageProcess(0, 1, 0, 1, ImageProcessBase.ImageScaleType.Quarter);
                     DamageIndicatorDetection.NewFrameArrivedEvent += DamageIndicatorDetection_NewFrameArrivedEvent;
 
-                    ImageProcess BloodDetector_BF1 = new ImageProcess(1500 / 1728f, 1700 / 1728f, 1028 / 1080f, 1029 / 1080f, ImageScaleType.OriginalSize, FrameRate: 15);
+                    ImageProcess BloodDetector_BF1 = new ImageProcess(1689 / 1920f, 1867 / 1920f, 1018 / 1080f, 1020 / 1080f, ImageScaleType.OriginalSize, FrameRate: 15);
                     BloodDetector_BF1.NewFrameArrivedEvent += BloodDetector_BF1_NewFrameArrivedEvent;
                     //ImageProcess BulletCount_BF1 = new ImageProcess(1526 / 1728f, 1594 / 1728f, 948 / 1080f, 988 / 1080f, ImageScaleType.OriginalSize, FrameRate: 3);
-                    ImageProcess BulletCount_BF1 = new ImageProcess(0.89, 0.922, 0.865, 0.93, ImageScaleType.OriginalSize, FrameRate: 1); // 1920*1080
+                    ImageProcess BulletCount_BF1 = new ImageProcess(0.89, 0.922, 0.865, 0.93, ImageScaleType.OriginalSize, FrameRate: 30); // 1920*1080
                     BulletCount_BF1.NewFrameArrivedEvent += BulletCount_BF1_NewFrameArrivedEvent;
                     //ImageProcess GrenadeCount_BF1 = new ImageProcess(1598 / 1728f, 1628 / 1728f, 978 / 1080f, 998 / 1080f, ImageScaleType.OriginalSize, FrameRate: 3);
                     //GrenadeCount_BF1.NewFrameArrivedEvent += GrenadeCount_BF1_NewFrameArrivedEvent;
@@ -157,10 +157,9 @@ namespace ScreenCapture
                 ocr.DefaultPageSegMode = PageSegMode.SingleBlock;
                 page = ocr.Process(pixImage);
                 var bulletStr = page.GetText(); // 識別後的內容
-
                 if (!string.IsNullOrEmpty(bulletStr))
                 {
-                    Save(BinaryImg, DateTime.Now.Ticks.ToString());
+                    //Save(BinaryImg, DateTime.Now.Ticks.ToString());
 
                     if (Int32.TryParse(bulletStr, out int num))
                     {
@@ -358,8 +357,8 @@ namespace ScreenCapture
 
                 double angle;
                 //Console.Clear();
-                if (GetHitAngle(LastImg, out angle))
-                    Console.WriteLine(angle);
+                //if (GetHitAngle(LastImg, out angle))
+                //    Console.WriteLine(angle);
                 //else
                 //    Console.WriteLine("false");
                 CvInvoke.Blur(AvailableImg, AvailableImg, new Size(5, 5), new Point(0, 0));
