@@ -120,6 +120,8 @@ namespace ImageProcessModule.ProcessingClass
         }
         private static int CalcFrameRate(long TotalFrameCount, long ElaspedMillsecond)
         {
+            if (ElaspedMillsecond == 0)
+                return 0;
             return (int)((TotalFrameCount * 1000) / ElaspedMillsecond);
         }
         protected override void ImageHandler(object args)
@@ -130,7 +132,7 @@ namespace ImageProcessModule.ProcessingClass
                     Thread.Sleep(1);
 
                 // Check FrameRate
-                if (PreferFrameRate >= 0 && CalcFrameRate(NewFrameCount, stopwatch.ElapsedMilliseconds) >= PreferFrameRate)
+                if (PreferFrameRate >= 0 && stopwatch  != null && CalcFrameRate(NewFrameCount, stopwatch.ElapsedMilliseconds) >= PreferFrameRate)
                 {
                     IsProcessingData = false;
                     continue;
