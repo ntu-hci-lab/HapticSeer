@@ -31,7 +31,7 @@ namespace ScreenCapture
             Project_Cars,
             BF1
         }
-        static GameType RunningGameType = GameType.BF1;
+        static GameType RunningGameType = GameType.Project_Cars;
         static BitmapBuffer bitmapBuffer = new BitmapBuffer();
         static CaptureMethod captureMethod;
         /// Initialize Tesseract object
@@ -292,7 +292,7 @@ namespace ScreenCapture
                 speedImageProcess.ResizeImage(BitmapFrame, 120, 76); // enlarge image(x2)
 
                 pixImage = PixConverter.ToPix(BitmapFrame); // PixConverter is unable to work at Tesseract 3.3.0
-                page = ocr.Process(pixImage);
+                page = ocr.Process(pixImage, PageSegMode.SingleBlock);
                 string speedStr = page.GetText(); // Recognized result
                 page.Dispose();
                 pixImage.Dispose();
