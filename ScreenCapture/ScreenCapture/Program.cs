@@ -1,4 +1,4 @@
-﻿using Emgu.CV;
+using Emgu.CV;
 using Emgu.CV.CvEnum;
 using ImageProcessModule;
 using ImageProcessModule.ProcessingClass;
@@ -115,14 +115,15 @@ namespace ScreenCapture
 
                     ImageProcess BloodDetector_BF1 = new ImageProcess(1500 / 1728f, 1700 / 1728f, 1028 / 1080f, 1029 / 1080f, ImageScaleType.OriginalSize, FrameRate: 15);
                     BloodDetector_BF1.NewFrameArrivedEvent += BloodDetector_BF1_NewFrameArrivedEvent;
-                    ImageProcess BulletCount_BF1 = new ImageProcess(1526 / 1728f, 1594 / 1728f, 948 / 1080f, 988 / 1080f, ImageScaleType.OriginalSize, FrameRate: 3);
+                    //ImageProcess BulletCount_BF1 = new ImageProcess(1526 / 1728f, 1594 / 1728f, 948 / 1080f, 988 / 1080f, ImageScaleType.OriginalSize, FrameRate: 3);
+                    ImageProcess BulletCount_BF1 = new ImageProcess(0.89, 0.922, 0.865, 0.93, ImageScaleType.OriginalSize, FrameRate: 1); // 1920*1080
                     BulletCount_BF1.NewFrameArrivedEvent += BulletCount_BF1_NewFrameArrivedEvent;
-                    ImageProcess GrenadeCount_BF1 = new ImageProcess(1598 / 1728f, 1628 / 1728f, 978 / 1080f, 998 / 1080f, ImageScaleType.OriginalSize, FrameRate: 3);
-                    GrenadeCount_BF1.NewFrameArrivedEvent += GrenadeCount_BF1_NewFrameArrivedEvent;
+                    //ImageProcess GrenadeCount_BF1 = new ImageProcess(1598 / 1728f, 1628 / 1728f, 978 / 1080f, 998 / 1080f, ImageScaleType.OriginalSize, FrameRate: 3);
+                    //GrenadeCount_BF1.NewFrameArrivedEvent += GrenadeCount_BF1_NewFrameArrivedEvent;
                     ImageProcesses.Add(DamageIndicatorDetection);
                     ImageProcesses.Add(BloodDetector_BF1);
                     ImageProcesses.Add(BulletCount_BF1);
-                    ImageProcesses.Add(GrenadeCount_BF1);
+                    //ImageProcesses.Add(GrenadeCount_BF1);
                     break;
             }
             // Do Cache Optimizer
@@ -130,22 +131,50 @@ namespace ScreenCapture
             CacheOptimizer.ResetAllAffinity();
         }
 
+        /* No need for now */
         private static void GrenadeCount_BF1_NewFrameArrivedEvent(ImageProcess sender, Mat mat)
         {
             if (!sender.Variable.ContainsKey("BinaryImage"))
                 sender.Variable.Add("BinaryImage", new Mat(mat.Size, DepthType.Cv8U, 1));
             Mat BinaryImg = sender.Variable["BinaryImage"] as Mat;
             ImageProcess.ElimateBackgroundWithSearchingSimilarColor(in mat, ref BinaryImg, new Color[] { Color.FromArgb(220, 220, 220) }, new uint[] { 0x00FF0000 }, ElimateColorApproach.ReserveSimilarColor_RemoveDifferentColor, 50);
-            // TODO OCR to BinaryImg
         }
 
         private static void BulletCount_BF1_NewFrameArrivedEvent(ImageProcess sender, Mat mat)
         {
+            Pix pixImage;
+            Page page;
+            
             if (!sender.Variable.ContainsKey("BinaryImage"))
                 sender.Variable.Add("BinaryImage", new Mat(mat.Size, DepthType.Cv8U, 1));
             Mat BinaryImg = sender.Variable["BinaryImage"] as Mat;
             ImageProcess.ElimateBackgroundWithSearchingSimilarColor(in mat, ref BinaryImg, new Color[] { Color.FromArgb(220, 220, 220) }, new uint[] { 0x00FF0000 }, ElimateColorApproach.ReserveSimilarColor_RemoveDifferentColor, 50);
-            // TODO OCR to BinaryImg
+
+            /* use Tesseract to recognize number */
+            try
+            {
+                pixImage = PixConverter.ToPix(BinaryImg.ToBitmap());
+                ocr.DefaultPageSegMode = PageSegMode.SingleBlock;
+                page = ocr.Process(pixImage);
+                var bulletStr = page.GetText(); // 識別後的內容
+
+                if (!string.IsNullOrEmpty(bulletStr))
+                {
+                    Save(BinaryImg, DateTime.Now.Ticks.ToString());
+
+                    if (Int32.TryParse(bulletStr, out int num))
+                    {
+                        Console.WriteLine("bullet number :"+ num.ToString());
+                    }
+                }
+
+                page.Dispose();
+                pixImage.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error message: " + ex.Message);
+            }
         }
 
         private static void BulletInBackpack_HLA_NewFrameArrivedEvent(ImageProcess sender, Mat mat)
@@ -261,7 +290,7 @@ namespace ScreenCapture
                 // BitmapFrame = speedImageProcess.NegativePicture(BitmapFrame); //turn into negative image
                 speedImageProcess.ResizeImage(BitmapFrame, 120, 76); // enlarge image(x2)
                 pixImage = PixConverter.ToPix(BitmapFrame); // PixConverter is unable to work at Tesseract 3.3.0
-                page = ocr.Process(pixImage);
+                page = ocr.Process(pixImage, PageSegMode.SingleBlock);
                 string speedStr = page.GetText(); // Recognized result
                 page.Dispose();
                 pixImage.Dispose();
