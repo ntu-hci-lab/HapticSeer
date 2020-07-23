@@ -10,7 +10,7 @@ using static ImageProcessModule.ImageProcessBase;
 
 namespace ScreenCapture
 {
-    class PC2 : ArrivalEvent
+    class PC2 : FeatureExtractors
     {
         private KalmanFilter filter;
         private SpeedImageProcess speedImageProcess = new SpeedImageProcess();

@@ -10,9 +10,8 @@ using static ImageProcessModule.ImageProcessBase;
 
 namespace ScreenCapture
 {
-    class BF1 : ArrivalEvent
+    class BF1 : FeatureExtractors
     {
-        
         public BF1(): base()
         {
             ImageProcessesList.Add(new ImageProcess(0, 1, 0, 1, ImageScaleType.Quarter));
@@ -73,7 +72,6 @@ namespace ScreenCapture
             }
         }
 
-
         private static void BloodDetectorEvent(ImageProcess sender, Mat mat)
         {
             double BloodValue;
@@ -110,9 +108,6 @@ namespace ScreenCapture
                 Console.WriteLine($"Actual: {BloodValue.ToString("0.000")}");
 #endif
         }
-
-
-
 
         private static void DamageIndicatorDetectionEvent(ImageProcess sender, Mat mat)
         {
@@ -152,9 +147,9 @@ namespace ScreenCapture
                 }
 
                 double angle;
-                //Console.Clear();
-                //if (GetHitAngle(LastImg, out angle))
-                //    Console.WriteLine(angle);
+                Console.Clear();
+                if (GetHitAngle(LastImg, out angle))
+                    Console.WriteLine(angle);
                 //else
                 //    Console.WriteLine("false");
                 CvInvoke.Blur(AvailableImg, AvailableImg, new Size(5, 5), new Point(0, 0));
@@ -162,6 +157,7 @@ namespace ScreenCapture
                 sender.Variable["AvailableImg"] = LastImg;
             }
         }
+
         private static bool GetHitAngle(Mat OneChannelImg, out double Angle)
         {
             long Sum_X = 0, Sum_Y = 0;

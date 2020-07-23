@@ -16,7 +16,7 @@ namespace ScreenCapture
             Project_Cars,
             BF1
         }
-        static GameType RunningGameType = GameType.Project_Cars;
+        static GameType RunningGameType = GameType.BF1;
         static BitmapBuffer bitmapBuffer = new BitmapBuffer();
         static CaptureMethod captureMethod;
 
@@ -67,7 +67,7 @@ namespace ScreenCapture
             // Start dispatch frames
             bitmapBuffer.StartDispatchToImageProcessBase();
 
-            ArrivalEvent arrivalEvents = ArrivalEvent.SetArrivalEventsByID( (int) RunningGameType);
+            FeatureExtractors arrivalEvents = FeatureExtractors.InitFeatureExtractor( (int) RunningGameType);
 
             // Do Cache Optimizer
             CacheOptimizer.Init();

@@ -7,7 +7,7 @@ using RedisEndpoint;
 
 namespace ScreenCapture
 {
-    public class ArrivalEvent
+    public class FeatureExtractors
     {
 
         /// Initialize Tesseract object
@@ -15,9 +15,9 @@ namespace ScreenCapture
         protected static TesseractEngine ocr = new TesseractEngine(Path.GetFullPath(@"..\..\"), "eng", EngineMode.Default);
         protected static Publisher publisher = new Publisher("localhost", 6380);
         protected List<ImageProcess> ImageProcessesList = new List<ImageProcess>();
-        protected ArrivalEvent() {}
+        protected FeatureExtractors() {}
 
-        public static ArrivalEvent SetArrivalEventsByID(int gameID)
+        public static FeatureExtractors InitFeatureExtractor(int gameID)
         {
             switch (gameID)
             {

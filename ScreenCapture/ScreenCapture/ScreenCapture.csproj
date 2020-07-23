@@ -85,10 +85,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ArrivalEvent.cs" />
-    <Compile Include="ArrivalEvents\BF1.cs" />
-    <Compile Include="ArrivalEvents\PC2.cs" />
-    <Compile Include="ArrivalEvents\HLA.cs" />
+    <Compile Include="FeatureExtractors.cs" />
+    <Compile Include="FeatureExtractors\BF1.cs" />
+    <Compile Include="FeatureExtractors\PC2.cs" />
+    <Compile Include="FeatureExtractors\HLA.cs" />
     <Compile Include="CaptureMethod\CaptureInterface.cs" />
     <Compile Include="CaptureMethod\CardCapture.cs" />
     <Compile Include="CaptureMethod\LocalCapture.cs" />
