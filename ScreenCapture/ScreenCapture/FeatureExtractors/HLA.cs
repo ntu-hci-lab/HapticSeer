@@ -9,7 +9,7 @@ using static ImageProcessModule.ImageProcessBase;
 
 namespace ScreenCapture
 {
-    class HLA : ArrivalEvent
+    class HLA : FeatureExtractors
     {
         public HLA() : base()
         {
