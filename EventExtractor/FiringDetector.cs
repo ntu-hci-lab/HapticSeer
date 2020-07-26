@@ -7,8 +7,7 @@ namespace EventDetectors
     class FiringDetector
     {
         private Subscriber bulletSubscriber, inputSubscriber;
-        private byte triggerState = 0;
-        private ushort bulletCount;
+        private StateObject state = new StateObject();
 
         public FiringDetector(string url, ushort port)
         {
@@ -18,8 +17,8 @@ namespace EventDetectors
             bulletSubscriber.SubscribeTo("BULLET");
             inputSubscriber.SubscribeTo("XINPUT");
 
-            bulletSubscriber.msgQueue.OnMessage(msg => FiringFunctions.Router(msg.Channel, msg.Message, ref triggerState));
-            inputSubscriber.msgQueue.OnMessage(msg => FiringFunctions.Router(msg.Channel, msg.Message, ref triggerState));
+            bulletSubscriber.msgQueue.OnMessage(msg => FiringFunctions.Router(msg.Channel, msg.Message, ref state));
+            inputSubscriber.msgQueue.OnMessage(msg => FiringFunctions.Router(msg.Channel, msg.Message, ref state));
         }
 
     }

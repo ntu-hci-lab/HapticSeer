@@ -5,7 +5,7 @@ using Emgu.CV;
 using Emgu.CV.CvEnum;
 using ImageProcessModule.ProcessingClass;
 using Tesseract;
-
+using RedisEndpoint;
 using static ImageProcessModule.ImageProcessBase;
 
 namespace ScreenCapture
@@ -59,6 +59,7 @@ namespace ScreenCapture
 
                     if (Int32.TryParse(bulletStr, out int num))
                     {
+                        publisher.Publish("BULLET", num.ToString());
                         Console.WriteLine("bullet number :" + num.ToString());
                     }
                 }
