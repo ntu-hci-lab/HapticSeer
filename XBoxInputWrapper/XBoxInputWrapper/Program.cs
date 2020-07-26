@@ -55,7 +55,7 @@ namespace XBoxInputWrapper
         static void EventSender(EventType SourceEvent, string EventInfo)
         {
             publisher.Publish("XINPUT", $"{SourceEvent.ToString()}|{EventInfo}");
-            Console.WriteLine(SourceEvent.ToString() + "\t" + EventInfo);
+            Console.WriteLine(SourceEvent.ToString() + "|" + EventInfo);
         }
         static void BackgroundGetControllerOutput(object process)
         {
@@ -74,12 +74,12 @@ namespace XBoxInputWrapper
                 ControllerOutputHooker.AccessXInputSetState().GetData(out NewLeftMotor, out NewRightMotor);
                 if (NewLeftMotor != OldLeftMotor)
                 {
-                    EventSender(EventType.LeftMotor, $"{OldLeftMotor.ToString()} -> {NewLeftMotor.ToString()}");
+                    EventSender(EventType.LeftMotor, $"{OldLeftMotor.ToString()}|{NewLeftMotor.ToString()}");
                     OldLeftMotor = NewLeftMotor;
                 }
                 if (NewRightMotor != OldRightMotor)
                 {
-                    EventSender(EventType.RightMotor, $"{OldRightMotor.ToString()} -> {NewRightMotor.ToString()}");
+                    EventSender(EventType.RightMotor, $"{OldRightMotor.ToString()}|{NewRightMotor.ToString()}");
                     OldRightMotor = NewRightMotor;
                 }
             }
@@ -117,7 +117,7 @@ namespace XBoxInputWrapper
                             if ((StateChangedButton & Mask) == 0)
                                 continue;
                             bool IsNowBtnPressed = (NewVal & Mask) != 0;
-                            EventSender(ControllerEvent, $"{wButtonsName[i]} {(IsNowBtnPressed ? "Pressed" : "Release")}");
+                            EventSender(ControllerEvent, $"{wButtonsName[i]}|{(IsNowBtnPressed ? "Pressed" : "Release")}");
                         }
                     }
                     else
@@ -126,7 +126,7 @@ namespace XBoxInputWrapper
                             NewVal = GetElementFromXInputState(NewState, ControllerEvent);
 
                         if (!OldVal.Equals(NewVal))
-                            EventSender(ControllerEvent, $"{OldVal.ToString()} -> {NewVal.ToString()}");
+                            EventSender(ControllerEvent, $"{OldVal.ToString()}|{NewVal.ToString()}");
                     }
                 }
 
