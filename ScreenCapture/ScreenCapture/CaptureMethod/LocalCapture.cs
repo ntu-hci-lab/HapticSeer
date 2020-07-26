@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Drawing.Imaging;
 using System.Threading;
 using Emgu.CV;
 using Emgu.CV.CvEnum;
