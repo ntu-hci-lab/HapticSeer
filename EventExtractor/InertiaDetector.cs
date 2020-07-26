@@ -1,38 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-
-namespace EventExtractors
+using RedisEndpoint;
+namespace EventDetectors
 {
     class InertiaDetector
     {
-        private PooledSubscriber speedSubscriber, inputSubscriber;
-        private ushort curSpeed = 0;
-        private double yAxis = 0d;
+        private Subscriber speedSubscriber, inputSubscriber;
+        private LinkedList<ushort> speed = new LinkedList<ushort>(); // 1/5 Sec
+        private double xInput = 0d, accelX = 0d, accelY = 0d;
+
         public InertiaDetector(string url, ushort port)
         {
-            bool flag = false;
-            speedSubscriber = new PooledSubscriber(url, port);
-            inputSubscriber = new PooledSubscriber(url, port);
+            for (int i = 0; i < 30; i++) speed.AddLast(0);
 
-            while (!flag)
-            {
-                speedSubscriber.TrySubscribeTo("SPEED", out flag);
-            }
-            flag = false;
-            while (!flag)
-            {
-                inputSubscriber.TrySubscribeTo("XINPUT", out flag);
-            }
+            speed.AddLast(0);
+            speedSubscriber = new Subscriber(url, port);
+            inputSubscriber = new Subscriber(url, port);
+            speedSubscriber.SubscribeTo("SPEED");
+            inputSubscriber.SubscribeTo("XINPUT");
 
-            speedSubscriber.GetMsqInstance().OnMessage((msg) =>
-            {
-                Console.WriteLine(msg.Message);
-            });
-            inputSubscriber.GetMsqInstance().OnMessage((msg) =>
-            {
-                Console.WriteLine(msg.SubscriptionChannel);
-            });
+            speedSubscriber.msgQueue.OnMessage(msg => InertiaFunctions.Parser(msg.Message, speed));
+            inputSubscriber.msgQueue.OnMessage(msg => InertiaFunctions.Parser(msg.Message, speed));
         }
+        
     }
 }

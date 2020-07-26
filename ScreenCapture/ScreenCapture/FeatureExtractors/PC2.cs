@@ -6,6 +6,8 @@ using Emgu.CV;
 using Emgu.CV.CvEnum;
 using ImageProcessModule.ProcessingClass;
 using Tesseract;
+
+using System.Globalization;
 using static ImageProcessModule.ImageProcessBase;
 
 namespace ScreenCapture
@@ -16,17 +18,27 @@ namespace ScreenCapture
         private SpeedImageProcess speedImageProcess = new SpeedImageProcess();
         private int speed = 0; // current speed
         private int preSpeed = 0; // previous speed
-
+#if DEBUG
+        private StreamWriter streamWriter;
+        private DateTime localDate;
+#endif
         public PC2() : base()
         {
+#if DEBUG
+
+            streamWriter = new StreamWriter("detected.txt");
+#endif
             filter = new KalmanFilter(1, 1, 0.05, 1, 0.1, speed);
 
-            ImageProcessesList.Add(new ImageProcess(1541 / 1720f, 1601 / 1720f, 962d / 1080, 1002d / 1080, ImageScaleType.OriginalSize));
+            ImageProcessesList.Add(new ImageProcess(1541 / 1720f, 1601 / 1720f, 962d / 1080, 1002d / 1080, ImageScaleType.OriginalSize, 60));
             ImageProcessesList.Last().NewFrameArrivedEvent += SpeedDetectionEvent;
         }
 
         private void SpeedDetectionEvent(ImageProcess sender, Mat mat)
         {
+#if DEBUG
+            localDate = DateTime.Now;
+#endif
             /* declare variables for Tesseract */
             Pix pixImage;
             Page page;
@@ -64,9 +76,13 @@ namespace ScreenCapture
             preSpeed = speed;
 
             /* Filtering(denoise) */
-            speed = (int)filter.Output(speed);
-           //publisher.Publish("SPEED", $"SMOOTHED|{speed}\n");
-            Console.WriteLine("  -Smoothed speed: " + speed + " mph\n");
+            //speed = (int)filter.Output(speed);
+            publisher.Publish("SPEED", $"SMOOTHED|{speed}");
+# if DEBUG
+            var time = localDate.Minute * 60 * 1000 + localDate.Second * 1000 + localDate.Millisecond;
+            Console.WriteLine("  -Smoothed speed: " + speed + " kmh\n");
+            streamWriter.WriteLine(time+","+speed);
+#endif
         }
     }
 }
