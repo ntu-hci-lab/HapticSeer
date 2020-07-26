@@ -8,7 +8,7 @@ namespace EventDetectors
     {
         static int Main()
         {
-            InertiaDetector e = new InertiaDetector("localhost", 6380);
+            FiringDetector e = new FiringDetector("localhost", 6380);
             _ = Console.ReadKey();
             return 0;
         }
