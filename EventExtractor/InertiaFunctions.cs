@@ -4,25 +4,66 @@ using System.Text;
 
 namespace EventDetectors
 {
-    static class InertiaFunctions
+    public static class InertiaFunctions
     {
-        public static double FPS = 30;
-        public static void Parser(string msg, LinkedList<ushort> curSpeed)
+        const double HANDLER_MAX_ANGLE = 30d;
+        const double EPS = 12d;
+
+        public static void Router(string channelName, string msg, ref StateObject state)
         {
-            var sep = msg.IndexOf('|');
-            var type = msg.Substring(0, sep);
-            switch (type)
+            switch (channelName)
             {
-                case "SMOOTHED":
-                    curSpeed.AddLast(ushort.Parse(msg.Substring(sep + 1)));
-                    curSpeed.RemoveFirst();
-                    Console.WriteLine((double)(curSpeed.Last.Value - curSpeed.First.Value) /  (FPS / 60));
+                case "XINPUT":
+                    int headerPos = msg.IndexOf('|');
+                    if(msg.Substring(0, headerPos)== "ThumbLX")
+                        UpdateNormalState(msg.Substring(headerPos+1), ref state);
                     break;
-                case "ThumbLX":
+                case "SPEED":
+                    UpdateSpeedState(msg, ref state);
                     break;
                 default:
                     break;
             }
+        }
+        public static void UpdateSpeedState(string msg, ref StateObject state)
+        {
+            try
+            {
+                ushort.TryParse(msg, out ushort parsedSpeed);
+                state.CurSpeed = parsedSpeed;
+            } 
+            catch (Exception e) 
+            {
+                Console.WriteLine(e.Message);
+            }
+        }
+        public static void UpdateNormalState(string msg, ref StateObject state)
+        {
+            
+            try
+            {
+                short.TryParse(msg.Split('|')[1], out short parsedHandler);
+                state.CurHandler = (double) parsedHandler / (double) short.MaxValue * HANDLER_MAX_ANGLE;
+                state.CurAccelY = GetAc(state.CurHandler, state.CurSpeed);
+# if DEBUG
+                Console.WriteLine(state.CurAccelY);
+# endif
+            } catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+        }
+        public static double GetAc(double turnAngle, int speed, double carLength=1.0)
+        {
+            
+            if (Math.Abs(turnAngle) < EPS) return 0;
+            double turnRad = Math.PI * turnAngle / 180d;
+            double speedMeterSecond = speed * 0.277777778;
+            double radius = carLength / Math.Sin(turnRad);
+            // double centripetalAccel = Math.Pow(speedMeterSecond, 2d) * Math.Pow(Math.Cos(turnRad), 2d) / radius;
+            Console.WriteLine($"{speedMeterSecond * Math.Tan(turnRad) / carLength}");
+            // TODO: Fix Accel Function
+            return centripetalAccel;
         }
     }
 }
