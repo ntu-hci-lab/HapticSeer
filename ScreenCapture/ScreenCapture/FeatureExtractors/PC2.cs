@@ -72,12 +72,9 @@ namespace ScreenCapture
             {
                 Console.WriteLine("Error message: " + ex.Message);
             }
-            // Console.WriteLine("  -Current speed: " + speed + " mph");
-            preSpeed = speed;
 
-            /* Filtering(denoise) */
-            //speed = (int)filter.Output(speed);
-            publisher.Publish("SPEED", $"SMOOTHED|{speed}");
+            publisher.Publish("SPEED", $"{speed}");
+
 # if DEBUG
             var time = localDate.Minute * 60 * 1000 + localDate.Second * 1000 + localDate.Millisecond;
             Console.WriteLine("  -Smoothed speed: " + speed + " kmh\n");
