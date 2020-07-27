@@ -6,6 +6,9 @@ namespace EventDetectors
 {
     public static class FiringFunctions
     {
+        const ushort TRIGGER_THRESHOLD = 180;
+        const double EPS = 150d; 
+
         public static void Router(string channelName, string msg, ref StateObject state)
         {
             switch (channelName)
@@ -29,6 +32,10 @@ namespace EventDetectors
             if (msg.Substring(0, sep) == "RightTrigger")
             {
                 state.TriggerState = byte.Parse(args[2]);
+                if (state.TriggerState > TRIGGER_THRESHOLD)
+                {
+                    state.LastTriggerExit = DateTime.Now;
+                }
             }
         }
         static void UpdateBulletState(string inputMsg, ref StateObject state)
@@ -36,15 +43,21 @@ namespace EventDetectors
             ushort curBullet;
             try
             {
+                var timeSpan = (DateTime.Now - state.LastTriggerExit).TotalMilliseconds;
                 ushort.TryParse(inputMsg, out curBullet);
-                if (state.TriggerState > 80)
+                if (timeSpan < EPS)
                 {
-
-                    if (state.BulletCount > curBullet)
+                    if (state.BulletCount > curBullet )
                     {
+                        state.publisher.Publish("FIRING", "FIRE");
                         Console.WriteLine("Fire");
                     }
-                    state.BulletCount = curBullet;
+# if DEBUG
+                    else
+                    {
+                        Console.WriteLine($"Bullet Count:{state.BulletCount}, Cur Bullet: {curBullet}, Timespan: {timeSpan}");
+                    }
+# endif
                 }
                 state.BulletCount = curBullet;
             }
