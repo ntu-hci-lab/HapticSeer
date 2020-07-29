@@ -13,6 +13,7 @@ namespace ImageProcessModule
 {
     public partial class ImageProcessBase
     {
+        public static long CaptureTicks;
         /// <summary>
         /// The fraction of left border in this Image.
         /// 0 is the most left. 1 is the most right
