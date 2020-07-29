@@ -1,4 +1,5 @@
-﻿using Emgu.CV;
+﻿#define LOGTIME
+using Emgu.CV;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -139,7 +140,14 @@ namespace ImageProcessModule.ProcessingClass
                 }
 
                 // Invoke Event
+#if LOGTIME
+                long Temp = CaptureTicks;
+#endif
                 NewFrameArrivedEvent?.Invoke(this, Data);
+#if LOGTIME
+                Console.WriteLine("Feature Latency: {0}", (DateTime.Now.Ticks - Temp) / (double)TimeSpan.TicksPerMillisecond);
+#endif
+                
 
                 // Add FrameCount
                 ++NewFrameCount;

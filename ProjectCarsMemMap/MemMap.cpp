@@ -96,7 +96,6 @@ int main()
 		printf( "mSessionState: (%d)\n", localCopy->mSessionState );
 		printf( "mOdometerKM: (%0.2f)\n", localCopy->mOdometerKM );
 		printf("mSpeed(%f)\n", localCopy->mSpeed);
-		localCopy->ma
 		printf("mAngularVelocity: (%f) (%f) (%f)\n", localCopy->mAngularVelocity[0], localCopy->mAngularVelocity[1], localCopy->mAngularVelocity[2]);
 		speed = ","+ std::to_string((localCopy->mSpeed) / 1000.0 * 3600.0) + "\n";
 		timestampString = std::to_string(timestamp);

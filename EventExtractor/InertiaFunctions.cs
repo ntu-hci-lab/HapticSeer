@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace EventDetectors
 {
     public static class InertiaFunctions
     {
-        const double HANDLER_MAX_ANGLE = 30d;
-        const double EPS = 12d;
+        const double HANDLER_MAX_ANGLE = 15d;
 
         public static void Router(string channelName, string msg, ref StateObject state)
         {
@@ -30,8 +27,12 @@ namespace EventDetectors
             try
             {
                 ushort.TryParse(msg, out ushort parsedSpeed);
-                state.CurSpeed = parsedSpeed;
-            } 
+                state.Speed = parsedSpeed;
+                state.Angle = state.LastAngle;
+#if DEBUG
+                Console.WriteLine($"AccelY: {state.AccelY}");
+# endif
+            }
             catch (Exception e) 
             {
                 Console.WriteLine(e.Message);
@@ -43,27 +44,11 @@ namespace EventDetectors
             try
             {
                 short.TryParse(msg.Split('|')[1], out short parsedHandler);
-                state.CurHandler = (double) parsedHandler / (double) short.MaxValue * HANDLER_MAX_ANGLE;
-                state.CurAccelY = GetAc(state.CurHandler, state.CurSpeed);
-# if DEBUG
-                Console.WriteLine(state.CurAccelY);
-# endif
+                state.LastAngle = (double) parsedHandler / (double) short.MaxValue * HANDLER_MAX_ANGLE;
             } catch (Exception e)
             {
                 Console.WriteLine(e.Message);
             }
-        }
-        public static double GetAc(double turnAngle, int speed, double carLength=1.0)
-        {
-            
-            if (Math.Abs(turnAngle) < EPS) return 0;
-            double turnRad = Math.PI * turnAngle / 180d;
-            double speedMeterSecond = speed * 0.277777778;
-            double radius = carLength / Math.Sin(turnRad);
-            // double centripetalAccel = Math.Pow(speedMeterSecond, 2d) * Math.Pow(Math.Cos(turnRad), 2d) / radius;
-            Console.WriteLine($"{speedMeterSecond * Math.Tan(turnRad) / carLength}");
-            // TODO: Fix Accel Function
-            return centripetalAccel;
         }
     }
 }

@@ -15,7 +15,6 @@
             如果您的應用程式需要針對回溯相容性進行這項虛擬化，請移除這個
             項目。
         -->
-        <requestedExecutionLevel  level="requireAdministrator" uiAccess="false" />
       </requestedPrivileges>
     </security>
   </trustInfo>
