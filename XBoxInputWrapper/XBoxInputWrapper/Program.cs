@@ -45,30 +45,25 @@ namespace XBoxInputWrapper
         static void BackgroundGetControllerInput()
         {
             var values = Enum.GetValues(typeof(EventType));
-            XInputState OldState = new XInputState();
             XInputState NewState = new XInputState();
-            XInputGetState(0, out OldState);
-
+            XInputGetState(0, out NewState);
+            int LastPacketIndex = NewState.dwPacketNumber; 
             while (IsProcessKeepRunning)
             {
                 Thread.Sleep(UpdateInterval_Millisecond);
                 XInputGetState(0, out NewState);
-                if (OldState.dwPacketNumber == NewState.dwPacketNumber)
+                if (NewState.dwPacketNumber == LastPacketIndex)
                     continue;   //No new data
 
                 foreach (EventType ControllerEvent in values)
                 {
                     if (ControllerEvent == EventType.Buttons)
                     {
-                        int OldVal = OldState.Gamepad.Buttons,
-                            NewVal = NewState.Gamepad.Buttons;
-                        int StateChangedButton = OldVal ^ NewVal;
-                        if (StateChangedButton == 0)
-                            continue;
+                        int NewVal = NewState.Gamepad.Buttons;
                         for (int i = 0; i < wButtonsName.Length; ++i)
                         {
                             int Mask = 1 << i;
-                            if ((StateChangedButton & Mask) == 0)
+                            if ((NewVal & Mask) == 0)
                                 continue;
                             bool IsNowBtnPressed = (NewVal & Mask) != 0;
                             EventSender(ControllerEvent, $"{wButtonsName[i]}|{(IsNowBtnPressed ? "Pressed" : "Release")}");
@@ -76,14 +71,10 @@ namespace XBoxInputWrapper
                     }
                     else
                     {
-                        object OldVal = GetElementFromXInputState(OldState, ControllerEvent),
-                            NewVal = GetElementFromXInputState(NewState, ControllerEvent);
-
-                        if (!OldVal.Equals(NewVal))
-                            EventSender(ControllerEvent, $"{OldVal.ToString()}|{NewVal.ToString()}");
+                        object NewVal = GetElementFromXInputState(NewState, ControllerEvent);
+                        EventSender(ControllerEvent, $" |{NewVal.ToString()}");
                     }
                 }
-                Swap(ref OldState, ref NewState);
             }
         }
     }
