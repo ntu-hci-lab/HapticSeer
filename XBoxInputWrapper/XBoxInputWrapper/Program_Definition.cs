@@ -6,6 +6,9 @@ namespace XBoxInputWrapper
 {
     partial class Program
     {
+        [DllImport("kernel32.dll", SetLastError = true, CallingConvention = CallingConvention.Winapi)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool IsWow64Process([In] IntPtr process, [Out] out bool wow64Process);
         public enum EventType
         {
             ThumbLX,
@@ -14,7 +17,9 @@ namespace XBoxInputWrapper
             ThumbRY,
             LeftTrigger,
             RightTrigger,
-            Buttons
+            Buttons,
+            LeftMotor,
+            RightMotor
         }
         struct XInputGamepad
         {
@@ -60,6 +65,10 @@ namespace XBoxInputWrapper
                     return state.Gamepad.RightTrigger;
                 case EventType.Buttons:
                     return state.Gamepad.Buttons;
+                case EventType.LeftMotor:
+                    return null;
+                case EventType.RightMotor:
+                    return null;
                 default:
                     throw new NotImplementedException();
             }
