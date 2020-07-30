@@ -58,7 +58,8 @@ namespace EventDetectors
                 double w2 = (carLength / Math.Sin(angleArray[3]) - carLength / Math.Sin(angleArray[2])) * 30;
                 double secondD = (w2- w1) * 15;
 
-                return Math.Clamp((-Math.Pow(Speed * Math.Cos((angleArray[1] + angleArray[2]) / 2), 2) / (carLength / Math.Sin((angleArray[1] + angleArray[2]) / 2)) + secondD) / 80, -6d, 6d);
+                return Math.Clamp((-Math.Pow(Speed * Math.Cos((angleArray[1] + angleArray[2]) / 2), 2) / 
+                    (carLength / Math.Sin((angleArray[1] + angleArray[2]) / 2)) + secondD) / 80, -6d, 6d);
             }
         }
         public double LastAngle { get => lastAngle; set => lastAngle = value; }
