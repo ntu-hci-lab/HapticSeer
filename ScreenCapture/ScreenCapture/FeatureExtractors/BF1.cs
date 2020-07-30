@@ -7,6 +7,7 @@ using ImageProcessModule.ProcessingClass;
 using Tesseract;
 using RedisEndpoint;
 using static ImageProcessModule.ImageProcessBase;
+using System.Threading.Tasks;
 
 namespace ScreenCapture
 {
@@ -70,7 +71,8 @@ namespace ScreenCapture
             {
                 Console.WriteLine("Error message: " + ex.Message);
             }
-            Console.WriteLine("Bullet Feature Latency: {0}", (DateTime.Now.Ticks - temp) / (double)TimeSpan.TicksPerMillisecond);
+            var elasped = (DateTime.Now.Ticks - temp) / (double)TimeSpan.TicksPerMillisecond;
+            Console.WriteLine("Bullet Feature Latency: {0}", elasped);
         }
 
         private static void BloodDetectorEvent(ImageProcess sender, Mat mat)
@@ -115,6 +117,7 @@ namespace ScreenCapture
 
         private static void DamageIndicatorDetectionEvent(ImageProcess sender, Mat mat)
         {
+            long temp = CaptureTicks;
             Mat LastImg, AvailableImg;
             if (sender.Variable.ContainsKey("LastImg"))
             {
@@ -133,27 +136,29 @@ namespace ScreenCapture
                 byte* Output = (byte*)AvailableImg.DataPointer;
                 byte* LastImage = (byte*)LastImg.DataPointer;
                 int Offset = 0;
-                for (int i = 0; i < AvailableImg.Rows; ++i)
-                {
-                    for (int j = 0; j < AvailableImg.Cols; ++j)
+                int rowNum = AvailableImg.Rows;
+                int colNum = AvailableImg.Cols;
+                Parallel.For(0, rowNum, i => {
+                    int offsetForThisRow = Offset + i * colNum* 4;
+                    for (int j=0; j< colNum; j++)
                     {
-                        int Green_Blue_Average = (Input[Offset] + Input[Offset + 1]) / 2;
-                        int Red = Input[Offset + 2];
+                        int Green_Blue_Average = (Input[offsetForThisRow] + Input[offsetForThisRow + 1]) / 2;
+                        int Red = Input[offsetForThisRow + 2];
                         int Diff = Math.Max(Red - Green_Blue_Average, 0);
-                        Output[Offset / 4] = (byte)Diff;
+                        Output[offsetForThisRow / 4] = (byte)Diff;
 
                         if (Diff <= 180)
-                            LastImage[Offset / 4] = 0;
+                            LastImage[offsetForThisRow / 4] = 0;
                         else
-                            LastImage[Offset / 4] = (byte)(Diff - LastImage[Offset / 4]);
-                        Offset += 4;
+                            LastImage[offsetForThisRow / 4] = (byte)(Diff - LastImage[offsetForThisRow / 4]);
+                        offsetForThisRow += 4;
                     }
-                }
+                });
 
                 double angle;
-                Console.Clear();
                 if (GetHitAngle(LastImg, out angle))
-                    Console.WriteLine(angle);
+                    publisher.Publish("DAMAGE", angle.ToString());
+                Console.WriteLine("DamageIndicator Latency: {0}", (DateTime.Now.Ticks - temp) / (double)TimeSpan.TicksPerMillisecond);
                 CvInvoke.Blur(AvailableImg, AvailableImg, new Size(5, 5), new Point(0, 0));
                 sender.Variable["LastImg"] = AvailableImg;
                 sender.Variable["AvailableImg"] = LastImg;
@@ -169,17 +174,19 @@ namespace ScreenCapture
             {
                 byte* OneChannelImgByteArray = (byte*)OneChannelImg.DataPointer;
                 int Offset = 0;
-                for (int y = 0; y < OneChannelImg.Height; ++y)
-                {
+                int h = OneChannelImg.Height;
+                int w = OneChannelImg.Width;
+                Parallel.For(0, h, y => {
                     int _y = CenterY - y;
-                    for (int x = 0; x < OneChannelImg.Width; ++x)
+                    int offsetForThisRow = Offset + y * w;
+                    for (int x=0 ;x<w; x++)
                     {
-                        uint Value = OneChannelImgByteArray[Offset++];
+                        uint Value = OneChannelImgByteArray[offsetForThisRow++];
                         int _x = x - CenterX;
                         Sum_X += Value * _x;
                         Sum_Y += Value * _y;
                     }
-                }
+                });
             }
             double SumY_Fraction = Sum_Y / (double)OneChannelImg.Width;
             double SumX_Fraction = Sum_X / (double)OneChannelImg.Height;
