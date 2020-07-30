@@ -1,5 +1,4 @@
 ﻿using System;
-
 namespace EventDetectors
 {
     public static class InertiaFunctions
@@ -8,6 +7,7 @@ namespace EventDetectors
 
         public static void Router(string channelName, string msg, ref StateObject state)
         {
+            var start = Program.globalSW.ElapsedTicks;
             switch (channelName)
             {
                 case "XINPUT":
@@ -21,6 +21,7 @@ namespace EventDetectors
                 default:
                     break;
             }
+            Console.WriteLine((Program.globalSW.ElapsedTicks - start) / (double) TimeSpan.TicksPerMillisecond);
         }
         public static void UpdateSpeedState(string msg, ref StateObject state)
         {
@@ -29,9 +30,7 @@ namespace EventDetectors
                 ushort.TryParse(msg, out ushort parsedSpeed);
                 state.Speed = parsedSpeed;
                 state.Angle = state.LastAngle;
-#if DEBUG
-                Console.WriteLine($"AccelY: {state.AccelY}");
-# endif
+                //Console.WriteLine($"AccelY: {state.AccelY}");
             }
             catch (Exception e) 
             {
@@ -43,7 +42,7 @@ namespace EventDetectors
             
             try
             {
-                short.TryParse(msg.Split('|')[1], out short parsedHandler);
+                short.TryParse( msg.Split('|')[1], out short parsedHandler );
                 state.LastAngle = (double) parsedHandler / (double) short.MaxValue * HANDLER_MAX_ANGLE;
             } catch (Exception e)
             {
