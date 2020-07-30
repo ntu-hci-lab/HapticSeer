@@ -1,4 +1,5 @@
-﻿using Emgu.CV;
+﻿#define LOGTIME
+using Emgu.CV;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -92,7 +93,7 @@ namespace ImageProcessModule.ProcessingClass
         /// <param name="ImageScale">The scale of incoming image.</param>
         /// <param name="FrameRate">The frame rate that application requires. Use negative number to represent infinity.</param>
         public ImageProcess(double Fraction_Left = 0, double Fraction_Right = 1, double Fraction_Top = 0, double Fraction_Bottom = 1, ImageScaleType ImageScale = ImageScaleType.OriginalSize, int FrameRate = 1)
-            :base(ImageScale)
+            : base(ImageScale)
         {
             /*Assertion*/
             Trace.Assert(Fraction_Left >= 0 && Fraction_Left <= 1, "Border Fraction should belongs to [0, 1].");
@@ -132,7 +133,7 @@ namespace ImageProcessModule.ProcessingClass
                     Thread.Sleep(1);
 
                 // Check FrameRate
-                if (PreferFrameRate >= 0 && stopwatch  != null && CalcFrameRate(NewFrameCount, stopwatch.ElapsedMilliseconds) >= PreferFrameRate)
+                if (PreferFrameRate >= 0 && stopwatch != null && CalcFrameRate(NewFrameCount, stopwatch.ElapsedMilliseconds) >= PreferFrameRate)
                 {
                     IsProcessingData = false;
                     continue;
@@ -141,9 +142,11 @@ namespace ImageProcessModule.ProcessingClass
                 // Invoke Event
                 NewFrameArrivedEvent?.Invoke(this, Data);
 
+
+
                 // Add FrameCount
                 ++NewFrameCount;
-                
+
                 // Release Lock to fetch new frame
                 IsProcessingData = false;
             }

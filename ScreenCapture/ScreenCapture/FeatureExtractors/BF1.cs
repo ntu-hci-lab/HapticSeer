@@ -20,7 +20,6 @@ namespace ScreenCapture
             ImageProcessesList.Add(new ImageProcess(1689 / 1920f, 1867 / 1920f, 1018 / 1080f, 1020 / 1080f, ImageScaleType.OriginalSize, FrameRate: 15));
             ImageProcessesList.Last().NewFrameArrivedEvent += BloodDetectorEvent;
 
-            //ImageProcess BulletCount_BF1 = new ImageProcess(1526 / 1728f, 1594 / 1728f, 948 / 1080f, 988 / 1080f, ImageScaleType.OriginalSize, FrameRate: 3);
             ImageProcessesList.Add (new ImageProcess(0.89, 0.922, 0.865, 0.93, ImageScaleType.OriginalSize, FrameRate: 30)); // 1920*1080
             ImageProcessesList.Last().NewFrameArrivedEvent += BulletCountEvent;
 
@@ -38,6 +37,7 @@ namespace ScreenCapture
 
         private static void BulletCountEvent(ImageProcess sender, Mat mat)
         {
+            long temp = CaptureTicks;
             Pix pixImage;
             Page page;
 
@@ -60,7 +60,6 @@ namespace ScreenCapture
                     if (Int32.TryParse(bulletStr, out int num))
                     {
                         publisher.Publish("BULLET", num.ToString());
-                        Console.WriteLine("bullet number :" + num.ToString());
                     }
                 }
 
@@ -71,10 +70,12 @@ namespace ScreenCapture
             {
                 Console.WriteLine("Error message: " + ex.Message);
             }
+            Console.WriteLine("Bullet Feature Latency: {0}", (DateTime.Now.Ticks - temp) / (double)TimeSpan.TicksPerMillisecond);
         }
 
         private static void BloodDetectorEvent(ImageProcess sender, Mat mat)
         {
+            long temp = CaptureTicks;
             double BloodValue;
             bool IsRedImpluse = false;
             unsafe
@@ -102,6 +103,8 @@ namespace ScreenCapture
                     Offset += 4;
                 }
                 BloodValue = Area / (double)(mat.Width);
+                publisher.Publish("BLOOD", BloodValue.ToString());
+                Console.WriteLine("Blood Feature Latency: {0}", (DateTime.Now.Ticks - temp) / (double)TimeSpan.TicksPerMillisecond);
             }
 
 #if DEBUG
@@ -151,8 +154,6 @@ namespace ScreenCapture
                 Console.Clear();
                 if (GetHitAngle(LastImg, out angle))
                     Console.WriteLine(angle);
-                //else
-                //    Console.WriteLine("false");
                 CvInvoke.Blur(AvailableImg, AvailableImg, new Size(5, 5), new Point(0, 0));
                 sender.Variable["LastImg"] = AvailableImg;
                 sender.Variable["AvailableImg"] = LastImg;
