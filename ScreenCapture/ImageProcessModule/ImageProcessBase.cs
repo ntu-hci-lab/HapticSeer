@@ -13,6 +13,7 @@ namespace ImageProcessModule
 {
     public partial class ImageProcessBase
     {
+        public static long CaptureTicks;
         /// <summary>
         /// The fraction of left border in this Image.
         /// 0 is the most left. 1 is the most right
@@ -153,7 +154,7 @@ namespace ImageProcessModule
                 Buffer.MemoryCopy(ResizedData.DataPointer.ToPointer(), Data.DataPointer.ToPointer(), TotalSize, TotalSize);
             }
             else
-            {   
+            {
                 // The image need to be clipped
                 int RawDataOffset =
                     +4 * ImageTop * ResizedData.Cols  // Skip Top Pixel
@@ -164,7 +165,7 @@ namespace ImageProcessModule
                 for (int i = 0; i < Data_Height; ++i)
                 {
                     // 4 Bytes * Data_Width * i-th rows
-                    int OutputDataOffset = (4 * i * Data_Width);    
+                    int OutputDataOffset = (4 * i * Data_Width);
 
                     // Compute pointer
                     IntPtr DstPointer = Data.DataPointer + OutputDataOffset,
@@ -173,7 +174,7 @@ namespace ImageProcessModule
                     Buffer.MemoryCopy(SrcPointer.ToPointer(), DstPointer.ToPointer(), Length, Length);
                     RawDataOffset += 4 * ResizedData.Cols;
                 }
-            } 
+            }
             // Update done flag
             IsUpdatingData = false;
             // Tell worker thread that it can be process now
