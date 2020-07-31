@@ -8,21 +8,22 @@ namespace EventDetectors
     {
         private Subscriber bulletSubscriber, inputSubscriber;
         private Publisher commonPublisher;
-        private StateObject state;
+        private WeaponState state;
 
-        public FiringDetector(string url, ushort port)
+        public FiringDetector(string url, ushort port, Publisher publisher = null)
         {
-            commonPublisher = new Publisher(url, port);
+            if (publisher == null) commonPublisher = new Publisher(url, port);
+            else commonPublisher = publisher;
+
             bulletSubscriber = new Subscriber(url, port);
             inputSubscriber = new Subscriber(url, port);
 
-            state = new StateObject(commonPublisher);
+            state = new WeaponState(commonPublisher);
             bulletSubscriber.SubscribeTo("BULLET");
             inputSubscriber.SubscribeTo("XINPUT");
 
             bulletSubscriber.msgQueue.OnMessage(msg => FiringFunctions.Router(msg.Channel, msg.Message, ref state));
             inputSubscriber.msgQueue.OnMessage(msg => FiringFunctions.Router(msg.Channel, msg.Message, ref state));
         }
-
     }
 }

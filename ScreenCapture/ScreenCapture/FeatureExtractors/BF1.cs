@@ -15,10 +15,10 @@ namespace ScreenCapture
     {
         public BF1(): base()
         {
-            ImageProcessesList.Add(new ImageProcess(0, 1, 0, 1, ImageScaleType.Quarter));
+            ImageProcessesList.Add(new ImageProcess(0.5-0.105, 0.5+0.105, 0.5-0.185, 0.5+0.185, ImageScaleType.OriginalSize, FrameRate: 60));
             ImageProcessesList.Last().NewFrameArrivedEvent += DamageIndicatorDetectionEvent;
 
-            ImageProcessesList.Add(new ImageProcess(1689 / 1920f, 1867 / 1920f, 1018 / 1080f, 1020 / 1080f, ImageScaleType.OriginalSize, FrameRate: 15));
+            ImageProcessesList.Add(new ImageProcess(1689 / 1920f, 1867 / 1920f, 1018 / 1080f, 1020 / 1080f, ImageScaleType.OriginalSize, FrameRate: 60));
             ImageProcessesList.Last().NewFrameArrivedEvent += BloodDetectorEvent;
 
             ImageProcessesList.Add (new ImageProcess(0.89, 0.922, 0.865, 0.93, ImageScaleType.OriginalSize, FrameRate: 30)); // 1920*1080
@@ -119,6 +119,7 @@ namespace ScreenCapture
         {
             long temp = CaptureTicks;
             Mat LastImg, AvailableImg;
+
             if (sender.Variable.ContainsKey("LastImg"))
             {
                 LastImg = sender.Variable["LastImg"] as Mat;
@@ -157,7 +158,12 @@ namespace ScreenCapture
 
                 double angle;
                 if (GetHitAngle(LastImg, out angle))
-                    publisher.Publish("DAMAGE", angle.ToString());
+                {
+#if DEBUG
+                    Console.WriteLine(angle.ToString());
+#endif
+                    publisher.Publish("HIT", angle.ToString());
+                }
                 Console.WriteLine("DamageIndicator Latency: {0}", (DateTime.Now.Ticks - temp) / (double)TimeSpan.TicksPerMillisecond);
                 CvInvoke.Blur(AvailableImg, AvailableImg, new Size(5, 5), new Point(0, 0));
                 sender.Variable["LastImg"] = AvailableImg;

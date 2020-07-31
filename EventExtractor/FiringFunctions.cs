@@ -9,7 +9,7 @@ namespace EventDetectors
         const ushort TRIGGER_THRESHOLD = 180;
         const double EPS = 150d; 
 
-        public static void Router(string channelName, string msg, ref StateObject state)
+        public static void Router(string channelName, string msg, ref WeaponState state)
         {
             switch (channelName)
             {
@@ -23,7 +23,7 @@ namespace EventDetectors
                     break;
             }
         }
-        static void UpdateXINPUTState(string inputMsg, ref StateObject state)
+        static void UpdateXINPUTState(string inputMsg, ref WeaponState state)
         {
             var msg = inputMsg;
             var sep = msg.IndexOf('|');
@@ -38,7 +38,7 @@ namespace EventDetectors
                 }
             }
         }
-        static void UpdateBulletState(string inputMsg, ref StateObject state)
+        static void UpdateBulletState(string inputMsg, ref WeaponState state)
         {
             ushort curBullet;
             try
