@@ -24,6 +24,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EventDetectors", "EventExtr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RedisEndpoint_dotnetCore", "RedisEndpoint_dotnetCore\RedisEndpoint_dotnetCore.csproj", "{83538ABD-3AE3-4DD7-87FE-58CA3816C315}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AudioProcessor", "AudioProcessor\AudioProcessor.csproj", "{42423496-01AC-4BA0-8CD1-E7BC5837F814}"
+	ProjectSection(ProjectDependencies) = postProject
+		{83538ABD-3AE3-4DD7-87FE-58CA3816C315} = {83538ABD-3AE3-4DD7-87FE-58CA3816C315}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -80,6 +85,14 @@ Global
 		{83538ABD-3AE3-4DD7-87FE-58CA3816C315}.Release|Any CPU.Build.0 = Release|Any CPU
 		{83538ABD-3AE3-4DD7-87FE-58CA3816C315}.Release|x64.ActiveCfg = Release|Any CPU
 		{83538ABD-3AE3-4DD7-87FE-58CA3816C315}.Release|x64.Build.0 = Release|Any CPU
+		{42423496-01AC-4BA0-8CD1-E7BC5837F814}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{42423496-01AC-4BA0-8CD1-E7BC5837F814}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{42423496-01AC-4BA0-8CD1-E7BC5837F814}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{42423496-01AC-4BA0-8CD1-E7BC5837F814}.Debug|x64.Build.0 = Debug|Any CPU
+		{42423496-01AC-4BA0-8CD1-E7BC5837F814}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{42423496-01AC-4BA0-8CD1-E7BC5837F814}.Release|Any CPU.Build.0 = Release|Any CPU
+		{42423496-01AC-4BA0-8CD1-E7BC5837F814}.Release|x64.ActiveCfg = Release|Any CPU
+		{42423496-01AC-4BA0-8CD1-E7BC5837F814}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
