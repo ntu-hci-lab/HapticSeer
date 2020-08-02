@@ -11,8 +11,8 @@ namespace EventDetectors
         static int Main()
         {
 
-            FiringDetector f = new FiringDetector(URL, PORT, commomPublisher);
-            HurtDetector h = new HurtDetector(URL, PORT, commomPublisher);
+            FiringDetector f = new FiringDetector(URL, PORT, enableAutoWeapons: true, commomPublisher);
+            //HurtDetector h = new HurtDetector(URL, PORT, commomPublisher);
             _ = Console.ReadKey();
             return 0;
         }
