@@ -70,7 +70,7 @@ namespace AudioProcessor
                             Console.WriteLine($"Impulse Detected - Mono:{m}, LFE:{l}, Angle: {angle:F3}, Hit Count:{hitCount}");
 #endif
                             if (publisher != null)
-                                publisher.Publish("IMPLUSE", $"{m}|{l}|{angle:F3}");
+                                publisher.Publish("IMPULSE", $"{m}|{l}|{angle:F3}");
                             hitCount++;
                         }
                     }

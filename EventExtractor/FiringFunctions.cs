@@ -6,8 +6,11 @@ namespace EventDetectors
 {
     public static class FiringFunctions
     {
+        private static int fireCount=0;
         const ushort TRIGGER_THRESHOLD = 180;
-        const double EPS = 150d; 
+        const double COOLING_TIME_MS = 500d;
+        const double EPS = 150d;
+
 
         public static void Router(string channelName, string msg, ref WeaponState state)
         {
@@ -18,6 +21,9 @@ namespace EventDetectors
                     break;
                 case "BULLET":
                     UpdateBulletState(msg, ref state);
+                    break;
+                case "IMPULSE":
+                    UpdateImpluseState(msg, ref state);
                     break;
                 default:
                     break;
@@ -34,7 +40,14 @@ namespace EventDetectors
                 state.TriggerState = byte.Parse(args[2]);
                 if (state.TriggerState > TRIGGER_THRESHOLD)
                 {
+                    if ((DateTime.Now - state.LastTriggerExit).TotalMilliseconds > COOLING_TIME_MS)
+                    {
+                        state.LastTriggerEnter = DateTime.Now;
+                    }
                     state.LastTriggerExit = DateTime.Now;
+                } else
+                {
+                    state.IsAutoFire = false;
                 }
             }
         }
@@ -47,15 +60,17 @@ namespace EventDetectors
                 ushort.TryParse(inputMsg, out curBullet);
                 if (timeSpan < EPS)
                 {
-                    if (state.BulletCount > curBullet )
+                    if (state.BulletCount > curBullet && !state.IsAutoFire)
                     {
                         state.publisher.Publish("FIRING", "FIRE");
-                        Console.WriteLine("Fire");
+# if DEBUG
+                        Console.WriteLine("Fire: "+(fireCount++).ToString());
+# endif
                     }
 # if DEBUG
                     else
                     {
-                        Console.WriteLine($"Bullet Count:{state.BulletCount}, Cur Bullet: {curBullet}, Timespan: {timeSpan}");
+                        //Console.WriteLine($"Bullet Count:{state.BulletCount}, Cur Bullet: {curBullet}, Timespan: {timeSpan}");
                     }
 # endif
                 }
@@ -66,7 +81,23 @@ namespace EventDetectors
                 Console.WriteLine(e.Message);
                 return;
             }
-            
+
+        }
+        static void UpdateImpluseState(string inputMsg, ref WeaponState state)
+        {
+            if( state.TriggerState > TRIGGER_THRESHOLD)
+            {
+# if DEBUG
+                Console.WriteLine($"Auto: {state.IsAutoFire}, {(DateTime.Now - state.LastTriggerEnter).Ticks}");
+# endif
+                if ((DateTime.Now - state.LastTriggerEnter).Ticks > 0)
+                {
+                    state.IsAutoFire = true;
+# if DEBUG
+                    Console.WriteLine("Fire: "+(fireCount++).ToString());
+# endif
+                }
+            }
         }
     }
 }
