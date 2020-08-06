@@ -1,6 +1,7 @@
 ﻿using CSCore.DSP;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 
@@ -19,6 +20,7 @@ namespace AudioProcessor
 
         private readonly List<float[]> monoBuffers;
         private readonly BiQuad biQuadFilter;
+        private Stopwatch stopwatch = new Stopwatch();
 
         public double alpha, margin;
         public double CurrentThreshold => currentThreshold;
@@ -33,6 +35,7 @@ namespace AudioProcessor
             this.margin = margin;
             this.monoBuffers = monoBuffers;
             this.noiseThreshold = noiseThreshold;
+            stopwatch.Start();
 
             mixedMonoLevel = new double[monoBuffers[0].Length];
             filterBuffer = new float[mixedMonoLevel.Length];
@@ -69,6 +72,7 @@ namespace AudioProcessor
 
         public bool Predict()
         {
+            var start = stopwatch.Elapsed;
             bool hit;
 
             if (!lfeProvided) MonoMixing();
@@ -97,6 +101,8 @@ namespace AudioProcessor
             }
             lastThreshold = currentThreshold;
 
+            var elapsed = (stopwatch.Elapsed - start);
+            Console.WriteLine($"{elapsed.TotalMilliseconds}");
             return hit;
         }
 

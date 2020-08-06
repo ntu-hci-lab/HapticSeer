@@ -1,19 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace EventDetectors
 {
     public static class FiringFunctions
     {
-        private static int fireCount=0;
         const ushort TRIGGER_THRESHOLD = 180;
         const double COOLING_TIME_MS = 500d;
         const double EPS = 150d;
+        private static int fireCount=0;
 
+#if DEBUG
+        private static Stopwatch commonStopwatch = new Stopwatch();
+#endif
+        
 
         public static void Router(string channelName, string msg, ref WeaponState state)
         {
+            if (!commonStopwatch.IsRunning) commonStopwatch.Start();
             switch (channelName)
             {
                 case "XINPUT":
@@ -31,6 +37,9 @@ namespace EventDetectors
         }
         static void UpdateXINPUTState(string inputMsg, ref WeaponState state)
         {
+#if DEBUG
+            var start = commonStopwatch.Elapsed;
+#endif
             var msg = inputMsg;
             var sep = msg.IndexOf('|');
             var header = msg.Substring(0, sep);
@@ -50,9 +59,16 @@ namespace EventDetectors
                     state.IsAutoFire = false;
                 }
             }
+#if DEBUG
+            var elapsed = commonStopwatch.Elapsed - start;
+            //Console.WriteLine($"Updated XINPUT in {elapsed.TotalMilliseconds} ms");
+#endif
         }
         static void UpdateBulletState(string inputMsg, ref WeaponState state)
         {
+#if DEBUG
+            var start = commonStopwatch.Elapsed;
+#endif
             ushort curBullet;
             try
             {
@@ -75,6 +91,10 @@ namespace EventDetectors
 # endif
                 }
                 state.BulletCount = curBullet;
+#if DEBUG
+                var elapsed = commonStopwatch.Elapsed-start;
+                //Console.WriteLine($"Updated BULLET in {elapsed.TotalMilliseconds} ms");
+#endif
             }
             catch (Exception e)
             {
@@ -85,7 +105,10 @@ namespace EventDetectors
         }
         static void UpdateImpluseState(string inputMsg, ref WeaponState state)
         {
-            if( state.TriggerState > TRIGGER_THRESHOLD)
+#if DEBUG
+            var start = commonStopwatch.Elapsed;
+#endif
+            if ( state.TriggerState > TRIGGER_THRESHOLD)
             {
 # if DEBUG
                 Console.WriteLine($"Auto: {state.IsAutoFire}, {(DateTime.Now - state.LastTriggerEnter).Ticks}");
@@ -94,7 +117,9 @@ namespace EventDetectors
                 {
                     state.IsAutoFire = true;
 # if DEBUG
+                    var elapsed = commonStopwatch.Elapsed-start;
                     Console.WriteLine("Fire: "+(fireCount++).ToString());
+                    //Console.WriteLine($"Updated IMPLUSE in {elapsed.TotalMilliseconds} ms");
 # endif
                 }
             }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace EventDetectors
@@ -7,9 +8,12 @@ namespace EventDetectors
     public static class HurtFunctions
     {
         const ushort EPS = 2;
-
+#if DEBUG
+        private static Stopwatch commonStopwatch = new Stopwatch();
+#endif
         public static void Router(string channelName, string msg, ref HealthState state)
         {
+            if (!commonStopwatch.IsRunning) commonStopwatch.Start();
             switch (channelName)
             {
                 case "BLOOD":
@@ -24,6 +28,7 @@ namespace EventDetectors
         }
         static void UpdateHPState(string inputMsg, ref HealthState state)
         {
+            var start = commonStopwatch.Elapsed;
             double curHP;
             byte roundedCurHP;
             try
@@ -48,21 +53,27 @@ namespace EventDetectors
                 }
 #if DEBUG
                 Console.WriteLine($"Real: {state.RealHP}, Reading: {roundedCurHP}");
+                var elapsed = commonStopwatch.Elapsed - start;
+                //Console.WriteLine($"Updated HP in {elapsed.TotalMilliseconds} ms");
 #endif
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 Console.WriteLine(e.Message);
             }
         }
         static void UpdateHitState(string inputMsg, ref HealthState state)
         {
+            var start = commonStopwatch.Elapsed;
             double angle;
             try
             {
                 if ((DateTime.Now-state.LastBloodLossSignal).TotalMilliseconds < EPS)
                 {
                     double.TryParse(inputMsg, out angle);
-# if DEBUG
+#if DEBUG
+                    var elapsed = commonStopwatch.Elapsed - start;
+                    Console.WriteLine($"Updated HIT in {elapsed.TotalMilliseconds} ms");
                     Console.WriteLine($"Hit: {angle}");
 #endif
                 }
