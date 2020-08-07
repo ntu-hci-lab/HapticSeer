@@ -13,6 +13,7 @@ namespace ScreenCapture
         /// Initialize Tesseract object
         /// Remember to add tessdata directory
         protected static TesseractEngine ocr = new TesseractEngine(Path.GetFullPath(@"..\..\"), "KomuB", EngineMode.Default);
+        protected static TesseractEngine ocr_eng = new TesseractEngine(Path.GetFullPath(@"..\..\"), "Alyx+eng", EngineMode.Default);
         protected static Publisher publisher = new Publisher("localhost", 6380);
         protected List<ImageProcess> ImageProcessesList = new List<ImageProcess>();
         protected FeatureExtractors() {}
