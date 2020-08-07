@@ -21,7 +21,7 @@ namespace EventDetectors
             inputSubscriber = new Subscriber(url, port);
 
             bulletSubscriber.SubscribeTo("BULLET");
-            inputSubscriber.SubscribeTo("XINPUT");
+            inputSubscriber.SubscribeTo("OPENVR");
 
             if (enableAutoWeapons)
             {

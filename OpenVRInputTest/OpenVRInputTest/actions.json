@@ -5,6 +5,10 @@
 			"binding_url": "bindings_vive_controller.json"
 		},
 		{
+			"controller_type": "vive_cosmos_controller",
+			"binding_url": "vive_cosmos_controller.json"
+		},
+		{
 			"controller_type": "knuckles",
 			"binding_url": "bindings_knuckles.json"
 		}

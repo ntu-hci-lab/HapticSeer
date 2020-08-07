@@ -17,8 +17,7 @@ namespace ScreenCapture
             //ImageProcessesList.Add(new ImageProcess(64 / 1920f, 302 / 1920f, 956 / 1080f, 1015 / 1080f, ImageScaleType.OriginalSize, FrameRate: 10));
             //ImageProcessesList.Last().NewFrameArrivedEvent += BloodDetectorEvent;
 
-            //ImageProcessesList.Add(new ImageProcess(1700 / 1920f, 1777 / 1920f, 955 / 1080f, 1015 / 1080f, ImageScaleType.OriginalSize, FrameRate: 3));
-            ImageProcessesList.Add(new ImageProcess(2263 / 2560f, 2375 / 2560f, 1350 / 1600f, 1430 / 1600f, ImageScaleType.OriginalSize));
+            ImageProcessesList.Add(new ImageProcess(1648 / 1920f, 1752 / 1920f, 927 / 1080f, 1003 / 1080f, ImageScaleType.OriginalSize));
             ImageProcessesList.Last().NewFrameArrivedEvent += BulletInGunEvent;
 
             //ImageProcessesList.Add(new ImageProcess(1796 / 1920f, 1859 / 1920f, 986 / 1080f, 1015 / 1080f, ImageScaleType.OriginalSize, FrameRate: 3));

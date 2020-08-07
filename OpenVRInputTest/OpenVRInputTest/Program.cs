@@ -7,12 +7,14 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using Valve.VR;
+using RedisEndpoint;
 using static OpenVRInputTest.VREventCallback;
 //Sources: https://github.com/BOLL7708/OpenVRInputTest
 namespace OpenVRInputTest
 {
     class Program
     {
+        public static Publisher publisher = new Publisher("localhost", 6380);
         public static float DataFrameRate = 90f;
         static ulong mActionSetHandle;
         //static ulong mActionHandleLeftB, mActionHandleRightB, mActionHandleLeftA, mActionHandleRightA, mActionHandleChord1, mActionHandleChord2;
