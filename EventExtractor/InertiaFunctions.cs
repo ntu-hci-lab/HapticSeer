@@ -21,16 +21,18 @@ namespace EventDetectors
                 default:
                     break;
             }
-            Console.WriteLine((Program.globalSW.ElapsedTicks - start) / (double) TimeSpan.TicksPerMillisecond);
+            //Console.WriteLine((Program.globalSW.ElapsedTicks - start) / (double) TimeSpan.TicksPerMillisecond);
         }
         public static void UpdateSpeedState(string msg, ref StateObject state)
         {
             try
             {
                 ushort.TryParse(msg, out ushort parsedSpeed);
+                if (parsedSpeed == 0) return;
                 state.Speed = parsedSpeed;
                 state.Angle = state.LastAngle;
-                //Console.WriteLine($"AccelY: {state.AccelY}");
+                
+                Console.WriteLine($"Speed: {parsedSpeed}");
             }
             catch (Exception e) 
             {
