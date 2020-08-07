@@ -1,15 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
-
+using System.Text.RegularExpressions;
+using System.Windows;
 namespace EventDetectors
 {
     public static class FiringFunctions
     {
-        const ushort TRIGGER_THRESHOLD = 180;
+        const double TRIGGER_THRESHOLD = 180/255;
         const double COOLING_TIME_MS = 500d;
         const double EPS = 150d;
+        private static Regex msgExp = new Regex(@"(.+)\|(.+)\|(.+)\|(.+)");
+        private static Regex vecExp = new Regex(@"\{(.+), (.+), (.+)\}");
         private static int fireCount=0;
 
 #if DEBUG
@@ -22,39 +23,39 @@ namespace EventDetectors
             if (!commonStopwatch.IsRunning) commonStopwatch.Start();
             switch (channelName)
             {
-                case "XINPUT":
-                    UpdateXINPUTState(msg, ref state);
+                case "OPENVR":
+                    UpdateInputState(msg, ref state);
                     break;
                 case "BULLET":
                     UpdateBulletState(msg, ref state);
-                    break;
-                case "IMPULSE":
-                    UpdateImpluseState(msg, ref state);
                     break;
                 default:
                     break;
             }
         }
-        static void UpdateXINPUTState(string inputMsg, ref WeaponState state)
+        static void UpdateInputState(string inputMsg, ref WeaponState state)
         {
 #if DEBUG
             var start = commonStopwatch.Elapsed;
 #endif
             var msg = inputMsg;
-            var sep = msg.IndexOf('|');
-            var header = msg.Substring(0, sep);
-            var args = msg.Substring(sep).Split('|');
-            if (msg.Substring(0, sep) == "RightTrigger")
+            var args = msgExp.Match(inputMsg).Groups;
+            if (args[1].Value == "RightController" && args[2].Value == "Digital" && args[3].Value == "TriggerVector1")
             {
-                state.TriggerState = byte.Parse(args[2]);
+                var triggerVec = vecExp.Match(args[4].Value).Groups;
+                state.TriggerState = double.Parse(triggerVec[1].Value);
                 if (state.TriggerState > TRIGGER_THRESHOLD)
                 {
+#if DEBUG
+                    Console.WriteLine($"Trigger ON");
+#endif
                     if ((DateTime.Now - state.LastTriggerExit).TotalMilliseconds > COOLING_TIME_MS)
                     {
                         state.LastTriggerEnter = DateTime.Now;
                     }
                     state.LastTriggerExit = DateTime.Now;
-                } else
+                }
+                else
                 {
                     state.IsAutoFire = false;
                 }
@@ -76,7 +77,7 @@ namespace EventDetectors
                 ushort.TryParse(inputMsg, out curBullet);
                 if (timeSpan < EPS)
                 {
-                    if (state.BulletCount > curBullet && !state.IsAutoFire)
+                    if (state.BulletCount > curBullet)
                     {
                         state.publisher.Publish("FIRING", "FIRE");
 # if DEBUG
@@ -102,27 +103,6 @@ namespace EventDetectors
                 return;
             }
 
-        }
-        static void UpdateImpluseState(string inputMsg, ref WeaponState state)
-        {
-#if DEBUG
-            var start = commonStopwatch.Elapsed;
-#endif
-            if ( state.TriggerState > TRIGGER_THRESHOLD)
-            {
-# if DEBUG
-                Console.WriteLine($"Auto: {state.IsAutoFire}, {(DateTime.Now - state.LastTriggerEnter).Ticks}");
-# endif
-                if ((DateTime.Now - state.LastTriggerEnter).Ticks > 0)
-                {
-                    state.IsAutoFire = true;
-# if DEBUG
-                    var elapsed = commonStopwatch.Elapsed-start;
-                    Console.WriteLine("Fire: "+(fireCount++).ToString());
-                    //Console.WriteLine($"Updated IMPLUSE in {elapsed.TotalMilliseconds} ms");
-# endif
-                }
-            }
         }
     }
 }
