@@ -12,22 +12,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScreenCapture", "ScreenCapt
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageProcessModule", "ScreenCapture\ImageProcessModule\ImageProcessModule.csproj", "{AAE057E7-E415-4D7C-B4E2-859772FA4B96}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XBoxInputWrapper", "XBoxInputWrapper\XBoxInputWrapper\XBoxInputWrapper.csproj", "{72511DF4-5031-4DA8-8AAB-796774C4C948}"
-	ProjectSection(ProjectDependencies) = postProject
-		{668FE0F4-ECE8-490E-9FFD-56192A3D810A} = {668FE0F4-ECE8-490E-9FFD-56192A3D810A}
-	EndProjectSection
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EventDetectors", "EventExtractor\EventDetectors.csproj", "{B027EF1E-8652-45F8-99AB-F5CA7EF35135}"
-	ProjectSection(ProjectDependencies) = postProject
-		{83538ABD-3AE3-4DD7-87FE-58CA3816C315} = {83538ABD-3AE3-4DD7-87FE-58CA3816C315}
-	EndProjectSection
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RedisEndpoint_dotnetCore", "RedisEndpoint_dotnetCore\RedisEndpoint_dotnetCore.csproj", "{83538ABD-3AE3-4DD7-87FE-58CA3816C315}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AudioProcessor", "AudioProcessor\AudioProcessor.csproj", "{42423496-01AC-4BA0-8CD1-E7BC5837F814}"
-	ProjectSection(ProjectDependencies) = postProject
-		{83538ABD-3AE3-4DD7-87FE-58CA3816C315} = {83538ABD-3AE3-4DD7-87FE-58CA3816C315}
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenVRInputTest", "OpenVRInputTest\OpenVRInputTest\OpenVRInputTest.csproj", "{A792CDBC-7877-407D-90B2-364335DABF4A}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -66,14 +53,6 @@ Global
 		{AAE057E7-E415-4D7C-B4E2-859772FA4B96}.Release|Any CPU.Build.0 = Release|Any CPU
 		{AAE057E7-E415-4D7C-B4E2-859772FA4B96}.Release|x64.ActiveCfg = Release|Any CPU
 		{AAE057E7-E415-4D7C-B4E2-859772FA4B96}.Release|x64.Build.0 = Release|Any CPU
-		{72511DF4-5031-4DA8-8AAB-796774C4C948}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{72511DF4-5031-4DA8-8AAB-796774C4C948}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{72511DF4-5031-4DA8-8AAB-796774C4C948}.Debug|x64.ActiveCfg = Debug|x64
-		{72511DF4-5031-4DA8-8AAB-796774C4C948}.Debug|x64.Build.0 = Debug|x64
-		{72511DF4-5031-4DA8-8AAB-796774C4C948}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{72511DF4-5031-4DA8-8AAB-796774C4C948}.Release|Any CPU.Build.0 = Release|Any CPU
-		{72511DF4-5031-4DA8-8AAB-796774C4C948}.Release|x64.ActiveCfg = Release|x64
-		{72511DF4-5031-4DA8-8AAB-796774C4C948}.Release|x64.Build.0 = Release|x64
 		{B027EF1E-8652-45F8-99AB-F5CA7EF35135}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B027EF1E-8652-45F8-99AB-F5CA7EF35135}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B027EF1E-8652-45F8-99AB-F5CA7EF35135}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -82,14 +61,6 @@ Global
 		{B027EF1E-8652-45F8-99AB-F5CA7EF35135}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B027EF1E-8652-45F8-99AB-F5CA7EF35135}.Release|x64.ActiveCfg = Release|Any CPU
 		{B027EF1E-8652-45F8-99AB-F5CA7EF35135}.Release|x64.Build.0 = Release|Any CPU
-		{83538ABD-3AE3-4DD7-87FE-58CA3816C315}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{83538ABD-3AE3-4DD7-87FE-58CA3816C315}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{83538ABD-3AE3-4DD7-87FE-58CA3816C315}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{83538ABD-3AE3-4DD7-87FE-58CA3816C315}.Debug|x64.Build.0 = Debug|Any CPU
-		{83538ABD-3AE3-4DD7-87FE-58CA3816C315}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{83538ABD-3AE3-4DD7-87FE-58CA3816C315}.Release|Any CPU.Build.0 = Release|Any CPU
-		{83538ABD-3AE3-4DD7-87FE-58CA3816C315}.Release|x64.ActiveCfg = Release|Any CPU
-		{83538ABD-3AE3-4DD7-87FE-58CA3816C315}.Release|x64.Build.0 = Release|Any CPU
 		{42423496-01AC-4BA0-8CD1-E7BC5837F814}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{42423496-01AC-4BA0-8CD1-E7BC5837F814}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{42423496-01AC-4BA0-8CD1-E7BC5837F814}.Debug|x64.ActiveCfg = Debug|Any CPU

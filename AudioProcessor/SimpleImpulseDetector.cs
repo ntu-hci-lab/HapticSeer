@@ -89,7 +89,7 @@ namespace AudioProcessor
             CastToDoubleArray();
             currentReading = GetCurrentReading();
 
-            if (currentThreshold.Equals(double.NaN))
+            if (double.IsInfinity(currentThreshold))
             {
                 currentThreshold = currentReading + margin;
                 hit = false;
@@ -102,7 +102,7 @@ namespace AudioProcessor
             lastThreshold = currentThreshold;
 
             var elapsed = (stopwatch.Elapsed - start);
-            Console.WriteLine($"{elapsed.TotalMilliseconds}");
+            //Console.WriteLine($"{elapsed.TotalMilliseconds}");
             return hit;
         }
 
