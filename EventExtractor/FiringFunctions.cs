@@ -6,9 +6,6 @@ namespace EventDetectors
 {
     public static class FiringFunctions
     {
-        const double TRIGGER_THRESHOLD = 180/255;
-        const double COOLING_TIME_MS = 500d;
-        const double EPS = 150d;
         private static Regex msgExp = new Regex(@"(.+)\|(.+)\|(.+)\|(.+)");
         private static Regex vecExp = new Regex(@"\{(.+), (.+), (.+)\}");
         private static int fireCount=0;
@@ -43,22 +40,8 @@ namespace EventDetectors
             if (args[1].Value == "RightController" && args[2].Value == "Digital" && args[3].Value == "TriggerVector1")
             {
                 var triggerVec = vecExp.Match(args[4].Value).Groups;
-                state.TriggerState = double.Parse(triggerVec[1].Value);
-                if (state.TriggerState > TRIGGER_THRESHOLD)
-                {
-#if DEBUG
-                    Console.WriteLine($"Trigger ON");
-#endif
-                    if ((DateTime.Now - state.LastTriggerExit).TotalMilliseconds > COOLING_TIME_MS)
-                    {
-                        state.LastTriggerEnter = DateTime.Now;
-                    }
-                    state.LastTriggerExit = DateTime.Now;
-                }
-                else
-                {
-                    state.IsAutoFire = false;
-                }
+                state.TriggerState = double.Parse(triggerVec[1].Value) == 1? true:false;
+                Console.WriteLine(state.TriggerState.ToString());
             }
 #if DEBUG
             var elapsed = commonStopwatch.Elapsed - start;
@@ -73,9 +56,8 @@ namespace EventDetectors
             ushort curBullet;
             try
             {
-                var timeSpan = (DateTime.Now - state.LastTriggerExit).TotalMilliseconds;
                 ushort.TryParse(inputMsg, out curBullet);
-                if (timeSpan < EPS)
+                if (state.TriggerState)
                 {
                     if (state.BulletCount > curBullet)
                     {
@@ -84,15 +66,10 @@ namespace EventDetectors
                         Console.WriteLine("Fire: "+(fireCount++).ToString());
 # endif
                     }
-# if DEBUG
-                    else
-                    {
-                        //Console.WriteLine($"Bullet Count:{state.BulletCount}, Cur Bullet: {curBullet}, Timespan: {timeSpan}");
-                    }
-# endif
                 }
                 state.BulletCount = curBullet;
 #if DEBUG
+                Console.WriteLine($"Bullet Count:{state.BulletCount}, Cur Bullet: {curBullet}");
                 var elapsed = commonStopwatch.Elapsed-start;
                 //Console.WriteLine($"Updated BULLET in {elapsed.TotalMilliseconds} ms");
 #endif
