@@ -94,7 +94,7 @@ namespace ScreenCapture
             }
             double EstimatedBlood = NowBlood * 0.2 + LowPassFilter_Blood * 0.8;
 #if DEBUG
-            Console.WriteLine($"Actual: {NowBlood.ToString("0.000")}\t Filted: {EstimatedBlood.ToString("0.000")}");
+            //Console.WriteLine($"Actual: {NowBlood.ToString("0.000")}\t Filted: {EstimatedBlood.ToString("0.000")}");
 #endif
             publisher.Publish("BLOOD", NowBlood.ToString("0.000"));
             sender.Variable["LowPassFilter_Blood"] = EstimatedBlood;
