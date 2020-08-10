@@ -15,8 +15,8 @@ namespace ScreenCapture
     {
         public HLA() : base()
         {
-            //ImageProcessesList.Add(new ImageProcess(64 / 1920f, 302 / 1920f, 956 / 1080f, 1015 / 1080f, ImageScaleType.OriginalSize, FrameRate: 10));
-            //ImageProcessesList.Last().NewFrameArrivedEvent += BloodDetectorEvent;
+            ImageProcessesList.Add(new ImageProcess(70 / 1920f, 366 / 1920f, 925 / 1080f, 1020 / 1080f, ImageScaleType.OriginalSize, FrameRate: 10));
+            ImageProcessesList.Last().NewFrameArrivedEvent += BloodDetectorEvent;
 
             ImageProcessesList.Add(new ImageProcess(1648 / 1920f, 1752 / 1920f, 927 / 1080f, 1003 / 1080f, ImageScaleType.OriginalSize));
             ImageProcessesList.Last().NewFrameArrivedEvent += BulletInGunEvent;
@@ -71,6 +71,7 @@ namespace ScreenCapture
                 double _BloodArea = mat.Height * mat.Width * 0.343;
                 sender.Variable.Add("BloodArea", _BloodArea);
             }
+            mat.Save("HLB.png");
             Mat BinaryImg = sender.Variable["BinaryImage"] as Mat;
             double LowPassFilter_Blood = (double)sender.Variable["LowPassFilter_Blood"];
             double BloodArea = (double)sender.Variable["BloodArea"];
@@ -95,6 +96,7 @@ namespace ScreenCapture
 #if DEBUG
             Console.WriteLine($"Actual: {NowBlood.ToString("0.000")}\t Filted: {EstimatedBlood.ToString("0.000")}");
 #endif
+            publisher.Publish("BLOOD", NowBlood.ToString("0.000"));
             sender.Variable["LowPassFilter_Blood"] = EstimatedBlood;
         }
 

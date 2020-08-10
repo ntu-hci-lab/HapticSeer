@@ -15,15 +15,10 @@ namespace EventDetectors
             if (publisher == null) commonPublisher = new Publisher(url, port);
             else commonPublisher = publisher;
 
-            bloodSubscriber = new Subscriber(url, port);
-            hitSubscriber = new Subscriber(url, port);
-
             state = new HealthState(commonPublisher);
+            bloodSubscriber = new Subscriber(url, port);
             bloodSubscriber.SubscribeTo("BLOOD");
-            hitSubscriber.SubscribeTo("HIT");
-
             bloodSubscriber.msgQueue.OnMessage(msg => HurtFunctions.Router(msg.Channel, msg.Message, ref state));
-            hitSubscriber.msgQueue.OnMessage(msg => HurtFunctions.Router(msg.Channel, msg.Message, ref state));
         }
 
     }
