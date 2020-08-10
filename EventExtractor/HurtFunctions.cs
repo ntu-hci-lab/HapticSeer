@@ -8,6 +8,8 @@ namespace EventDetectors
     public static class HurtFunctions
     {
         const ushort EPS = 2;
+        const double HP_UPPERBOUND = 70;
+        const double HP_SENSITIVITY = 4;
 #if DEBUG
         private static Stopwatch commonStopwatch = new Stopwatch();
 #endif
@@ -18,9 +20,6 @@ namespace EventDetectors
             {
                 case "BLOOD":
                     UpdateHPState(msg, ref state);
-                    break;
-                case "HIT":
-                    UpdateHitState(msg, ref state);
                     break;
                 default:
                     break;
@@ -34,49 +33,46 @@ namespace EventDetectors
             try
             {
                 double.TryParse(inputMsg, out curHP);
-                roundedCurHP = (byte) Math.Round(curHP*100);
+                roundedCurHP = (byte) Math.Round(curHP * 100);
 
-                if (roundedCurHP != 0)
+                if (roundedCurHP <= HP_UPPERBOUND)
                 {
-                    if (roundedCurHP < state.RealHP)
+                    if (roundedCurHP != 0)
                     {
-                        state.LastBloodLossSignal = DateTime.Now;
-                        state.RealHP = roundedCurHP;
+                        if (state.RealHP - roundedCurHP > HP_SENSITIVITY)
+                        {
+                            state.LastBloodLossSignal = DateTime.Now;
+                            state.RealHP = roundedCurHP;
+                            Console.WriteLine("HIT");
+                        }
+                        else if (roundedCurHP - state.RealHP > 10)
+                        {
+                            if(state.LastHPBurst != null)
+                            {
+                                if ((DateTime.Now - state.LastHPBurst).Value.TotalSeconds > 1)
+                                {
+                                    Console.WriteLine("HEAL");
+                                    state.RealHP = roundedCurHP;
+                                    state.LastHPBurst = null;
+                                } 
+                            } 
+                            else
+                            {
+                                state.LastHPBurst = DateTime.Now;
+                            }
+                            
+                        }
                     }
-                    else if (roundedCurHP - state.RealHP < 10)
+                    else
                     {
-                        state.RealHP = roundedCurHP;
+                        state.RealHP = 100;
                     }
-                } else
-                {
-                    state.RealHP = 100;
                 }
 #if DEBUG
                 Console.WriteLine($"Real: {state.RealHP}, Reading: {roundedCurHP}");
                 var elapsed = commonStopwatch.Elapsed - start;
                 //Console.WriteLine($"Updated HP in {elapsed.TotalMilliseconds} ms");
 #endif
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
-        }
-        static void UpdateHitState(string inputMsg, ref HealthState state)
-        {
-            var start = commonStopwatch.Elapsed;
-            double angle;
-            try
-            {
-                if ((DateTime.Now-state.LastBloodLossSignal).TotalMilliseconds < EPS)
-                {
-                    double.TryParse(inputMsg, out angle);
-#if DEBUG
-                    var elapsed = commonStopwatch.Elapsed - start;
-                    Console.WriteLine($"Updated HIT in {elapsed.TotalMilliseconds} ms");
-                    Console.WriteLine($"Hit: {angle}");
-#endif
-                }
             }
             catch (Exception e)
             {

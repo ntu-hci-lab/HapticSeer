@@ -69,7 +69,7 @@ namespace EventDetectors
                 }
                 state.BulletCount = curBullet;
 #if DEBUG
-                Console.WriteLine($"Bullet Count:{state.BulletCount}, Cur Bullet: {curBullet}");
+                //Console.WriteLine($"Bullet Count:{state.BulletCount}, Cur Bullet: {curBullet}");
                 var elapsed = commonStopwatch.Elapsed-start;
                 //Console.WriteLine($"Updated BULLET in {elapsed.TotalMilliseconds} ms");
 #endif
