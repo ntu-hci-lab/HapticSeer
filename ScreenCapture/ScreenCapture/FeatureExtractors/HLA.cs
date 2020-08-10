@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using Emgu.CV;
 using Emgu.CV.CvEnum;
@@ -104,6 +105,7 @@ namespace ScreenCapture
 
             Mat BinaryImg = sender.Variable["BinaryImage"] as Mat;
             ImageProcess.ElimateBackgroundWithSearchingSimilarColor(in mat, ref BinaryImg, new Color[] { Color.FromArgb(250, 0, 0) }, new uint[] { 0x00FF0000 }, ElimateColorApproach.ReserveSimilarColor_RemoveDifferentColor, 70);
+            CvInvoke.MorphologyEx(BinaryImg, BinaryImg, MorphOp.Open, ImageProcess.Kernel_2x2, new Point(0, 0), 1, BorderType.Default, new Emgu.CV.Structure.MCvScalar(0, 0, 0));
             // Tesseract OCR
             Pix pixImage;
             Page page;
