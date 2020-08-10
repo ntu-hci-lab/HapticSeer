@@ -12,7 +12,7 @@ namespace EventDetectors
         {
 
             FiringDetector f = new FiringDetector(URL, PORT, enableAutoWeapons: false, commonPublisher);
-            HurtDetector h = new HurtDetector(URL, PORT, commonPublisher);
+            //HurtDetector h = new HurtDetector(URL, PORT, commonPublisher);
             _ = Console.ReadKey();
             return 0;
         }

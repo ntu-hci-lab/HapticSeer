@@ -37,11 +37,16 @@ namespace EventDetectors
 #endif
             var msg = inputMsg;
             var args = msgExp.Match(inputMsg).Groups;
-            if (args[1].Value == "RightController" && args[2].Value == "Digital" && args[3].Value == "TriggerVector1")
+            if (args[1].Value == "RightController" && args[2].Value == "Digital")
             {
-                var triggerVec = vecExp.Match(args[4].Value).Groups;
-                state.TriggerState = double.Parse(triggerVec[1].Value) == 1? true:false;
-                Console.WriteLine(state.TriggerState.ToString());
+                switch (args[3].Value){
+                    case "TriggerVector1":
+                        var triggerVec = vecExp.Match(args[4].Value).Groups;
+                        state.TriggerState = double.Parse(triggerVec[1].Value) == 1 ? true : false;
+                        break;
+                    default:
+                        break;
+                }
             }
 #if DEBUG
             var elapsed = commonStopwatch.Elapsed - start;
