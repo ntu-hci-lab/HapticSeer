@@ -1,4 +1,8 @@
-﻿using System;
+﻿
+using System;
+using System.Diagnostics;
+using System.IO;
+using System.Text;
 using RedisEndpoint;
 
 namespace EventDetectors
@@ -8,11 +12,11 @@ namespace EventDetectors
         const string URL = "localhost";
         const ushort PORT = 6380;
         private static Publisher commonPublisher = new Publisher(URL, PORT);
+
         static int Main()
         {
-
             FiringDetector f = new FiringDetector(URL, PORT, enableAutoWeapons: false, commonPublisher);
-            //HurtDetector h = new HurtDetector(URL, PORT, commonPublisher);
+            HurtDetector h = new HurtDetector(URL, PORT, commonPublisher);
             _ = Console.ReadKey();
             return 0;
         }

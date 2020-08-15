@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿#define LOG
+using System;
 using System.Diagnostics;
-using System.Text;
 
 namespace EventDetectors
 {
@@ -43,6 +42,7 @@ namespace EventDetectors
                         {
                             state.LastBloodLossSignal = DateTime.Now;
                             state.RealHP = roundedCurHP;
+                            state.publisher.Publish("HIT", "0");
                             Console.WriteLine("HIT");
                         }
                         else if (roundedCurHP - state.RealHP > 10)
