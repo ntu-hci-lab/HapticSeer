@@ -101,7 +101,6 @@
     <Compile Include="CaptureMethod\CaptureInterface.cs" />
     <Compile Include="CaptureMethod\CardCapture.cs" />
     <Compile Include="CaptureMethod\LocalCapture.cs" />
-    <Compile Include="KalmanFilter.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="CacheOptimizer.cs" />
@@ -110,6 +109,10 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+    <None Include="tessdata\eng.traineddata" />
+    <None Include="tessdata\KomuB.traineddata">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Content Include="README.txt" />
