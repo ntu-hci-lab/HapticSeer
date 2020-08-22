@@ -20,10 +20,13 @@ namespace HapticSeerDashboard
             };
 
             Console.WriteLine(Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory));
-            Nodes[0] = new Extractor(Path.Combine(SolutionRoot, Paths["FeatureExtract"]), "PC2", 
+            Nodes[0] = new Extractor(Path.Combine(SolutionRoot, Paths["FeatureExtract"]), 
+                "PC2", 
                 new string[] {"SPEED"}
             );
-            Nodes[1] = new Node(Path.Combine(SolutionRoot, Paths["XInputCap"]))
+            Nodes[1] = new Node(Path.Combine(SolutionRoot, Paths["XInputCap"]), 
+                null, 
+                new string[] { "XINPUT" })
             {
                 EnableOutput = true
             };
