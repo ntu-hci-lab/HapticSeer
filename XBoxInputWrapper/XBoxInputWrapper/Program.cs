@@ -31,16 +31,18 @@ namespace XBoxInputWrapper
         static bool IsProcessKeepRunning = true;
         static Thread ControllerInputThread = new Thread(BackgroundGetControllerInput);
         static Publisher publisher = new Publisher("localhost", 6380);
+        static string outletChannelName;
 
         static void Main(string[] args)
         {
+            outletChannelName = args[0];
             Console.CancelKeyPress += (s, e) => { IsProcessKeepRunning = false; };
             ControllerInputThread.Start();
             Thread.Sleep(-1);
         }
         static void EventSender(EventType SourceEvent, string EventInfo)
         {
-            publisher.Publish("XINPUT", $"{SourceEvent.ToString()}|{EventInfo}");
+            publisher.Publish(outletChannelName, $"{SourceEvent.ToString()}|{EventInfo}");
             Console.WriteLine(SourceEvent.ToString() + "|" + EventInfo);
         }
         static void BackgroundGetControllerInput()
