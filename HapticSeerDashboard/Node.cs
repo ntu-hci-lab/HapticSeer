@@ -36,9 +36,18 @@ namespace HapticSeerDashboard
             {
                 for (int i = 0; i < outlet.Length; i++) process.StartInfo.ArgumentList.Add(outlet[i]);
             }
-            //process.StartInfo.RedirectStandardOutput = enableOutput;
-            process.StartInfo.UseShellExecute = true;
+            process.StartInfo.UseShellExecute = enableOutput;
             process.Start();
+        }
+    }
+    class Extractor : Node
+    {
+        public Extractor(
+            string executablePath,
+            string gameName,
+            string[] outletChannels = null) : base(executablePath, new string[] { gameName }, outletChannels)
+        { 
+        ///<summary> Wrapper for Extractor</summary>
         }
     }
     

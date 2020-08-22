@@ -8,6 +8,7 @@ namespace XBoxInputWrapper
     partial class Program
     {
         const int UpdateInterval_Millisecond = 1;
+        const short ThumbEPS = 3200;
         public static readonly string[] wButtonsName = new string[]
               {
             "DPAD_Up",
@@ -53,8 +54,6 @@ namespace XBoxInputWrapper
             {
                 Thread.Sleep(UpdateInterval_Millisecond);
                 XInputGetState(0, out NewState);
-                if (OldState.dwPacketNumber == NewState.dwPacketNumber)
-                    continue;   //No new data
 
                 foreach (EventType ControllerEvent in values)
                 {
@@ -74,6 +73,13 @@ namespace XBoxInputWrapper
                             EventSender(ControllerEvent, $"{wButtonsName[i]}|{(IsNowBtnPressed ? "Pressed" : "Release")}");
                         }
                     }
+                    else if (ControllerEvent < EventType.LeftTrigger) //ThumB
+                    {
+                        object OldVal = GetElementFromXInputState(OldState, ControllerEvent),
+                            NewVal = GetElementFromXInputState(NewState, ControllerEvent);
+
+                        EventSender(ControllerEvent, $"{OldVal.ToString()}|{(Math.Abs((int)(short) NewVal) > ThumbEPS? NewVal.ToString(): "0")}");
+                    } 
                     else
                     {
                         object OldVal = GetElementFromXInputState(OldState, ControllerEvent),

@@ -7,7 +7,7 @@ namespace EventDetectors
 {
     public class StateObject
     {
-        private const double EPS = 0.01d, ANGLE_ALPHA = 0.95, SPEED_ALPHA = 0.7;
+        private const double EPS = 0.01d, ANGLE_ALPHA = 0.9, SPEED_ALPHA = 0.7;
         private LinkedList<double> speed = new LinkedList<double>();
         private LinkedList<double> handlerAngle = new LinkedList<double>();
         private double[] angleArray = new double[5];

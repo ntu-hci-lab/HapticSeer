@@ -30,6 +30,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HapticSeerDashboard", "Hapt
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InertiaDetector", "InertiaDetector\InertiaDetector.csproj", "{ECAFC69A-435F-43E0-85C6-F40C0941D680}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HLADetector", "HLADetector\HLADetector.csproj", "{35366B85-9282-4C2E-8D20-75AE56548D7C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -144,6 +146,18 @@ Global
 		{ECAFC69A-435F-43E0-85C6-F40C0941D680}.Release|x64.Build.0 = Release|Any CPU
 		{ECAFC69A-435F-43E0-85C6-F40C0941D680}.Release|x86.ActiveCfg = Release|Any CPU
 		{ECAFC69A-435F-43E0-85C6-F40C0941D680}.Release|x86.Build.0 = Release|Any CPU
+		{35366B85-9282-4C2E-8D20-75AE56548D7C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{35366B85-9282-4C2E-8D20-75AE56548D7C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{35366B85-9282-4C2E-8D20-75AE56548D7C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{35366B85-9282-4C2E-8D20-75AE56548D7C}.Debug|x64.Build.0 = Debug|Any CPU
+		{35366B85-9282-4C2E-8D20-75AE56548D7C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{35366B85-9282-4C2E-8D20-75AE56548D7C}.Debug|x86.Build.0 = Debug|Any CPU
+		{35366B85-9282-4C2E-8D20-75AE56548D7C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{35366B85-9282-4C2E-8D20-75AE56548D7C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{35366B85-9282-4C2E-8D20-75AE56548D7C}.Release|x64.ActiveCfg = Release|Any CPU
+		{35366B85-9282-4C2E-8D20-75AE56548D7C}.Release|x64.Build.0 = Release|Any CPU
+		{35366B85-9282-4C2E-8D20-75AE56548D7C}.Release|x86.ActiveCfg = Release|Any CPU
+		{35366B85-9282-4C2E-8D20-75AE56548D7C}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

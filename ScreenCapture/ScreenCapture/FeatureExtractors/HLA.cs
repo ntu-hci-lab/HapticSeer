@@ -37,7 +37,7 @@ namespace ScreenCapture
             try
             {
                 pixImage = PixConverter.ToPix(BinaryImg.ToBitmap());
-                page = ocr_eng.Process(pixImage, PageSegMode.SingleBlock);
+                page = tesseractEngine.Process(pixImage, PageSegMode.SingleBlock);
                 var bulletStr = page.GetText();
                 page.Dispose();
                 pixImage.Dispose();
@@ -114,7 +114,7 @@ namespace ScreenCapture
             try
             {
                 pixImage = PixConverter.ToPix(BinaryImg.ToBitmap());
-                page = ocr_eng.Process(pixImage, PageSegMode.SingleBlock);
+                page = tesseractEngine.Process(pixImage, PageSegMode.SingleBlock);
                 var bulletStr = page.GetText();
                 page.Dispose();
                 pixImage.Dispose();
