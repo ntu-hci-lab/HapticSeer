@@ -24,7 +24,6 @@ namespace ScreenCapture
         static long msgCnt = 0;
 #endif
 
-        private KalmanFilter filter;
         private SpeedImageProcess speedImageProcess = new SpeedImageProcess();
         private int speed = 0; // current speed
         private int preSpeed = 0; // previous speed
@@ -63,7 +62,7 @@ namespace ScreenCapture
                 // BitmapFrame = speedImageProcess.NegativePicture(BitmapFrame); //turn into negative image
                 speedImageProcess.ResizeImage(BitmapFrame, 120, 76); // enlarge image(x2)
                 pixImage = PixConverter.ToPix(BitmapFrame); // PixConverter is unable to work at Tesseract 3.3.0
-                page = ocr.Process(pixImage, PageSegMode.SingleBlock);
+                page = tesseractEngine.Process(pixImage, PageSegMode.SingleBlock);
                 string speedStr = page.GetText(); // Recognized result
                 page.Dispose();
                 pixImage.Dispose();

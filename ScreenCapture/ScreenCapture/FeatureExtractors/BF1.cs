@@ -51,8 +51,8 @@ namespace ScreenCapture
             try
             {
                 pixImage = PixConverter.ToPix(BinaryImg.ToBitmap());
-                ocr.DefaultPageSegMode = PageSegMode.SingleBlock;
-                page = ocr.Process(pixImage);
+                tesseractEngine.DefaultPageSegMode = PageSegMode.SingleBlock;
+                page = tesseractEngine.Process(pixImage);
                 var bulletStr = page.GetText(); // 識別後的內容
                 if (!string.IsNullOrEmpty(bulletStr))
                 {

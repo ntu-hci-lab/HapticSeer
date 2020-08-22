@@ -12,21 +12,23 @@ namespace ScreenCapture
 
         /// Initialize Tesseract object
         /// Remember to add tessdata directory
-        protected static TesseractEngine ocr = new TesseractEngine(Path.GetFullPath(@"..\..\"), "KomuB", EngineMode.Default);
-        protected static TesseractEngine ocr_eng = new TesseractEngine(Path.GetFullPath(@"..\..\"), "Alyx+eng", EngineMode.Default);
+        protected static TesseractEngine tesseractEngine;
         protected static Publisher publisher = new Publisher("localhost", 6380);
         protected List<ImageProcess> ImageProcessesList = new List<ImageProcess>();
-        protected FeatureExtractors() {}
+        protected FeatureExtractors() { }
 
-        public static FeatureExtractors InitFeatureExtractor(int gameID)
+        public static FeatureExtractors InitFeatureExtractor(int gameID, string[] outlets)
         {
             switch (gameID)
             {
                 case 1:
+                    tesseractEngine = new TesseractEngine(Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory), "Alyx+eng", EngineMode.Default);
                     return new HLA();
                 case 2:
-                    return new PC2();
+                    tesseractEngine = new TesseractEngine(Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory), "KomuB", EngineMode.Default);
+                    return new PC2(outlets[0]);
                 case 3:
+                    tesseractEngine = new TesseractEngine(Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory), "KomuB", EngineMode.Default);
                     return new BF1();
                 default:
                     throw new NotImplementedException("Invalid gameID");
