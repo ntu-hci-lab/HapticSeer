@@ -19,8 +19,10 @@ namespace ScreenCapture
             ImageProcessesList.Add(new ImageProcess(1700 / 1920f, 1777 / 1920f, 955 / 1080f, 1015 / 1080f, ImageScaleType.OriginalSize, FrameRate: 3));
             ImageProcessesList.Last().NewFrameArrivedEvent += BulletInGunEvent;
 
+            /*
             ImageProcessesList.Add(new ImageProcess(1796 / 1920f, 1859 / 1920f, 986 / 1080f, 1015 / 1080f, ImageScaleType.OriginalSize, FrameRate: 3));
             ImageProcessesList.Last().NewFrameArrivedEvent += BulletInBackpackEvent;
+            */
         }
 
         private static void BulletInBackpackEvent(ImageProcess sender, Mat mat)

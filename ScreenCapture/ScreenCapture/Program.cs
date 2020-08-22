@@ -1,6 +1,7 @@
 using ImageProcessModule;
 using System;
 using System.Diagnostics;
+using System.Linq;
 
 namespace ScreenCapture
 {
@@ -16,7 +17,6 @@ namespace ScreenCapture
             Project_Cars,
             BF1
         }
-        static GameType RunningGameType = GameType.Project_Cars;
         static BitmapBuffer bitmapBuffer = new BitmapBuffer();
         static CaptureMethod captureMethod;
 
@@ -24,7 +24,7 @@ namespace ScreenCapture
         /// Parse Argument to get the Capture Method
         /// </summary>
         /// <param name="args">Args from Main</param>
-        static void ArgumentParser(string[] args)
+        /*static void ArgumentParser(string[] args)
         {
             if (String.Compare(args[0], "Local", StringComparison.OrdinalIgnoreCase) == 0)
                 captureMethod = new LocalCapture(bitmapBuffer); //Default: Local Capture
@@ -42,7 +42,7 @@ namespace ScreenCapture
                 // Force close the process
                 Process.GetCurrentProcess().Kill();
             }
-        }
+        }*/
         static void Main(string[] args)
         {
             //Thread.Sleep(5000);
@@ -53,13 +53,13 @@ namespace ScreenCapture
                 });
 
             // Check the Capture Method from args
-            if (args.Length == 0)
-                captureMethod = new LocalCapture(bitmapBuffer); // Default: Local Capture
-            else
-                ArgumentParser(args); // Parse Arguments
+            //if (args.Length == 0)
+            //    captureMethod = new LocalCapture(bitmapBuffer); // Default: Local Capture
+            //else
+            //    ArgumentParser(args); // Parse Arguments
 
-            if (captureMethod == null)
-                throw new Exception("Error! CaptureMethod is null!");
+            //if (captureMethod == null)
+            //    throw new Exception("Error! CaptureMethod is null!");
 
             // Start Capture
             captureMethod.Start();
@@ -67,7 +67,10 @@ namespace ScreenCapture
             // Start dispatch frames
             bitmapBuffer.StartDispatchToImageProcessBase();
 
-            FeatureExtractors arrivalEvents = FeatureExtractors.InitFeatureExtractor( (int)RunningGameType );
+            FeatureExtractors arrivalEvents = FeatureExtractors.InitFeatureExtractor( 
+                (int) Enum.Parse(typeof(GameType), args[0]),
+                (string[]) args.Skip(1)
+            );
 
             // Do Cache Optimizer
             CacheOptimizer.Init();

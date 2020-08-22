@@ -7,15 +7,17 @@ namespace EventDetectors
         private Publisher commonPublisher;
         private StateObject state;
 
-        public InertiaDetector(string url, ushort port)
+        public InertiaDetector(string url, ushort port, 
+            string speedInlet, string xinputInlet, 
+            string accXOutlet, string accYOutlet)
         {
             commonPublisher = new Publisher(url, port);
             speedSubscriber = new Subscriber(url, port);
             inputSubscriber = new Subscriber(url, port);
 
             state = new StateObject(commonPublisher);
-            speedSubscriber.SubscribeTo("SPEED");
-            inputSubscriber.SubscribeTo("XINPUT");
+            speedSubscriber.SubscribeTo(speedInlet);
+            inputSubscriber.SubscribeTo(xinputInlet);
 
             speedSubscriber.msgQueue.OnMessage(msg => InertiaFunctions.Router(msg.Channel, msg.Message, ref state));
             inputSubscriber.msgQueue.OnMessage(msg => InertiaFunctions.Router(msg.Channel, msg.Message, ref state));

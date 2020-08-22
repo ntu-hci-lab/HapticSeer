@@ -23,7 +23,14 @@ namespace RedisEndpoint
         {
             if (multiplexer == null)
             {
-                redisConfiguration.EndPoints.Add(url, port);
+                try
+                {
+                    redisConfiguration.EndPoints.Add(url, port);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
                 multiplexer = ConnectionMultiplexer.Connect(redisConfiguration);
             }
         }
