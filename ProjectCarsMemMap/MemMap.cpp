@@ -5,25 +5,38 @@
 // Used for this example
 #include <stdio.h>
 #include <conio.h>
-
+#include <ctime>
 #include <Sysinfoapi.h>
 #include <fstream>
 #include <string>
+#include <thread>
 // Name of the pCars memory mapped file
 #define MAP_OBJECT_NAME "$pcars2$"
 
 int main()
 {
+	Sleep(5000);
 	// Init File Writer
-	std::string speed;
+	std::string accelx;
+	std::string accely;
 	std::fstream file;
 	
-	long long timestamp;
+	
+	long long timestamp, startTimeMs;
 	std::string timestampString;
 	const char* timestampStringPtr = timestampString.c_str();
-	const char* speedStringPtr = speed.c_str();
+	const char* accelxStringPtr = accelx.c_str();
+	const char* accelyStringPtr = accely.c_str();
+	char* filename = new char[18]; //mm_ss_fff_raw.csv
 	SYSTEMTIME* timePtr = new SYSTEMTIME();
-	file.open("raw.txt",std::ios::out | std::ios::trunc);
+
+	GetSystemTime(timePtr);
+	startTimeMs = (long long)(timePtr->wMinute) * 1000 * 60 +
+		(long long)timePtr->wSecond * 1000 +
+		timePtr->wMilliseconds;
+
+	sprintf(filename, "%d_%d_%d_raw.csv", timePtr->wMinute, timePtr->wSecond, timePtr->wMilliseconds);
+	file.open(filename, std::ios::out | std::ios::trunc);
 
 	// Open the memory-mapped file
 	HANDLE fileHandle = OpenFileMapping( PAGE_READONLY, FALSE, MAP_OBJECT_NAME );
@@ -79,7 +92,10 @@ int main()
 			continue;
 		}
 		GetSystemTime(timePtr);
-		timestamp = (long long)(timePtr->wMinute * 1000 * 60 + timePtr->wSecond * 1000) + timePtr->wMilliseconds;
+
+		timestamp = (long long)(timePtr->wMinute) * 1000 * 60 + 
+			(long long) timePtr->wSecond * 1000 +
+			timePtr->wMilliseconds - startTimeMs;
 
 		printf( "Sequence number increase %d, current index %d, previous index %d\n", indexChange, localCopy->mSequenceNumber, updateIndex );
 
@@ -95,11 +111,13 @@ int main()
 		printf( "mGameState: (%d)\n", localCopy->mGameState );
 		printf( "mSessionState: (%d)\n", localCopy->mSessionState );
 		printf( "mOdometerKM: (%0.2f)\n", localCopy->mOdometerKM );
-		printf("mSpeed(%f)\n", localCopy->mSpeed);
-		speed = ","+ std::to_string((localCopy->mSpeed) / 1000.0 * 3600.0) + "\n";
+
+		accelx = "," + std::to_string(localCopy->mLocalAcceleration[0]);
+		accely = "," + std::to_string(localCopy->mLocalAcceleration[2]) + '\n';
 		timestampString = std::to_string(timestamp);
 		file.write(timestampStringPtr, timestampString.size());
-		file.write(speedStringPtr, speed.size());
+		file.write(accelxStringPtr, accelx.size());
+		file.write(accelyStringPtr, accely.size());
 		system("cls");
 
 		if ( _kbhit() && _getch() == 27 ) // check for escape

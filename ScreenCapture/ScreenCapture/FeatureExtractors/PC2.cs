@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -12,23 +13,34 @@ using static ImageProcessModule.ImageProcessBase;
 
 namespace ScreenCapture
 {
+
+
     class PC2 : FeatureExtractors
     {
+
+#if LOG
+        static DateTime startTime = DateTime.Now;
+        static StreamWriter csvWriter = new StreamWriter($"{startTime.ToString("mm_ss_ffff")}_send.csv");
+        static long msgCnt = 0;
+#endif
+
         private KalmanFilter filter;
         private SpeedImageProcess speedImageProcess = new SpeedImageProcess();
         private int speed = 0; // current speed
         private int preSpeed = 0; // previous speed
+        private string speedOutlet;
+
 #if DEBUG
         private StreamWriter streamWriter;
         private DateTime localDate;
 #endif
-        public PC2() : base()
+
+        public PC2(string speedOutlet = null) : base()
         {
 #if DEBUG
-
+            this.speedOutlet = speedOutlet;
             streamWriter = new StreamWriter("detected.txt");
 #endif
-            filter = new KalmanFilter(1, 1, 0.05, 1, 0.1, speed);
 
             ImageProcessesList.Add(new ImageProcess(1541 / 1720f, 1601 / 1720f, 962d / 1080, 1002d / 1080, ImageScaleType.OriginalSize, 60));
             ImageProcessesList.Last().NewFrameArrivedEvent += SpeedDetectionEvent;
@@ -72,13 +84,17 @@ namespace ScreenCapture
             {
                 Console.WriteLine("Error message: " + ex.Message);
             }
-            // Console.WriteLine("  -Current speed: " + speed + " mph");
-            preSpeed = speed;
+#if LOG
+            csvWriter.WriteLine($"{speed},{++msgCnt},{(DateTime.Now - startTime).TotalMilliseconds}");
+            if(speedOutlet!=null)
+                publisher.Publish(speedOutlet, $"{speed},{msgCnt}");
+#endif
+#if !LOG
+            if (speedOutlet!=null)
+                publisher.Publish(speedOutlet, $"{speed}");
+#endif
 
-            /* Filtering(denoise) */
-            //speed = (int)filter.Output(speed);
-            publisher.Publish("SPEED", $"SMOOTHED|{speed}");
-# if DEBUG
+#if DEBUG
             var time = localDate.Minute * 60 * 1000 + localDate.Second * 1000 + localDate.Millisecond;
             Console.WriteLine("  -Smoothed speed: " + speed + " kmh\n");
             streamWriter.WriteLine(time+","+speed);
