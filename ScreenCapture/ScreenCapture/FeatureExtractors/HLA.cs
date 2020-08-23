@@ -13,8 +13,13 @@ namespace ScreenCapture
 {
     class HLA : FeatureExtractors
     {
-        public HLA() : base()
+        private string bulletOutlet;
+        private string bloodOutlet;
+        public HLA(string bulletOutlet, string bloodOutlet) : base()
         {
+            this.bulletOutlet = bulletOutlet;
+            this.bloodOutlet = bloodOutlet;
+
             ImageProcessesList.Add(new ImageProcess(70 / 1920f, 366 / 1920f, 925 / 1080f, 1020 / 1080f, ImageScaleType.OriginalSize, FrameRate: 10));
             ImageProcessesList.Last().NewFrameArrivedEvent += BloodDetectorEvent;
 
@@ -58,7 +63,7 @@ namespace ScreenCapture
             }
         }
 
-        private static void BloodDetectorEvent(ImageProcess sender, Mat mat)
+        private void BloodDetectorEvent(ImageProcess sender, Mat mat)
         {
             if (!sender.Variable.ContainsKey("BinaryImage"))
                 sender.Variable.Add("BinaryImage", new Mat(mat.Size, DepthType.Cv8U, 1));
@@ -96,11 +101,12 @@ namespace ScreenCapture
 #if DEBUG
             //Console.WriteLine($"Actual: {NowBlood.ToString("0.000")}\t Filted: {EstimatedBlood.ToString("0.000")}");
 #endif
-            publisher.Publish("BLOOD", NowBlood.ToString("0.000"));
+            if(bloodOutlet!=null)
+                publisher.Publish(bloodOutlet, NowBlood.ToString("0.000"));
             sender.Variable["LowPassFilter_Blood"] = EstimatedBlood;
         }
 
-        private static void BulletInGunEvent(ImageProcess sender, Mat mat)
+        private void BulletInGunEvent(ImageProcess sender, Mat mat)
         {
             if (!sender.Variable.ContainsKey("BinaryImage"))
                 sender.Variable.Add("BinaryImage", new Mat(mat.Size, DepthType.Cv8U, 1));
@@ -122,7 +128,8 @@ namespace ScreenCapture
                 {
                     if (Int32.TryParse(bulletStr, out int num))
                     {
-                        publisher.Publish("BULLET", num.ToString());
+                        if(bulletOutlet != null)
+                            publisher.Publish(bulletOutlet, num.ToString());
 #if DEBUG
                         Console.WriteLine($"Bullet in gun: {num}\t");
 #endif

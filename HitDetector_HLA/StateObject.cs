@@ -5,7 +5,7 @@ using RedisEndpoint;
 
 namespace EventDetectors
 {
-    public class HealthState
+    public class StateObject
     {
         private byte realHP = 100;
         private DateTime lastBloodLossSignal = DateTime.Now;
@@ -13,9 +13,10 @@ namespace EventDetectors
 
         public Publisher publisher;
         public byte RealHP { get => realHP; set => realHP = value; }
+        public string bloodInlet, hitOutlet;
         public DateTime LastBloodLossSignal { get => lastBloodLossSignal; set => lastBloodLossSignal = value; }
         public DateTime? LastHPBurst { get => lastHPBurst; set => lastHPBurst = value; }
 
-        public HealthState(Publisher publisher) => this.publisher = publisher;
+        public StateObject(Publisher publisher) => this.publisher = publisher;
     }
 }

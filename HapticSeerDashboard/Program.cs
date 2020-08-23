@@ -2,50 +2,48 @@
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.IO;
-
+using Newtonsoft.Json;
 namespace HapticSeerDashboard
 {
     class Program
     {
-        public readonly static string SolutionRoot = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\.."));
-        public static  Node[] Nodes = new Node[3];
-        public static IReadOnlyDictionary<string, string> Paths;
+        public readonly static string SolutionRoot = Path.GetFullPath(Path.Combine(
+            AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\.."));
+        public static List<NodeBaseInstance> nodes = new List<NodeBaseInstance>();
         static void Main(string[] args)
         {
-            Paths = new Dictionary<string, string>()
+            using (StreamReader f = File.OpenText(Path.Combine(
+                AppDomain.CurrentDomain.BaseDirectory,
+                "sampleConfig2.json")))
             {
-                {"FeatureExtract", @"ScreenCapture\ScreenCapture\bin\Debug\ScreenCapture.exe"},
-                {"XInputCap",  @"XBoxInputWrapper\XBoxInputWrapper\bin\x64\Debug\netcoreapp3.1\XBoxInputWrapper.exe"},
-                {"InertiaDetect", @"InertiaDetector\bin\Debug\netcoreapp3.1\InertiaDetector.exe"}
-            };
+                Console.WriteLine($"Solution Root is: {SolutionRoot}");
+                JsonSerializer serializer = new JsonSerializer();
+                ConfigSchema schema = (ConfigSchema) serializer.Deserialize(f, typeof(ConfigSchema));
 
-            Console.WriteLine(Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory));
-            Nodes[0] = new Extractor(Path.Combine(SolutionRoot, Paths["FeatureExtract"]), 
-                "PC2", 
-                new string[] {"SPEED"}
-            );
-            Nodes[1] = new Node(Path.Combine(SolutionRoot, Paths["XInputCap"]), 
-                null, 
-                new string[] { "XINPUT" })
-            {
-                EnableOutput = true
-            };
-            Nodes[2] = new Node(Path.Combine(SolutionRoot, Paths["InertiaDetect"]),
-                new string[] { "SPEED", "XINPUT" },
-                new string[] { "AccelX", "AccelY" })
-            {
-                EnableOutput = true
-            };
-            
+                foreach (var detector in schema.eventDetectors)
+                {
+                    nodes.Add(new NodeBaseInstance(Path.Combine(SolutionRoot,
+                        schema.Paths[detector.Type]), detector.Inlets, detector.Outlets, detector.Options));
+                }
+                foreach (var extractor in schema.extractorSets)
+                {
+                    nodes.Add(new ExtractorSet(Path.Combine(SolutionRoot,
+                        schema.Paths["FeatureExtract"]), extractor.Type, extractor.Outlets, extractor.Options));
+                }
+                foreach (var capturer in schema.rawCapturers)
+                {
+                    nodes.Add(new RawCapturer(Path.Combine(SolutionRoot,
+                        schema.Paths[capturer.Type]), capturer.Outlets, capturer.Options));
+                }
 
-            Console.WriteLine(Nodes[0].ExecutablePath);
-            for (int i = 0; i < Nodes.Length; i++) 
-            {
-                Nodes[i].Launch();
+                foreach (var node in nodes)
+                {
+                    Console.WriteLine(node.ExecutablePath);
+                    node.Launch();
+                }
+                _ = Console.ReadKey();
             }
-
             
-            _ = Console.ReadKey();
         }
     }
 }

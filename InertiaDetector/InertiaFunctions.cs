@@ -17,18 +17,15 @@ namespace EventDetectors
         public static void Router(string channelName, string msg, ref StateObject state)
         {
             var start = Program.globalSW.ElapsedTicks;
-            switch (channelName)
+            if(channelName == state.xinputInlet)
             {
-                case "XINPUT":
-                    int headerPos = msg.IndexOf('|');
-                    if (msg.Substring(0, headerPos)== "ThumbLX")
-                        UpdateNormalState(msg.Substring(headerPos+1), ref state);
-                    break;
-                case "SPEED":
-                    UpdateSpeedState(msg, ref state);
-                    break;
-                default:
-                    break;
+                int headerPos = msg.IndexOf('|');
+                if (msg.Substring(0, headerPos) == "ThumbLX")
+                    UpdateNormalState(msg.Substring(headerPos + 1), ref state);
+            }
+            else if (channelName == state.speedInlet)
+            {
+                UpdateSpeedState(msg, ref state);
             }
             //Console.WriteLine((Program.globalSW.ElapsedTicks - start) / (double) TimeSpan.TicksPerMillisecond);
         }

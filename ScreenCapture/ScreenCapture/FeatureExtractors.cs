@@ -23,7 +23,7 @@ namespace ScreenCapture
             {
                 case 1:
                     tesseractEngine = new TesseractEngine(Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory), "Alyx+eng", EngineMode.Default);
-                    return new HLA();
+                    return new HLA(outlets[0], outlets[1]);
                 case 2:
                     tesseractEngine = new TesseractEngine(Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory), "KomuB", EngineMode.Default);
                     return new PC2(outlets[0]);

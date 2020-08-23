@@ -13,7 +13,7 @@ namespace ScreenCapture
         public enum GameType
         {
             None,
-            HL_A,
+            HLA,
             PC2,
             BF1
         }

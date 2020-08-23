@@ -8,27 +8,32 @@ namespace EventDetectors
     {
         private Subscriber bulletSubscriber, inputSubscriber, impulseSubscriber;
         private Publisher commonPublisher;
-        private WeaponState state;
+        private StateObject state;
 
-        public FiringDetector(string url, ushort port, bool enableAutoWeapons, Publisher publisher = null)
+        public FiringDetector(string url, ushort port, bool enableHighFreqWeapons, 
+            string bulletInlet, string openvrInlet,
+            string fireOutlet=null, Publisher publisher = null)
         {
             if (publisher == null) commonPublisher = new Publisher(url, port);
             else commonPublisher = publisher;
 
-            state = new WeaponState(commonPublisher);
+            state = new StateObject(commonPublisher);
+            state.bulletInlet = bulletInlet;
+            state.openvrInlet = openvrInlet;
+            state.fireOutlet = fireOutlet;
 
             bulletSubscriber = new Subscriber(url, port);
             inputSubscriber = new Subscriber(url, port);
 
-            bulletSubscriber.SubscribeTo("BULLET");
-            inputSubscriber.SubscribeTo("OPENVR");
+            bulletSubscriber.SubscribeTo(bulletInlet);
+            inputSubscriber.SubscribeTo(openvrInlet);
 
-            if (enableAutoWeapons)
+            /*if (enableHighFreqWeapons)
             {
                 impulseSubscriber = new Subscriber(url, port);
                 impulseSubscriber.SubscribeTo("IMPULSE");
                 impulseSubscriber.msgQueue.OnMessage(msg => FiringFunctions.Router(msg.Channel, msg.Message, ref state));
-            }
+            }*/
 
             bulletSubscriber.msgQueue.OnMessage(msg => FiringFunctions.Router(msg.Channel, msg.Message, ref state));
             inputSubscriber.msgQueue.OnMessage(msg => FiringFunctions.Router(msg.Channel, msg.Message, ref state));
