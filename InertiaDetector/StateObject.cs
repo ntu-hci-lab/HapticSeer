@@ -13,7 +13,7 @@ namespace EventDetectors
         private double[] angleArray = new double[5];
         private double carLength, lastAngle;
         private byte frameLength;
-        public string accXOutlet, accYOutlet;
+        public string xinputInlet, speedInlet, accXOutlet, accYOutlet;
         public Publisher publisher;
 
 

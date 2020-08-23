@@ -1,0 +1,41 @@
+﻿{
+  "Paths": {
+    "_comment": "YOU MAY COPY THIS OBJECT DIRECTLY!",
+    "FeatureExtract": "ScreenCapture\\ScreenCapture\\bin\\Debug\\ScreenCapture.exe",
+    "XInputCap": "XBoxInputWrapper\\XBoxInputWrapper\\bin\\x64\\Debug\\netcoreapp3.1\\XBoxInputWrapper.exe",
+    "OpenVR": "OpenVRInputTest\\OpenVRInputTest\\bin\\x64\\Debug\\OpenVRInputTest.exe",
+    "InertiaDetect": "InertiaDetector\\bin\\Debug\\netcoreapp3.1\\InertiaDetector.exe",
+    "FireDetectHLA": "FiringDetector_HLA\\bin\\Debug\\netcoreapp3.1\\FiringDetector_HLA.exe",
+    "HitDetectHLA": "HitDetector_HLA\\bin\\Debug\\netcoreapp3.1\\HitDetector_HLA.exe"
+  },
+  "ExtractorSets": [
+    {
+      "Type": "HLA",
+      "Outlets": [ "BULLET", "BLOOD" ]
+    }
+  ],
+  "RawCapturers": [
+    {
+      "Type": "OpenVR",
+      "Outlets": [ "OPENVR" ]
+    }
+  ],
+  "EventDetectors": [
+    {
+      "Type": "FireDetectHLA",
+      "Inlets": [ "BULLET", "OPENVR" ],
+      "Outlets": [ "Fire" ],
+      "Options": {
+        "UseShellExecute": "True"
+      }
+    },
+    {
+      "Type": "HitDetectHLA",
+      "Inlets": [ "BLOOD" ],
+      "Outlets": [ "HIT" ],
+      "Options": {
+        "UseShellExecute": "True"
+      }
+    }
+  ]
+}

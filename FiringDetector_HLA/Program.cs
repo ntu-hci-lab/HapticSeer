@@ -11,12 +11,10 @@ namespace EventDetectors
     {
         const string URL = "localhost";
         const ushort PORT = 6380;
-        private static Publisher commonPublisher = new Publisher(URL, PORT);
 
-        static int Main()
+        static int Main(string[] args)
         {
-            FiringDetector f = new FiringDetector(URL, PORT, enableAutoWeapons: false, commonPublisher);
-            HurtDetector h = new HurtDetector(URL, PORT, commonPublisher);
+            FiringDetector f = new FiringDetector(URL, PORT, enableHighFreqWeapons: false, args[0], args[1], args[2]);
             _ = Console.ReadKey();
             return 0;
         }

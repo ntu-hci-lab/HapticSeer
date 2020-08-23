@@ -15,22 +15,19 @@ namespace EventDetectors
 #endif
         
 
-        public static void Router(string channelName, string msg, ref WeaponState state)
+        public static void Router(string channelName, string msg, ref StateObject state)
         {
             if (!commonStopwatch.IsRunning) commonStopwatch.Start();
-            switch (channelName)
+            if (channelName == state.openvrInlet)
             {
-                case "OPENVR":
-                    UpdateInputState(msg, ref state);
-                    break;
-                case "BULLET":
-                    UpdateBulletState(msg, ref state);
-                    break;
-                default:
-                    break;
+                UpdateInputState(msg, ref state);
+            }
+            else if (channelName == state.bulletInlet)
+            {
+                UpdateBulletState(msg, ref state);
             }
         }
-        static void UpdateInputState(string inputMsg, ref WeaponState state)
+        static void UpdateInputState(string inputMsg, ref StateObject state)
         {
 #if DEBUG
             var start = commonStopwatch.Elapsed;
@@ -39,10 +36,10 @@ namespace EventDetectors
             var args = msgExp.Match(inputMsg).Groups;
             if (args[1].Value == "RightController" && args[2].Value == "Digital")
             {
+
                 switch (args[3].Value){
-                    case "TriggerVector1":
-                        var triggerVec = vecExp.Match(args[4].Value).Groups;
-                        state.TriggerState = double.Parse(triggerVec[1].Value) == 1 ? true : false;
+                    case "Trigger":
+                        state.TriggerState = args[4].Value == "Pressed" ? true : false;
                         break;
                     default:
                         break;
@@ -53,7 +50,7 @@ namespace EventDetectors
             //Console.WriteLine($"Updated XINPUT in {elapsed.TotalMilliseconds} ms");
 #endif
         }
-        static void UpdateBulletState(string inputMsg, ref WeaponState state)
+        static void UpdateBulletState(string inputMsg, ref StateObject state)
         {
 #if DEBUG
             var start = commonStopwatch.Elapsed;
@@ -66,7 +63,8 @@ namespace EventDetectors
                 {
                     if (state.BulletCount > curBullet)
                     {
-                        state.publisher.Publish("FIRING", "FIRE");
+                        if(state.fireOutlet!=null)
+                        state.publisher.Publish(state.fireOutlet, "FIRE");
 # if DEBUG
                         Console.WriteLine("Fire: "+(fireCount++).ToString());
 # endif

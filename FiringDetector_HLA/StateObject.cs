@@ -5,16 +5,17 @@ using RedisEndpoint;
 
 namespace EventDetectors
 {
-    public class WeaponState
+    public class StateObject
     {
         private bool triggerState = false;
         private ushort bulletCount = 0;
-        
+
+
         public Publisher publisher;
+        public string openvrInlet, bulletInlet, fireOutlet;
         public bool TriggerState { get => triggerState; set => triggerState = value; }
         public ushort BulletCount { get => bulletCount; set => bulletCount = value; }
-
-        public WeaponState(Publisher publisher) => this.publisher = publisher;
+        public StateObject(Publisher publisher) => this.publisher = publisher;
 
     }
 }

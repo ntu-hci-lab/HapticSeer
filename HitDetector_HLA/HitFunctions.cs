@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 namespace EventDetectors
 {
-    public static class HurtFunctions
+    public static class HitFunctions
     {
         const ushort EPS = 2;
         const double HP_UPPERBOUND = 70;
@@ -12,19 +12,15 @@ namespace EventDetectors
 #if DEBUG
         private static Stopwatch commonStopwatch = new Stopwatch();
 #endif
-        public static void Router(string channelName, string msg, ref HealthState state)
+        public static void Router(string channelName, string msg, ref StateObject state)
         {
             if (!commonStopwatch.IsRunning) commonStopwatch.Start();
-            switch (channelName)
+            if (channelName == state.bloodInlet)
             {
-                case "BLOOD":
-                    UpdateHPState(msg, ref state);
-                    break;
-                default:
-                    break;
+                UpdateHPState(msg, ref state);
             }
         }
-        static void UpdateHPState(string inputMsg, ref HealthState state)
+        static void UpdateHPState(string inputMsg, ref StateObject state)
         {
             var start = commonStopwatch.Elapsed;
             double curHP;
@@ -38,11 +34,13 @@ namespace EventDetectors
                 {
                     if (roundedCurHP != 0)
                     {
-                        if (state.RealHP - roundedCurHP > HP_SENSITIVITY)
+                        var bloodLoss = state.RealHP - roundedCurHP;
+                        if (bloodLoss > HP_SENSITIVITY)
                         {
                             state.LastBloodLossSignal = DateTime.Now;
                             state.RealHP = roundedCurHP;
-                            state.publisher.Publish("HIT", "0");
+                            if(state.hitOutlet!=null)
+                                state.publisher.Publish(state.hitOutlet, bloodLoss.ToString());
                             Console.WriteLine("HIT");
                         }
                         else if (roundedCurHP - state.RealHP > 10)

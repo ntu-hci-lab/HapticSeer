@@ -16,6 +16,10 @@ namespace EventDetectors
             inputSubscriber = new Subscriber(url, port);
 
             state = new StateObject(commonPublisher);
+            state.speedInlet = speedInlet;
+            state.xinputInlet = xinputInlet;
+            state.accXOutlet = accXOutlet;
+            state.accYOutlet = accYOutlet;
             speedSubscriber.SubscribeTo(speedInlet);
             inputSubscriber.SubscribeTo(xinputInlet);
 

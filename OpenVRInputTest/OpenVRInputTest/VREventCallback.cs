@@ -27,7 +27,8 @@ namespace OpenVRInputTest
              */
             Utils.PrintInfo($"From {SourceTypeName} Get {EventType} Item: {EventName} Data: {StateInfo}");
 #endif
-            Program.publisher.Publish("OPENVR", $"{SourceTypeName}|{EventType}|{EventName}|{StateInfo}");
+            if(Program.outletChannelName != null)
+                Program.publisher.Publish(Program.outletChannelName, $"{SourceTypeName}|{EventType}|{EventName}|{StateInfo}");
         }
         public static void NewDigitalEvent(DeviceType SourceType, DigitalControllerEvent EventClass, bool State)
         {
