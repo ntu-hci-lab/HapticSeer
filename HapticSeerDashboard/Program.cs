@@ -14,7 +14,7 @@ namespace HapticSeerDashboard
         {
             using (StreamReader f = File.OpenText(Path.Combine(
                 AppDomain.CurrentDomain.BaseDirectory,
-                "sampleConfig2.json")))
+                "sampleConfig3.json")))
             {
                 Console.WriteLine($"Solution Root is: {SolutionRoot}");
                 JsonSerializer serializer = new JsonSerializer();

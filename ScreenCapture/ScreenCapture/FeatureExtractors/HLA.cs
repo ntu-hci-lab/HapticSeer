@@ -13,9 +13,8 @@ namespace ScreenCapture
 {
     class HLA : FeatureExtractors
     {
-        private string bulletOutlet;
-        private string bloodOutlet;
-        public HLA(string bulletOutlet, string bloodOutlet) : base()
+        private string bulletOutlet, bloodOutlet;
+        public HLA(string bulletOutlet = null, string bloodOutlet = null) : base()
         {
             this.bulletOutlet = bulletOutlet;
             this.bloodOutlet = bloodOutlet;
@@ -29,7 +28,7 @@ namespace ScreenCapture
             //ImageProcessesList.Add(new ImageProcess(1796 / 1920f, 1859 / 1920f, 986 / 1080f, 1015 / 1080f, ImageScaleType.OriginalSize, FrameRate: 3));
             //ImageProcessesList.Last().NewFrameArrivedEvent += BulletInBackpackEvent;
         }
-        private static void BulletInBackpackEvent(ImageProcess sender, Mat mat)
+        /*private static void BulletInBackpackEvent(ImageProcess sender, Mat mat)
         {
             if (!sender.Variable.ContainsKey("BinaryImage"))
                 sender.Variable.Add("BinaryImage", new Mat(mat.Size, DepthType.Cv8U, 1));
@@ -61,7 +60,7 @@ namespace ScreenCapture
             {
                 Console.WriteLine("Error message: " + ex.Message);
             }
-        }
+        }*/
 
         private void BloodDetectorEvent(ImageProcess sender, Mat mat)
         {

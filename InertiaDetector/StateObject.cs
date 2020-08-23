@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using RedisEndpoint;
 
-namespace EventDetectors
-{
+namespace PC2Detectors {
     public class StateObject
     {
         private const double EPS = 0.01d, ANGLE_ALPHA = 0.9, SPEED_ALPHA = 0.7;

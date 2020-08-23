@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using RedisEndpoint;
-namespace EventDetectors
+namespace HLADetectors
 {
     class FiringDetector
     {
@@ -12,10 +12,10 @@ namespace EventDetectors
 
         public FiringDetector(string url, ushort port, bool enableHighFreqWeapons, 
             string bulletInlet, string openvrInlet,
-            string fireOutlet=null, Publisher publisher = null)
+            string fireOutlet=null)
         {
-            if (publisher == null) commonPublisher = new Publisher(url, port);
-            else commonPublisher = publisher;
+            commonPublisher = new Publisher(url, port);
+
 
             state = new StateObject(commonPublisher);
             state.bulletInlet = bulletInlet;

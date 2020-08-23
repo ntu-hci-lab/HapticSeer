@@ -1,20 +1,16 @@
-﻿
-using System;
-using System.Diagnostics;
-using System.IO;
-using System.Text;
+﻿using System;
 using RedisEndpoint;
 
-namespace HLADetectors
+namespace BF1Detectors
 {
     class Program
     {
         const string URL = "localhost";
         const ushort PORT = 6380;
-
+        private static Publisher commonPublisher = new Publisher(URL, PORT);
         static int Main(string[] args)
         {
-            HitDetector h = new HitDetector(URL, PORT, args[0], args[1]);
+            HurtDetector h = new HurtDetector(URL, PORT, args[0], args[1], args[2]);
             _ = Console.ReadKey();
             return 0;
         }

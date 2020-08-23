@@ -8,7 +8,7 @@ using System.Linq;
 namespace AudioProcessor
 {
 
-    class SimpleImpulseDetector
+    class SimplePulseDetector
     {
         private const int LFE_CHANNEL_NUMBER = 3;
 
@@ -26,7 +26,7 @@ namespace AudioProcessor
         public double CurrentThreshold => currentThreshold;
         public double CurrentReading => currentReading;
 
-        public SimpleImpulseDetector(List<float[]> monoBuffers, bool lfeProvided,
+        public SimplePulseDetector(List<float[]> monoBuffers, bool lfeProvided,
             BiQuad biQuadFilter = null, double alpha = 0.7, double margin = 3.5, double noiseThreshold = -40)
         {
             this.alpha = alpha;

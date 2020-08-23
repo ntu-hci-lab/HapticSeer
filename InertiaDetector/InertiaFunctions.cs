@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text;
-namespace EventDetectors
+namespace PC2Detectors
 {
     public static class InertiaFunctions
     {

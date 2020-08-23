@@ -18,11 +18,11 @@ namespace AudioProcessor
         private int channelNum, systemSampleRate, hitCount = 0;
         private LowpassFilter lpf;
         private Localisationer localisationer;
-        private SimpleImpulseDetector MonoImpulseDetector, LFEImpulseDetector;
+        private SimplePulseDetector MonoPulseDetector, LFEPulseDetector;
         private List<float[]> monoBuffers = new List<float[]>();
 
 
-        public AudioProcessor(Publisher publisher)
+        public AudioProcessor(Publisher publisher, string pulseOutlet = null)
         {
             using WasapiCapture capture = new WasapiLoopbackCapture(CAPTURE_LATENCY);
             capture.Initialize();
@@ -40,13 +40,13 @@ namespace AudioProcessor
             InitializeMonoBuffers(monoBuffers, channelNum, notificationSource.BlockCount);
             blockBuffer = new float[notificationSource.BlockCount * channelNum];
             lpf = new LowpassFilter(systemSampleRate, LFE_CUTOFF);
-            MonoImpulseDetector =
-                new SimpleImpulseDetector(monoBuffers, lfeProvided: false, biQuadFilter: lpf);
+            MonoPulseDetector =
+                new SimplePulseDetector(monoBuffers, lfeProvided: false, biQuadFilter: lpf);
             localisationer = new Localisationer(monoBuffers);
             if (channelNum > 2)
             {
-                LFEImpulseDetector =
-                        new SimpleImpulseDetector(monoBuffers, lfeProvided: true);
+                LFEPulseDetector =
+                        new SimplePulseDetector(monoBuffers, lfeProvided: true);
             }
 
             capture.DataAvailable += (s, e) =>
@@ -56,36 +56,36 @@ namespace AudioProcessor
                     monoBuffers = Deinterlacing(monoBuffers,
                                                 blockBuffer,
                                                 channelNum);
-                    if (LFEImpulseDetector != null)
+                    if (LFEPulseDetector != null)
                     {
-                        bool m = MonoImpulseDetector.Predict();
-                        bool l = LFEImpulseDetector.Predict();
+                        bool m = MonoPulseDetector.Predict();
+                        bool l = LFEPulseDetector.Predict();
                         if (m || l)
                         {
                             double angle = localisationer.GetLoudestAngle();
 #if DEBUG
                             Console.Clear();
-                            Console.WriteLine($"LFE Level: {LFEImpulseDetector.CurrentReading:F3}, LFE Threshold: {LFEImpulseDetector.CurrentThreshold:F3}");
-                            Console.WriteLine($"Mixed Level: {MonoImpulseDetector.CurrentReading:F3}, Mixed Threshold: {MonoImpulseDetector.CurrentThreshold:F3}");
+                            Console.WriteLine($"LFE Level: {LFEPulseDetector.CurrentReading:F3}, LFE Threshold: {LFEPulseDetector.CurrentThreshold:F3}");
+                            Console.WriteLine($"Mixed Level: {MonoPulseDetector.CurrentReading:F3}, Mixed Threshold: {MonoPulseDetector.CurrentThreshold:F3}");
                             Console.WriteLine($"Impulse Detected - Mono:{m}, LFE:{l}, Angle: {angle:F3}, Hit Count:{hitCount}");
 #endif
-                            if (publisher != null)
-                                publisher.Publish("IMPULSE", $"{m}|{l}|{angle:F3}");
+                            if (publisher != null && pulseOutlet != null)
+                                publisher.Publish(pulseOutlet, $"{m}|{l}|{angle:F3}");
                             hitCount++;
                         }
                     }
                     else
                     {
-                        if (MonoImpulseDetector.Predict())
+                        if (MonoPulseDetector.Predict())
                         {
                             double angle = localisationer.GetLoudestAngle();
 #if DEBUG
                             Console.Clear();
-                            Console.WriteLine($"Level: {MonoImpulseDetector.CurrentReading:F3}, Threshold: {MonoImpulseDetector.CurrentThreshold:F3}");
+                            Console.WriteLine($"Level: {MonoPulseDetector.CurrentReading:F3}, Threshold: {MonoPulseDetector.CurrentThreshold:F3}");
                             Console.WriteLine($"Impulse Detected - Mono, Angle:{angle:F3}, Hit Count:{hitCount}");
 #endif
-                            if (publisher != null)
-                                publisher.Publish("IMPULSE", $"True|False|{angle:F3}");
+                            if (publisher != null && pulseOutlet != null)
+                                publisher.Publish(pulseOutlet, $"True|False|{angle:F3}");
                             hitCount++;
                         }
                     }
@@ -119,10 +119,10 @@ namespace AudioProcessor
             capture.Stop();
         }
 
-        public static int Main()
+        public static int Main(string[] args)
         {
             Publisher publisher = new Publisher("localhost", 6380);
-            AudioProcessor audioProcessor = new AudioProcessor(publisher);
+            AudioProcessor audioProcessor = new AudioProcessor(publisher, args[0]);
             return 0;
         }
     }
