@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Windows;
-namespace EventDetectors
+namespace HLADetectors
 {
     public static class FiringFunctions
     {

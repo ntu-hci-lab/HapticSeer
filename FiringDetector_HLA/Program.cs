@@ -5,7 +5,7 @@ using System.IO;
 using System.Text;
 using RedisEndpoint;
 
-namespace EventDetectors
+namespace HLADetectors
 {
     class Program
     {

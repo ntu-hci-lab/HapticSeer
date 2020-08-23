@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using RedisEndpoint;
 
-namespace EventDetectors
+namespace HLADetectors
 {
     class HitDetector
     {

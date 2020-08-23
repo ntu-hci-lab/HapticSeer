@@ -29,7 +29,7 @@ namespace ScreenCapture
                     return new PC2(outlets[0]);
                 case 3:
                     tesseractEngine = new TesseractEngine(Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory), "KomuB", EngineMode.Default);
-                    return new BF1();
+                    return new BF1(outlets[0], outlets[1], outlets[2]);
                 default:
                     throw new NotImplementedException("Invalid gameID");
             }

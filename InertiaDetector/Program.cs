@@ -4,7 +4,7 @@ using System.Text;
 using System.Diagnostics;
 using System.Threading;
 
-namespace EventDetectors
+namespace PC2Detectors
 {
     class Program
     {

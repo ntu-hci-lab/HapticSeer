@@ -2,7 +2,7 @@
 using System;
 using System.Diagnostics;
 
-namespace EventDetectors
+namespace HLADetectors
 {
     public static class HitFunctions
     {

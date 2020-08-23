@@ -13,30 +13,34 @@ namespace ScreenCapture
 {
     class BF1 : FeatureExtractors
     {
-        public BF1(): base()
+        private string bulletOutlet, bloodOutlet, hitOutlet;
+        public BF1(string bulletOutlet = null, string bloodOutlet = null, string hitOutlet = null) : base()
         {
-            ImageProcessesList.Add(new ImageProcess(0.5-0.105, 0.5+0.105, 0.5-0.185, 0.5+0.185, ImageScaleType.OriginalSize, FrameRate: 60));
+            this.bulletOutlet = bulletOutlet;
+            this.bloodOutlet = bloodOutlet;
+            this.hitOutlet = hitOutlet;
+            ImageProcessesList.Add(new ImageProcess(0.5 - 0.105, 0.5 + 0.105, 0.5 - 0.185, 0.5 + 0.185, ImageScaleType.OriginalSize, FrameRate: 60));
             ImageProcessesList.Last().NewFrameArrivedEvent += DamageIndicatorDetectionEvent;
 
             ImageProcessesList.Add(new ImageProcess(1689 / 1920f, 1867 / 1920f, 1018 / 1080f, 1020 / 1080f, ImageScaleType.OriginalSize, FrameRate: 60));
             ImageProcessesList.Last().NewFrameArrivedEvent += BloodDetectorEvent;
 
-            ImageProcessesList.Add (new ImageProcess(0.89, 0.922, 0.865, 0.93, ImageScaleType.OriginalSize, FrameRate: 30)); // 1920*1080
+            ImageProcessesList.Add(new ImageProcess(0.89, 0.922, 0.865, 0.93, ImageScaleType.OriginalSize, FrameRate: 30)); // 1920*1080
             ImageProcessesList.Last().NewFrameArrivedEvent += BulletCountEvent;
 
             //ImageProcessesList.Add(new ImageProcess(1598 / 1728f, 1628 / 1728f, 978 / 1080f, 998 / 1080f, ImageScaleType.OriginalSize, FrameRate: 3));
             //ImageProcessesList.Last().NewFrameArrivedEventt += GrenadeCount_BF1_NewFrameArrivedEvent;
         }
 
-        private static void GrenadeCountEvent(ImageProcess sender, Mat mat)
+        /*private static void GrenadeCountEvent(ImageProcess sender, Mat mat)
         {
             if (!sender.Variable.ContainsKey("BinaryImage"))
                 sender.Variable.Add("BinaryImage", new Mat(mat.Size, DepthType.Cv8U, 1));
             Mat BinaryImg = sender.Variable["BinaryImage"] as Mat;
             ImageProcess.ElimateBackgroundWithSearchingSimilarColor(in mat, ref BinaryImg, new Color[] { Color.FromArgb(220, 220, 220) }, new uint[] { 0x00FF0000 }, ElimateColorApproach.ReserveSimilarColor_RemoveDifferentColor, 50);
-        }
+        }*/
 
-        private static void BulletCountEvent(ImageProcess sender, Mat mat)
+        private void BulletCountEvent(ImageProcess sender, Mat mat)
         {
             long temp = CaptureTicks;
             Pix pixImage;
@@ -60,7 +64,8 @@ namespace ScreenCapture
 
                     if (Int32.TryParse(bulletStr, out int num))
                     {
-                        publisher.Publish("BULLET", num.ToString());
+                        if(bulletOutlet != null)
+                        publisher.Publish(bulletOutlet, num.ToString());
                     }
                 }
 
@@ -72,10 +77,10 @@ namespace ScreenCapture
                 Console.WriteLine("Error message: " + ex.Message);
             }
             var elasped = (DateTime.Now.Ticks - temp) / (double)TimeSpan.TicksPerMillisecond;
-            Console.WriteLine("Bullet Feature Latency: {0}", elasped);
+            //Console.WriteLine("Bullet Feature Latency: {0}", elasped);
         }
 
-        private static void BloodDetectorEvent(ImageProcess sender, Mat mat)
+        private void BloodDetectorEvent(ImageProcess sender, Mat mat)
         {
             long temp = CaptureTicks;
             double BloodValue;
@@ -105,17 +110,22 @@ namespace ScreenCapture
                     Offset += 4;
                 }
                 BloodValue = Area / (double)(mat.Width);
-                publisher.Publish("BLOOD", BloodValue.ToString());
-                Console.WriteLine("Blood Feature Latency: {0}", (DateTime.Now.Ticks - temp) / (double)TimeSpan.TicksPerMillisecond);
+
+                //Console.WriteLine("Blood Feature Latency: {0}", (DateTime.Now.Ticks - temp) / (double)TimeSpan.TicksPerMillisecond);
             }
 
-#if DEBUG
             if (!IsRedImpluse)
+            {
+                if (bloodOutlet != null)
+                    publisher.Publish(bloodOutlet, BloodValue.ToString());
+#if DEBUG
                 Console.WriteLine($"Actual: {BloodValue.ToString("0.000")}");
 #endif
+            }
+
         }
 
-        private static void DamageIndicatorDetectionEvent(ImageProcess sender, Mat mat)
+        private void DamageIndicatorDetectionEvent(ImageProcess sender, Mat mat)
         {
             long temp = CaptureTicks;
             Mat LastImg, AvailableImg;
@@ -140,8 +150,8 @@ namespace ScreenCapture
                 int rowNum = AvailableImg.Rows;
                 int colNum = AvailableImg.Cols;
                 Parallel.For(0, rowNum, i => {
-                    int offsetForThisRow = Offset + i * colNum* 4;
-                    for (int j=0; j< colNum; j++)
+                    int offsetForThisRow = Offset + i * colNum * 4;
+                    for (int j = 0; j < colNum; j++)
                     {
                         int Green_Blue_Average = (Input[offsetForThisRow] + Input[offsetForThisRow + 1]) / 2;
                         int Red = Input[offsetForThisRow + 2];
@@ -162,9 +172,10 @@ namespace ScreenCapture
 #if DEBUG
                     Console.WriteLine(angle.ToString());
 #endif
-                    publisher.Publish("HIT", angle.ToString());
+                    if(hitOutlet!=null)
+                        publisher.Publish(hitOutlet, angle.ToString());
                 }
-                Console.WriteLine("DamageIndicator Latency: {0}", (DateTime.Now.Ticks - temp) / (double)TimeSpan.TicksPerMillisecond);
+                //Console.WriteLine("DamageIndicator Latency: {0}", (DateTime.Now.Ticks - temp) / (double)TimeSpan.TicksPerMillisecond);
                 CvInvoke.Blur(AvailableImg, AvailableImg, new Size(5, 5), new Point(0, 0));
                 sender.Variable["LastImg"] = AvailableImg;
                 sender.Variable["AvailableImg"] = LastImg;
@@ -185,7 +196,7 @@ namespace ScreenCapture
                 Parallel.For(0, h, y => {
                     int _y = CenterY - y;
                     int offsetForThisRow = Offset + y * w;
-                    for (int x=0 ;x<w; x++)
+                    for (int x = 0; x < w; x++)
                     {
                         uint Value = OneChannelImgByteArray[offsetForThisRow++];
                         int _x = x - CenterX;

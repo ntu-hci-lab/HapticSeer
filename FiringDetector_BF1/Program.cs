@@ -5,7 +5,7 @@ using System.IO;
 using System.Text;
 using RedisEndpoint;
 
-namespace HLADetectors
+namespace BF1Detectors
 {
     class Program
     {
@@ -14,7 +14,13 @@ namespace HLADetectors
 
         static int Main(string[] args)
         {
-            HitDetector h = new HitDetector(URL, PORT, args[0], args[1]);
+            FiringDetector f = new FiringDetector(URL,
+                PORT,
+                enableHighFreqWeapons: true,
+                args[0],
+                args[1],
+                args[2],
+                args[3]);
             _ = Console.ReadKey();
             return 0;
         }

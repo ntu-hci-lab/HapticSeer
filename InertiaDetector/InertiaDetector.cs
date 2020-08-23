@@ -1,5 +1,5 @@
 ﻿using RedisEndpoint;
-namespace EventDetectors
+namespace PC2Detectors
 {
     class InertiaDetector
     {
