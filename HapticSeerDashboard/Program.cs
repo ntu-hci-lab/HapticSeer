@@ -10,6 +10,18 @@ namespace HapticSeerDashboard
         public readonly static string SolutionRoot = Path.GetFullPath(Path.Combine(
             AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\.."));
         public static List<NodeBaseInstance> nodes = new List<NodeBaseInstance>();
+        public static Dictionary<string, string> paths =
+            JsonConvert.DeserializeObject<Dictionary<string, string>>
+            (
+                File.ReadAllText
+                (
+                    Path.Combine
+                    (
+                        AppDomain.CurrentDomain.BaseDirectory,
+                        "path.json"
+                    )
+                )
+            );
         static void Main(string[] args)
         {
             using (StreamReader f = File.OpenText(Path.Combine(
@@ -18,22 +30,22 @@ namespace HapticSeerDashboard
             {
                 Console.WriteLine($"Solution Root is: {SolutionRoot}");
                 JsonSerializer serializer = new JsonSerializer();
-                ConfigSchema schema = (ConfigSchema) serializer.Deserialize(f, typeof(ConfigSchema));
+                ConfigSchema schema = (ConfigSchema)serializer.Deserialize(f, typeof(ConfigSchema));
 
                 foreach (var detector in schema.eventDetectors)
                 {
                     nodes.Add(new NodeBaseInstance(Path.Combine(SolutionRoot,
-                        schema.Paths[detector.Type]), detector.Inlets, detector.Outlets, detector.Options));
+                        paths[detector.Type]), detector.Inlets, detector.Outlets, detector.Options));
                 }
                 foreach (var extractor in schema.extractorSets)
                 {
                     nodes.Add(new ExtractorSet(Path.Combine(SolutionRoot,
-                        schema.Paths["FeatureExtract"]), extractor.Type, extractor.Outlets, extractor.Options));
+                        paths["FeatureExtract"]), extractor.Type, extractor.Outlets, extractor.Options));
                 }
                 foreach (var capturer in schema.rawCapturers)
                 {
                     nodes.Add(new RawCapturer(Path.Combine(SolutionRoot,
-                        schema.Paths[capturer.Type]), capturer.Outlets, capturer.Options));
+                        paths[capturer.Type]), capturer.Outlets, capturer.Options));
                 }
 
                 foreach (var node in nodes)
