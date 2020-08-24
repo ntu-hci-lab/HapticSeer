@@ -7,7 +7,7 @@ namespace BF1Detectors
 {
     public static class FiringFunctions
     {
-        const ushort TRIGGER_THRESHOLD = 180;
+        const ushort TRIGGER_THRESHOLD = 150;
         const double COOLING_TIME_MS = 500d;
         const double EPS = 150d;
         private static int fireCount=0;
