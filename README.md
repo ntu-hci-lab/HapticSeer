@@ -1,4 +1,5 @@
 # HapticSeer Tutorial
+[HackMD (With Directory)](https://hackmd.io/@yuhsinlin/HkWxCyWmw)
 ## Setup
 1. Download whole solution
 2. Build all
