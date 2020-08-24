@@ -1,16 +1,4 @@
 ﻿{
-  "Paths": {
-    "_comment": "YOU MAY COPY THIS OBJECT DIRECTLY!",
-    "FeatureExtract": "ScreenCapture\\ScreenCapture\\bin\\Debug\\ScreenCapture.exe",
-    "XInputCap": "XBoxInputWrapper\\XBoxInputWrapper\\bin\\x64\\Debug\\netcoreapp3.1\\XBoxInputWrapper.exe",
-    "OpenVR": "OpenVRInputTest\\OpenVRInputTest\\bin\\x64\\Debug\\OpenVRInputTest.exe",
-    "InertiaDetect": "InertiaDetector\\bin\\Debug\\netcoreapp3.1\\InertiaDetector.exe",
-    "FireDetectHLA": "FiringDetector_HLA\\bin\\Debug\\netcoreapp3.1\\FiringDetector_HLA.exe",
-    "HitDetectHLA": "HitDetector_HLA\\bin\\Debug\\netcoreapp3.1\\HitDetector_HLA.exe",
-    "FireDetectBF1": "FiringDetector_BF1\\bin\\Debug\\netcoreapp3.1\\FiringDetector_BF1.exe",
-    "HitDetectBF1": "HitDetector_BF1\\bin\\Debug\\netcoreapp3.1\\HitDetector_BF1.exe",
-    "PulseCap": "AudioProcessor\\bin\\Debug\\netcoreapp3.1\\AudioProcessor.exe"
-  },
   "ExtractorSets": [
     {
       "Type": "BF1",

@@ -23,7 +23,6 @@ namespace HapticSeerDashboard
         public List<ExtractorSet> extractorSets = new List<ExtractorSet>();
         public List<RawCapturer> rawCapturers = new List<RawCapturer>();
         public List<EventDetector> eventDetectors = new List<EventDetector>();
-        public Dictionary<string, string> Paths { get; set; }
 
     }
 }
