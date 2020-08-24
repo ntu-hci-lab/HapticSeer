@@ -47,7 +47,7 @@ namespace BF1Detectors
                             if (state.IncomingOutlet != null)
                                 state.publisher.Publish(state.IncomingOutlet, $"{bloodLoss},{state.LastHitAngle.ToString()}");
 #if DEBUG
-                            Console.WriteLine($"INCOMING, {bloodLoss},{state.LastHitAngle.ToString()}");
+                            Console.WriteLine($"INCOMING, {bloodLoss}|{state.LastHitAngle.ToString()}");
 #endif
                         }
                     }

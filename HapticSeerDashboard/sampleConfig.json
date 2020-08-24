@@ -23,7 +23,7 @@
     {
       "Type": "HitDetectHLA",
       "Inlets": [ "BLOOD" ],
-      "Outlets": [ "HIT" ],
+      "Outlets": [ "HURT" ],
       "Options": {
         "UseShellExecute": "True"
       }
