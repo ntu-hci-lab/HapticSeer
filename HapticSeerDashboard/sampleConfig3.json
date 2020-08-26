@@ -1,23 +1,25 @@
 ﻿{
   "ExtractorSets": [
     {
-      "Type": "BF1",
+      "Name": "HUDExtractorSet",
+      "Preset": "BF1",
       "Outlets": [ "BULLET", "BLOOD", "HIT" ]
     }
   ],
   "RawCapturers": [
     {
-      "Type": "XInputCap",
+      "Name": "GenericXboxInputCapturer",
       "Outlets": [ "XINPUT" ]
     },
     {
-      "Type": "PulseCap",
+      "Name": "GenericPulseCapturer",
       "Outlets": [ "PULSE" ]
     }
   ],
   "EventDetectors": [
     {
-      "Type": "HitDetectBF1",
+      "Name": "HitDetector",
+      "Preset":  "BF1",
       "Inlets": [ "BLOOD", "HIT" ],
       "Outlets": [ "IMCOMING" ],
       "Options": {
@@ -25,7 +27,8 @@
       }
     },
     {
-      "Type": "FireDetectBF1",
+      "Name": "FiringDetector",
+      "Preset": "BF1",
       "Inlets": [ "BULLET", "XINPUT", "PULSE" ],
       "Outlets": [ "FIRE" ],
       "Options": {
