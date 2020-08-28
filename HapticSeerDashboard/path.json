@@ -1,7 +1,7 @@
 ﻿{
   "HUDExtractorSet": "ScreenCapture\\ScreenCapture\\bin\\Debug\\ScreenCapture.exe",
-  "GenericXboxInputCapturer": "XBoxInputWrapper\\XBoxInputWrapper\\bin\\x64\\Debug\\netcoreapp3.1\\XBoxInputWrapper.exe",
-  "GenericOpenVRInputCapturer": "OpenVRInputTest\\OpenVRInputTest\\bin\\x64\\Debug\\OpenVRInputTest.exe",
+  "GenericXboxInputCapturer": "XBoxInputWrapper\\XBoxInputWrapper\\bin\\Debug\\netcoreapp3.1\\XBoxInputWrapper.exe",
+  "GenericOpenVRInputCapturer": "OpenVRInputTest\\OpenVRInputTest\\bin\\Debug\\OpenVRInputTest.exe",
   "GenericPulseCapturer": "AudioProcessor\\bin\\Debug\\netcoreapp3.1\\AudioProcessor.exe",
   "InertiaDetector_PC2": "InertiaDetector\\bin\\Debug\\netcoreapp3.1\\InertiaDetector.exe",
   "FiringDetector_HLA": "FiringDetector_HLA\\bin\\Debug\\netcoreapp3.1\\FiringDetector_HLA.exe",
