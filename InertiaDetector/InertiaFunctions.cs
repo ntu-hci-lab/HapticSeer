@@ -43,7 +43,7 @@ namespace PC2Detectors
 # if LOG
                 csvWriter.WriteLine($"{(DateTime.Now - startTime).Ticks / TimeSpan.TicksPerMillisecond},{state.AccelX},{state.AccelY}");
 # endif
-                Console.WriteLine(state.AccelX);
+                Console.WriteLine(state.AccelY);
             }
             catch (Exception e) 
             {
