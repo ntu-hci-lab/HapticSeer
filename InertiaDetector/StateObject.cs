@@ -52,7 +52,7 @@ namespace PC2Detectors {
         }
         public double AccelY
         {
-            get => (speed.Last.Value - speed.First.Value) / ((frameLength-1) * 0.06);
+            get => -(speed.Last.Value - speed.First.Value) / ((frameLength-1) * 0.06);
         }
         public double AccelX
         {
