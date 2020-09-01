@@ -88,7 +88,8 @@ namespace HapticSeerDashboard
             [OnDeserialized]
             private void OnDeserialized(StreamingContext context)
             {
-                Inlets = new string[] { Preset };
+                if(Preset != null)
+                    Inlets = new string[] { Preset };
             }
             protected override string GetPath(string type, string subtype)
             {

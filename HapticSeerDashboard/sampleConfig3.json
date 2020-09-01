@@ -4,16 +4,16 @@
       "Name": "HUDExtractorSet",
       "Preset": "BF1",
       "Outlets": [ "BULLET", "BLOOD", "HIT" ]
+    },
+    {
+      "Name": "GenericPulseExtractor",
+      "Outlets": [ "PULSE" ]
     }
   ],
   "RawCapturers": [
     {
       "Name": "GenericXboxInputCapturer",
       "Outlets": [ "XINPUT" ]
-    },
-    {
-      "Name": "GenericPulseCapturer",
-      "Outlets": [ "PULSE" ]
     }
   ],
   "EventDetectors": [
