@@ -5,6 +5,8 @@ using CSCore.Streams;
 using RedisEndpoint;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Diagnostics;
 
 namespace AudioProcessor
 {
@@ -21,6 +23,10 @@ namespace AudioProcessor
         private SimplePulseDetector MonoPulseDetector, LFEPulseDetector;
         private List<float[]> monoBuffers = new List<float[]>();
 
+        public readonly static string SolutionRoot = Path.GetFullPath(Path.Combine(
+            AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\.."));
+        public static Stopwatch sw = new Stopwatch();
+        public static StreamWriter processTimeLogger;
 
         public AudioProcessor(Publisher publisher, string pulseOutlet = null)
         {
@@ -53,6 +59,7 @@ namespace AudioProcessor
             {
                 while (notificationSource.Read(blockBuffer, 0, notificationSource.BlockCount * channelNum) > 0)
                 {
+                    var dataInTime = sw.ElapsedMilliseconds;
                     monoBuffers = Deinterlacing(monoBuffers,
                                                 blockBuffer,
                                                 channelNum);
@@ -70,7 +77,11 @@ namespace AudioProcessor
                             Console.WriteLine($"Impulse Detected - Mono:{m}, LFE:{l}, Angle: {angle:F3}, Hit Count:{hitCount}");
 #endif
                             if (publisher != null && pulseOutlet != null)
+                            {
                                 publisher.Publish(pulseOutlet, $"{m}|{l}|{angle:F3}");
+                                processTimeLogger.WriteLineAsync($"{dataInTime},{sw.ElapsedMilliseconds}");
+                            }
+                                
                             hitCount++;
                         }
                     }
@@ -85,7 +96,11 @@ namespace AudioProcessor
                             Console.WriteLine($"Impulse Detected - Mono, Angle:{angle:F3}, Hit Count:{hitCount}");
 #endif
                             if (publisher != null && pulseOutlet != null)
+                            {
                                 publisher.Publish(pulseOutlet, $"True|False|{angle:F3}");
+                                processTimeLogger.WriteLineAsync($"{dataInTime},{sw.ElapsedMilliseconds}");
+                            }
+                                
                             hitCount++;
                         }
                     }
@@ -110,6 +125,7 @@ namespace AudioProcessor
 
         void StartCapturingAndHold(WasapiCapture capture)
         {
+            
             capture.Start();
 #if DEBUG
             Console.WriteLine("Start Capturing...");
@@ -121,6 +137,12 @@ namespace AudioProcessor
 
         public static int Main(string[] args)
         {
+            processTimeLogger = new StreamWriter(Path.Combine(SolutionRoot, 
+                $"impluse_extractor_{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}.csv")) 
+            { 
+                AutoFlush = true
+            };
+            sw.Start();
             Publisher publisher = new Publisher("localhost", 6380);
             AudioProcessor audioProcessor = new AudioProcessor(publisher, args[0]);
             return 0;
