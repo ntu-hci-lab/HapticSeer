@@ -10,6 +10,7 @@ using Tesseract;
 
 using System.Globalization;
 using static ImageProcessModule.ImageProcessBase;
+using System.Diagnostics;
 
 namespace ScreenCapture
 {
@@ -50,6 +51,7 @@ namespace ScreenCapture
 #if DEBUG
             localDate = DateTime.Now;
 #endif
+            var startTick = Program.globalStopwatch.ElapsedTicks;
             /* declare variables for Tesseract */
             Pix pixImage;
             Page page;
@@ -89,8 +91,13 @@ namespace ScreenCapture
                 publisher.Publish(speedOutlet, $"{speed},{msgCnt}");
 #endif
 #if !LOG
-            if (speedOutlet!=null)
+            if (speedOutlet != null) 
+            {
                 publisher.Publish(speedOutlet, $"{speed}");
+                Program.logWriters[0].WriteLineAsync(
+$"{(double)startTick / Stopwatch.Frequency * 1000},{(double)Program.globalStopwatch.ElapsedTicks / Stopwatch.Frequency * 1000}");
+            }
+                
 #endif
 
 #if DEBUG
