@@ -8,6 +8,7 @@ using Tesseract;
 using RedisEndpoint;
 using static ImageProcessModule.ImageProcessBase;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace ScreenCapture
 {
@@ -42,7 +43,7 @@ namespace ScreenCapture
 
         private void BulletCountEvent(ImageProcess sender, Mat mat)
         {
-            long temp = CaptureTicks;
+            var startTick = Program.globalStopwatch.ElapsedTicks;
             Pix pixImage;
             Page page;
 
@@ -65,7 +66,11 @@ namespace ScreenCapture
                     if (Int32.TryParse(bulletStr, out int num))
                     {
                         if(bulletOutlet != null)
-                        publisher.Publish(bulletOutlet, num.ToString());
+                        {
+                            publisher.Publish(bulletOutlet, num.ToString());
+                            Program.logWriters[0].WriteLineAsync(
+                                $"{(double)startTick / Stopwatch.Frequency * 1000},{(double)Program.globalStopwatch.ElapsedTicks / Stopwatch.Frequency * 1000}");
+                        }
                     }
                 }
 
@@ -76,13 +81,12 @@ namespace ScreenCapture
             {
                 Console.WriteLine("Error message: " + ex.Message);
             }
-            var elasped = (DateTime.Now.Ticks - temp) / (double)TimeSpan.TicksPerMillisecond;
             //Console.WriteLine("Bullet Feature Latency: {0}", elasped);
         }
 
         private void BloodDetectorEvent(ImageProcess sender, Mat mat)
         {
-            long temp = CaptureTicks;
+            var startTick = Program.globalStopwatch.ElapsedTicks;
             double BloodValue;
             bool IsRedImpluse = false;
             unsafe
@@ -117,7 +121,11 @@ namespace ScreenCapture
             if (!IsRedImpluse)
             {
                 if (bloodOutlet != null)
+                {
                     publisher.Publish(bloodOutlet, BloodValue.ToString());
+                    Program.logWriters[1].WriteLineAsync(
+$"{(double)startTick / Stopwatch.Frequency * 1000},{(double)Program.globalStopwatch.ElapsedTicks / Stopwatch.Frequency * 1000}");
+                }
 #if DEBUG
                 Console.WriteLine($"Actual: {BloodValue.ToString("0.000")}");
 #endif
@@ -127,7 +135,7 @@ namespace ScreenCapture
 
         private void DamageIndicatorDetectionEvent(ImageProcess sender, Mat mat)
         {
-            long temp = CaptureTicks;
+            var startTick = Program.globalStopwatch.ElapsedTicks;
             Mat LastImg, AvailableImg;
 
             if (sender.Variable.ContainsKey("LastImg"))
@@ -172,8 +180,13 @@ namespace ScreenCapture
 #if DEBUG
                     Console.WriteLine(angle.ToString());
 #endif
-                    if(hitOutlet!=null)
+                    if (hitOutlet != null)
+                    {
                         publisher.Publish(hitOutlet, angle.ToString());
+                        Program.logWriters[2].WriteLineAsync(
+$"{(double)startTick / Stopwatch.Frequency * 1000},{(double)Program.globalStopwatch.ElapsedTicks / Stopwatch.Frequency * 1000}");
+                    }
+
                 }
                 //Console.WriteLine("DamageIndicator Latency: {0}", (DateTime.Now.Ticks - temp) / (double)TimeSpan.TicksPerMillisecond);
                 CvInvoke.Blur(AvailableImg, AvailableImg, new Size(5, 5), new Point(0, 0));
@@ -184,6 +197,7 @@ namespace ScreenCapture
 
         private static bool GetHitAngle(Mat OneChannelImg, out double Angle)
         {
+
             long Sum_X = 0, Sum_Y = 0;
             int CenterX = OneChannelImg.Width / 2,
                 CenterY = OneChannelImg.Height / 2;

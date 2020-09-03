@@ -1,6 +1,7 @@
 using ImageProcessModule;
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 
 namespace ScreenCapture
@@ -17,6 +18,9 @@ namespace ScreenCapture
             PC2,
             BF1
         }
+        public static Stopwatch globalStopwatch;
+        public static StreamWriter[] logWriters;
+        public static long startTimeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         static BitmapBuffer bitmapBuffer = new BitmapBuffer();
         static CaptureMethod captureMethod;
 
@@ -45,6 +49,9 @@ namespace ScreenCapture
         }*/
         static void Main(string[] args)
         {
+            globalStopwatch = new Stopwatch();
+            globalStopwatch.Start();
+
             //Thread.Sleep(5000);
             Console.CancelKeyPress +=
                 new ConsoleCancelEventHandler((o, t) =>

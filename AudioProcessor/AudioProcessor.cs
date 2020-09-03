@@ -59,7 +59,7 @@ namespace AudioProcessor
             {
                 while (notificationSource.Read(blockBuffer, 0, notificationSource.BlockCount * channelNum) > 0)
                 {
-                    var dataInTime = sw.ElapsedMilliseconds;
+                    var dataInTick = sw.ElapsedTicks;
                     monoBuffers = Deinterlacing(monoBuffers,
                                                 blockBuffer,
                                                 channelNum);
@@ -79,7 +79,7 @@ namespace AudioProcessor
                             if (publisher != null && pulseOutlet != null)
                             {
                                 publisher.Publish(pulseOutlet, $"{m}|{l}|{angle:F3}");
-                                processTimeLogger.WriteLineAsync($"{dataInTime},{sw.ElapsedMilliseconds}");
+                                processTimeLogger.WriteLineAsync($"{(double)dataInTick / Stopwatch.Frequency * 1000},{(double)sw.ElapsedTicks / Stopwatch.Frequency * 1000}");
                             }
                                 
                             hitCount++;
@@ -98,7 +98,7 @@ namespace AudioProcessor
                             if (publisher != null && pulseOutlet != null)
                             {
                                 publisher.Publish(pulseOutlet, $"True|False|{angle:F3}");
-                                processTimeLogger.WriteLineAsync($"{dataInTime},{sw.ElapsedMilliseconds}");
+                                processTimeLogger.WriteLineAsync($"{(double) dataInTick / Stopwatch.Frequency * 1000},{(double)sw.ElapsedTicks / Stopwatch.Frequency * 1000}");
                             }
                                 
                             hitCount++;

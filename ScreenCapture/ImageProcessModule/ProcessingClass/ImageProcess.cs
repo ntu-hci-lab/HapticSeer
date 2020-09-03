@@ -140,15 +140,8 @@ namespace ImageProcessModule.ProcessingClass
                 }
 
                 // Invoke Event
-#if LOGTIME
-                long Temp = CaptureTicks;
-#endif
-                NewFrameArrivedEvent?.Invoke(this, Data);
-#if LOGTIME
-                Console.WriteLine("Feature Latency: {0}", (DateTime.Now.Ticks - Temp) / (double)TimeSpan.TicksPerMillisecond);
-#endif
-                
 
+                NewFrameArrivedEvent?.Invoke(this, Data);
 
 
                 // Add FrameCount
