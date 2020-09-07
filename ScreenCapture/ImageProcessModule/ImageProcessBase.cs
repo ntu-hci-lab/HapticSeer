@@ -2,6 +2,7 @@
 using Emgu.CV.CvEnum;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -13,7 +14,6 @@ namespace ImageProcessModule
 {
     public partial class ImageProcessBase
     {
-        public static long CaptureTicks;
         /// <summary>
         /// The fraction of left border in this Image.
         /// 0 is the most left. 1 is the most right

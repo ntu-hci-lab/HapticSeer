@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -64,6 +65,7 @@ namespace ScreenCapture
 
         private void BloodDetectorEvent(ImageProcess sender, Mat mat)
         {
+            var startTick = Program.globalStopwatch.ElapsedTicks;
             if (!sender.Variable.ContainsKey("BinaryImage"))
                 sender.Variable.Add("BinaryImage", new Mat(mat.Size, DepthType.Cv8U, 1));
 
@@ -100,13 +102,19 @@ namespace ScreenCapture
 #if DEBUG
             //Console.WriteLine($"Actual: {NowBlood.ToString("0.000")}\t Filted: {EstimatedBlood.ToString("0.000")}");
 #endif
-            if(bloodOutlet!=null)
+            if (bloodOutlet != null)
+            {
                 publisher.Publish(bloodOutlet, NowBlood.ToString("0.000"));
+                Program.logWriters[0].WriteLineAsync(
+$"{(double)startTick / Stopwatch.Frequency * 1000},{(double)Program.globalStopwatch.ElapsedTicks / Stopwatch.Frequency * 1000}");
+            }
+                
             sender.Variable["LowPassFilter_Blood"] = EstimatedBlood;
         }
 
         private void BulletInGunEvent(ImageProcess sender, Mat mat)
         {
+            var startTick = Program.globalStopwatch.ElapsedTicks;
             if (!sender.Variable.ContainsKey("BinaryImage"))
                 sender.Variable.Add("BinaryImage", new Mat(mat.Size, DepthType.Cv8U, 1));
 
@@ -128,7 +136,12 @@ namespace ScreenCapture
                     if (Int32.TryParse(bulletStr, out int num))
                     {
                         if(bulletOutlet != null)
+                        {
                             publisher.Publish(bulletOutlet, num.ToString());
+                            Program.logWriters[1].WriteLineAsync(
+$"{(double)startTick / Stopwatch.Frequency * 1000},{(double)Program.globalStopwatch.ElapsedTicks / Stopwatch.Frequency * 1000}");
+                        }
+                            
 #if DEBUG
                         Console.WriteLine($"Bullet in gun: {num}\t");
 #endif

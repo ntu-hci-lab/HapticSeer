@@ -123,8 +123,6 @@ namespace ScreenCapture
                     // Try to get duplicated frame within given time
                     duplicatedOutput.AcquireNextFrame(10000, out duplicateFrameInformation, out screenResource);
 
-                    ImageProcessBase.CaptureTicks = DateTime.Now.Ticks;
-
                     // copy resource into memory that can be accessed by the CPU
                     using (var screenTexture2D = screenResource.QueryInterface<Texture2D>())
                         device.ImmediateContext.CopyResource(screenTexture2D, screenTexture);
