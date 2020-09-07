@@ -54,17 +54,16 @@ namespace AudioProcessor
 
         private void CastToDoubleArray()
         {
-            for (int block = 0; block < filterBuffer.Length; block++)
-            {
-                mixedMonoLevel[block] = filterBuffer[block];
-            }
+            mixedMonoLevel = Array.ConvertAll<float, double>(
+                filterBuffer, item => (double)item
+            );
         }
 
         private double GetCurrentReading()
         {
             for (int block = 0; block < mixedMonoLevel.Length; block++)
             {
-                mixedMonoLevel[block] = Math.Pow(mixedMonoLevel[block], 2);
+                mixedMonoLevel[block] *= mixedMonoLevel[block];
             }
 
             return 20 * Math.Log(Math.Sqrt(mixedMonoLevel.Average()));
