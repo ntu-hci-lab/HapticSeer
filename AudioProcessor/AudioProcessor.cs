@@ -5,7 +5,7 @@ using CSCore.Streams;
 using RedisEndpoint;
 using System;
 using System.Collections.Generic;
-
+using System.Threading.Tasks;
 namespace AudioProcessor
 {
 
@@ -101,10 +101,10 @@ namespace AudioProcessor
 
         List<float[]> Deinterlacing(List<float[]> monoBuffers, float[] blockBuffer, int channelNum)
         {
-            for (int block = 0; block < blockBuffer.Length; block++)
+            Parallel.For(0, blockBuffer.Length, (block) =>
             {
                 monoBuffers[block % channelNum][block / channelNum] = blockBuffer[block];
-            }
+            });
             return monoBuffers;
         }
 
