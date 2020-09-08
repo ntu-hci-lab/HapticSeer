@@ -370,3 +370,4 @@ FodyWeavers.xsd
 /ProjectCarsMemMap/raw.txt
 /SimDevice
 *.csv
+*.xlsx

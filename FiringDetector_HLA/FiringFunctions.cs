@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Windows;
+using static LatencyLogger.LatencyLoggerBase;
 namespace HLADetectors
 {
     public static class FiringFunctions
@@ -52,6 +53,7 @@ namespace HLADetectors
         }
         static void UpdateBulletState(string inputMsg, ref StateObject state)
         {
+            var startMs = GetElapsedMillseconds();
 #if DEBUG
             var start = commonStopwatch.Elapsed;
 #endif
@@ -63,8 +65,11 @@ namespace HLADetectors
                 {
                     if (state.BulletCount > curBullet)
                     {
-                        if(state.fireOutlet!=null)
-                        state.publisher.Publish(state.fireOutlet, "FIRE");
+                        Program.loggers.processTimeLoggers["firing_detector"].WriteLineAsync(
+                            $"{startMs},{GetElapsedMillseconds()}"
+                        );
+                        if (state.fireOutlet!=null)
+                            state.publisher.Publish(state.fireOutlet, "FIRE");
 # if DEBUG
                         Console.WriteLine("Fire: "+(fireCount++).ToString());
 # endif

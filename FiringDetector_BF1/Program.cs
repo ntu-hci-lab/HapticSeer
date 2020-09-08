@@ -1,10 +1,7 @@
 ﻿
 using System;
-using System.Diagnostics;
-using System.IO;
-using System.Text;
 using RedisEndpoint;
-
+using LatencyLogger;
 namespace BF1Detectors
 {
     class Program
@@ -12,8 +9,13 @@ namespace BF1Detectors
         const string URL = "localhost";
         const ushort PORT = 6380;
 
+        public static LatencyLoggerBase loggers;
+
         static int Main(string[] args)
         {
+            loggers = new LatencyLoggerBase(
+            new string[] { "firing_detector" }, "BF1"
+            );
             FiringDetector f = new FiringDetector(URL,
                 PORT,
                 enableHighFreqWeapons: true,

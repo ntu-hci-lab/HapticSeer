@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using System.IO;
+using System.Diagnostics;
 
 namespace BF1Detectors
 {
@@ -35,6 +37,7 @@ namespace BF1Detectors
             var args = msg.Substring(sep).Split('|');
             if (msg.Substring(0, sep) == "RightTrigger")
             {
+
                 state.TriggerState = byte.Parse(args[2]);
                 if (state.TriggerState > TRIGGER_THRESHOLD)
                 {
@@ -57,6 +60,7 @@ namespace BF1Detectors
         }
         static void UpdateBulletState(string inputMsg, ref StateObject state)
         {
+            var startMs = LatencyLogger.LatencyLoggerBase.GetElapsedMillseconds();
             ushort curBullet;
             try
             {
@@ -68,6 +72,9 @@ namespace BF1Detectors
                     {
                         if (state.BulletCount > curBullet && !state.IsAutoFire)
                         {
+                            Program.loggers.processTimeLoggers["firing_detector"].WriteLineAsync(
+                                $"{startMs},{LatencyLogger.LatencyLoggerBase.GetElapsedMillseconds()},1"    
+                            );
                             if (state.FireOutlet != null)
                                 state.publisher.Publish(state.FireOutlet, "FIRE");
 #if DEBUG
@@ -93,14 +100,17 @@ namespace BF1Detectors
         }
         static void UpdatePulseState(string inputMsg, ref StateObject state)
         {
-            if ( state.TriggerState > TRIGGER_THRESHOLD )
-            {
+            var startMs = LatencyLogger.LatencyLoggerBase.GetElapsedMillseconds();
+            if ( state.TriggerState > TRIGGER_THRESHOLD) {
                 var timespan = (DateTime.Now - state.LastTriggerEnter).Value.Ticks 
                     / TimeSpan.TicksPerMillisecond;
                 if ( timespan > EPS)
                 {
                     state.IsAutoFire = true;
-                    if(state.FireOutlet != null)
+                    Program.loggers.processTimeLoggers["firing_detector"].WriteLineAsync(
+                                $"{startMs},{LatencyLogger.LatencyLoggerBase.GetElapsedMillseconds()},2"
+                    );
+                    if (state.FireOutlet != null)
                         state.publisher.Publish(state.FireOutlet, "FIRE");
 #if DEBUG
                     Console.WriteLine($"Auto: {state.IsAutoFire}, " + (fireCount++).ToString());
