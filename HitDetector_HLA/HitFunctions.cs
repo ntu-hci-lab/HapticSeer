@@ -1,6 +1,7 @@
 ﻿#define LOG
 using System;
 using System.Diagnostics;
+using static LatencyLogger.LatencyLoggerBase;
 
 namespace HLADetectors
 {
@@ -22,6 +23,7 @@ namespace HLADetectors
         }
         static void UpdateHPState(string inputMsg, ref StateObject state)
         {
+            var startMs = GetElapsedMillseconds();
             var start = commonStopwatch.Elapsed;
             double curHP;
             byte roundedCurHP;
@@ -39,7 +41,10 @@ namespace HLADetectors
                         {
                             state.LastBloodLossSignal = DateTime.Now;
                             state.RealHP = roundedCurHP;
-                            if(state.hitOutlet!=null)
+                            Program.loggers.processTimeLoggers["hit_detector"].WriteLineAsync(
+                                $"{startMs},{GetElapsedMillseconds()},1"
+                            );
+                            if (state.hitOutlet!=null)
                                 state.publisher.Publish(state.hitOutlet, bloodLoss.ToString());
                             Console.WriteLine("HIT");
                         }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using RedisEndpoint;
+
 namespace BF1Detectors
 {
     class FiringDetector

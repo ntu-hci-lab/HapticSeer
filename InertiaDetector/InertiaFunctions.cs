@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text;
+using static LatencyLogger.LatencyLoggerBase;
 namespace PC2Detectors
 {
     public static class InertiaFunctions
@@ -16,7 +17,6 @@ namespace PC2Detectors
 # endif
         public static void Router(string channelName, string msg, ref StateObject state)
         {
-            var start = Program.globalSW.ElapsedTicks;
             if(channelName == state.xinputInlet)
             {
                 int headerPos = msg.IndexOf('|');
@@ -31,6 +31,7 @@ namespace PC2Detectors
         }
         public static void UpdateSpeedState(string msg, ref StateObject state)
         {
+            var startMs = GetElapsedMillseconds();
             string[] splited = msg.Split(',');
             try
             {
@@ -38,8 +39,13 @@ namespace PC2Detectors
                 if (parsedSpeed == 0) return;
                 state.Speed = parsedSpeed;
                 state.Angle = state.LastAngle;
-                if (state.accXOutlet != null) state.publisher.Publish(state.accXOutlet, $"{state.AccelX.ToString()}");
-                if (state.accYOutlet != null) state.publisher.Publish(state.accYOutlet, $"{state.AccelY.ToString()}");
+                var accX = state.AccelX;
+                var accY = state.AccelY;
+                Program.loggers.processTimeLoggers["inertia_detector"].WriteLineAsync(
+                    $"{startMs},{GetElapsedMillseconds()}"
+                );
+                if (state.accXOutlet != null) state.publisher.Publish(state.accXOutlet, $"{accX.ToString()}");
+                if (state.accYOutlet != null) state.publisher.Publish(state.accYOutlet, $"{accY.ToString()}");
 # if LOG
                 csvWriter.WriteLine($"{(DateTime.Now - startTime).Ticks / TimeSpan.TicksPerMillisecond},{state.AccelX},{state.AccelY}");
 # endif

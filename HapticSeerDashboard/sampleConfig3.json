@@ -3,14 +3,14 @@
     {
       "Name": "HUDExtractorSet",
       "Preset": "BF1",
-      "Outlets": [ "BULLET", "BLOOD", "HIT" ]
-    },
-    {
-      "Name": "GenericPulseExtractor",
-      "Outlets": [ "PULSE" ],
+      "Outlets": [ "BULLET", "BLOOD", "HIT" ],
       "Options": {
         "UseShellExecute": "True"
       }
+    },
+    {
+      "Name": "GenericPulseExtractor",
+      "Outlets": [ "PULSE" ]
     }
   ],
   "RawCapturers": [

@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\LatencyLogger\LatencyLogger.csproj" />
     <ProjectReference Include="..\RedisEndpoint_dotnetCore\RedisEndpoint_dotnetCore.csproj" />
   </ItemGroup>
 
