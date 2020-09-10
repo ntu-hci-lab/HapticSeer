@@ -26,10 +26,7 @@
       "Name": "HitDetector",
       "Preset":  "HLA",
       "Inlets": [ "BLOOD" ],
-      "Outlets": [ "HURT" ],
-      "Options": {
-        "UseShellExecute": "True"
-      }
+      "Outlets": [ "HURT" ]
     }
   ]
 }

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text;
-using static LatencyLogger.LatencyLoggerBase;
+using static EvaluationLogger.Base;
 namespace PC2Detectors
 {
     public static class InertiaFunctions
@@ -41,8 +41,8 @@ namespace PC2Detectors
                 state.Angle = state.LastAngle;
                 var accX = state.AccelX;
                 var accY = state.AccelY;
-                Program.loggers.processTimeLoggers["inertia_detector"].WriteLineAsync(
-                    $"{startMs},{GetElapsedMillseconds()}"
+                Program.loggers.loggerDict["inertia_detector"].WriteLineAsync(
+                    $"{state.AccelX},{state.AccelY},{GetElapsedMillseconds()}"
                 );
                 if (state.accXOutlet != null) state.publisher.Publish(state.accXOutlet, $"{accX.ToString()}");
                 if (state.accYOutlet != null) state.publisher.Publish(state.accYOutlet, $"{accY.ToString()}");

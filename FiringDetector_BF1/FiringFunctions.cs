@@ -60,7 +60,7 @@ namespace BF1Detectors
         }
         static void UpdateBulletState(string inputMsg, ref StateObject state)
         {
-            var startMs = LatencyLogger.LatencyLoggerBase.GetElapsedMillseconds();
+            var startMs = EvaluationLogger.Base.GetElapsedMillseconds();
             ushort curBullet;
             try
             {
@@ -72,8 +72,8 @@ namespace BF1Detectors
                     {
                         if (state.BulletCount > curBullet && !state.IsAutoFire)
                         {
-                            Program.loggers.processTimeLoggers["firing_detector"].WriteLineAsync(
-                                $"{startMs},{LatencyLogger.LatencyLoggerBase.GetElapsedMillseconds()},1"    
+                            Program.loggers.loggerDict["firing_detector"].WriteLineAsync(
+                                $"{startMs},{EvaluationLogger.Base.GetElapsedMillseconds()},1"    
                             );
                             if (state.FireOutlet != null)
                                 state.publisher.Publish(state.FireOutlet, "FIRE");
@@ -100,15 +100,15 @@ namespace BF1Detectors
         }
         static void UpdatePulseState(string inputMsg, ref StateObject state)
         {
-            var startMs = LatencyLogger.LatencyLoggerBase.GetElapsedMillseconds();
+            var startMs = EvaluationLogger.Base.GetElapsedMillseconds();
             if ( state.TriggerState > TRIGGER_THRESHOLD) {
                 var timespan = (DateTime.Now - state.LastTriggerEnter).Value.Ticks 
                     / TimeSpan.TicksPerMillisecond;
                 if ( timespan > EPS)
                 {
                     state.IsAutoFire = true;
-                    Program.loggers.processTimeLoggers["firing_detector"].WriteLineAsync(
-                                $"{startMs},{LatencyLogger.LatencyLoggerBase.GetElapsedMillseconds()},2"
+                    Program.loggers.loggerDict["firing_detector"].WriteLineAsync(
+                                $"{startMs},{EvaluationLogger.Base.GetElapsedMillseconds()},2"
                     );
                     if (state.FireOutlet != null)
                         state.publisher.Publish(state.FireOutlet, "FIRE");

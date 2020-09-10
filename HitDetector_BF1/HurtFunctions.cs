@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
-using static LatencyLogger.LatencyLoggerBase;
+using static EvaluationLogger.Base;
 namespace BF1Detectors
 {
     public static class HurtFunctions
@@ -45,7 +45,7 @@ namespace BF1Detectors
                             (now - state.LastHitSignal).TotalMilliseconds       > HIT_EPS)
                         {
                             state.LastHitSignal = now;
-                            Program.loggers.processTimeLoggers["hit_detector"].WriteLineAsync(
+                            Program.loggers.loggerDict["hit_detector"].WriteLineAsync(
                                 $"{startMs},{GetElapsedMillseconds()},1"
                             );
                             if (state.IncomingOutlet != null)

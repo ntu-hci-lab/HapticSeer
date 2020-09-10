@@ -1,10 +1,9 @@
-﻿
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
 using RedisEndpoint;
-using LatencyLogger;
+using EvaluationLogger;
 namespace HLADetectors
 {
     class Program
@@ -12,11 +11,11 @@ namespace HLADetectors
         const string URL = "localhost";
         const ushort PORT = 6380;
 
-        public static LatencyLoggerBase loggers;
+        public static Base loggers;
 
         static int Main(string[] args)
         {
-            loggers = new LatencyLoggerBase(
+            loggers = new Base(
                 new string[] { "hit_detector" }, "HLA"
             );
             HitDetector h = new HitDetector(URL, PORT, args[0], args[1]);
