@@ -35,7 +35,7 @@ namespace ScreenCapture
                     {
                         AutoFlush = true
                     };
-                    tesseractEngine = new TesseractEngine(Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory), "Alyx+eng", EngineMode.Default);
+                    tesseractEngine = new TesseractEngine(Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory), "HalfLife", EngineMode.Default);
                     return new HLA(outlets[0], outlets[1]);
                 case 2:
                     Program.logWriters = new StreamWriter[1];
