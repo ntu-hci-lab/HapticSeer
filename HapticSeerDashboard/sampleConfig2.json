@@ -3,7 +3,10 @@
     {
       "Name": "HUDExtractorSet",
       "Preset": "PC2",
-      "Outlets": [ "SPEED" ]
+      "Outlets": [ "SPEED" ],
+      "Options": {
+        "UseShellExecute": "True"
+      }
     }
   ],
   "RawCapturers": [
@@ -17,10 +20,7 @@
       "Name": "InertiaDetector",
       "Preset": "PC2",
       "Inlets": [ "SPEED", "XINPUT" ],
-      "Outlets": [ "ACCELX", "ACCELY" ],
-      "Options": {
-        "UseShellExecute": "True"
-      }
+      "Outlets": [ "ACCELX", "ACCELY" ]
     }
   ]
 }
