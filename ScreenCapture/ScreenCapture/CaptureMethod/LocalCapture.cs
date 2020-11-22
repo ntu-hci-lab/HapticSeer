@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Drawing.Imaging;
 using System.Threading;
 using Emgu.CV;
 using Emgu.CV.CvEnum;
@@ -123,7 +122,6 @@ namespace ScreenCapture
 
                     // Try to get duplicated frame within given time
                     duplicatedOutput.AcquireNextFrame(10000, out duplicateFrameInformation, out screenResource);
-
 
                     // copy resource into memory that can be accessed by the CPU
                     using (var screenTexture2D = screenResource.QueryInterface<Texture2D>())

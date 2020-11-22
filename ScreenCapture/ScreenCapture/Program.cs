@@ -1,25 +1,34 @@
-﻿using ImageProcessModule;
-using ImageProcessModule.ProcessingClass;
+using ImageProcessModule;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
-using System.Management;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace ScreenCapture
 {
     class Program
     {
+        /// <summary>
+        /// Specify the scenario that the program runs
+        /// </summary>
+        public enum GameType
+        {
+            None,
+            HLA,
+            PC2,
+            BF1
+        }
+        public static Stopwatch globalStopwatch;
+        public static StreamWriter[] logWriters;
+        public static long startTimeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         static BitmapBuffer bitmapBuffer = new BitmapBuffer();
         static CaptureMethod captureMethod;
+
         /// <summary>
         /// Parse Argument to get the Capture Method
         /// </summary>
         /// <param name="args">Args from Main</param>
-        static void ArgumentParser(string[] args)
+        /*static void ArgumentParser(string[] args)
         {
             if (String.Compare(args[0], "Local", StringComparison.OrdinalIgnoreCase) == 0)
                 captureMethod = new LocalCapture(bitmapBuffer); //Default: Local Capture
@@ -37,24 +46,29 @@ namespace ScreenCapture
                 // Force close the process
                 Process.GetCurrentProcess().Kill();
             }
-        }
+        }*/
         static void Main(string[] args)
         {
-            Thread.Sleep(5000);
+            globalStopwatch = new Stopwatch();
+            globalStopwatch.Start();
+
+            //Thread.Sleep(5000);
             Console.CancelKeyPress +=
                 new ConsoleCancelEventHandler((o, t) =>
                 {
                     captureMethod.Stop();   //Stop Capturing
                 });
 
-            // Check the Capture Method from args
-            if (args.Length == 0)
-                captureMethod = new LocalCapture(bitmapBuffer); // Default: Local Capture
-            else
-                ArgumentParser(args); // Parse Arguments
+            captureMethod = new LocalCapture(bitmapBuffer);
 
-            if (captureMethod == null)
-                throw new Exception("Error! CaptureMethod is null!");
+            // Check the Capture Method from args
+            //if (args.Length == 0)
+            //    captureMethod = new LocalCapture(bitmapBuffer); // Default: Local Capture
+            //else
+            //    ArgumentParser(args); // Parse Arguments
+
+            //if (captureMethod == null)
+            //    throw new Exception("Error! CaptureMethod is null!");
 
             // Start Capture
             captureMethod.Start();
@@ -62,17 +76,15 @@ namespace ScreenCapture
             // Start dispatch frames
             bitmapBuffer.StartDispatchToImageProcessBase();
 
-            ImageProcess imageProcess = new ImageProcess(0.5);
-            imageProcess.NewFrameArrivedEvent += new ImageProcess.NewFrameArrived((mat) =>
-            {
-                mat.Save("O:\\p.png");
-            });
-            BarBloodIndicatorDetector barBloodIndicatorDetector = new BarBloodIndicatorDetector();
+            FeatureExtractors arrivalEvents = FeatureExtractors.InitFeatureExtractor(
+                (int)Enum.Parse(typeof(GameType), args[0]),
+                args.Skip(1).ToArray()
+            );
 
             // Do Cache Optimizer
             CacheOptimizer.Init();
             CacheOptimizer.ResetAllAffinity();
         }
-
     }
+
 }

@@ -1,0 +1,35 @@
+﻿{
+  "ExtractorSets": [
+    {
+      "Name": "HUDExtractorSet",
+      "Preset": "HLA",
+      "Outlets": [ "BULLET", "BLOOD" ]
+    }
+  ],
+  "RawCapturers": [
+    {
+      "Name": "GenericOpenVRInputCapturer",
+      "Outlets": [ "OPENVR" ]
+    }
+  ],
+  "EventDetectors": [
+    {
+      "Name": "FiringDetector",
+      "Preset": "HLA",
+      "Inlets": [ "BULLET", "OPENVR" ],
+      "Outlets": [ "Fire" ],
+      "Options": {
+        "UseShellExecute": "True"
+      }
+    },
+    {
+      "Name": "HitDetector",
+      "Preset":  "HLA",
+      "Inlets": [ "BLOOD" ],
+      "Outlets": [ "HURT" ],
+      "Options": {
+        "UseShellExecute": "True"
+      }
+    }
+  ]
+}

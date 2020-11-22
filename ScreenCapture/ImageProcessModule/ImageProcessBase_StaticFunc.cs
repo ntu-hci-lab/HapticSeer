@@ -12,7 +12,7 @@ namespace ImageProcessModule
 {
     public partial class ImageProcessBase
     {
-        protected static Mat Kernel_4x4
+        public static Mat Kernel_4x4
         {
             get
             {
@@ -28,8 +28,8 @@ namespace ImageProcessModule
                 return Kernel_4x4;
             }
         }
-        protected static Mat _Kernel_4x4 = null;
-        protected static Mat Kernel_2x2
+        public static Mat _Kernel_4x4 = null;
+        public static Mat Kernel_2x2
         {
             get
             {
@@ -45,7 +45,7 @@ namespace ImageProcessModule
                 return _Kernel_2x2;
             }
         }
-        protected static Mat _Kernel_2x2 = null;
+        public static Mat _Kernel_2x2 = null;
         public enum ImageScaleType
         {
             OriginalSize,

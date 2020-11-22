@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "HapticSeerDashboard": {
+      "commandName": "Project",
+      "commandLineArgs": "sampleConfig.json"
+    }
+  }
+}

@@ -1,0 +1,26 @@
+﻿{
+  "ExtractorSets": [
+    {
+      "Name": "HUDExtractorSet",
+      "Preset": "PC2",
+      "Outlets": [ "SPEED" ]
+    }
+  ],
+  "RawCapturers": [
+    {
+      "Name": "GenericXboxInputCapturer",
+      "Outlets": [ "XINPUT" ]
+    }
+  ],
+  "EventDetectors": [
+    {
+      "Name": "InertiaDetector",
+      "Preset": "PC2",
+      "Inlets": [ "SPEED", "XINPUT" ],
+      "Outlets": [ "ACCELX", "ACCELY" ],
+      "Options": {
+        "UseShellExecute": "True"
+      }
+    }
+  ]
+}

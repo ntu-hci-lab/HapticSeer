@@ -2,7 +2,9 @@
 using Emgu.CV.CvEnum;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -106,7 +108,7 @@ namespace ImageProcessModule
         /// </summary>
         /// <param name="IsAddImageProcessList">The object will be added to a list that stores all objects whose class is devided from ImageProcessBase. Only when this is true, the object will continuously receive new frame.</param>
         /// <param name="IsCreateNewThread">A new thread will be created for computing. If it is false, then it is necessary to call ImageHandler.</param>
-        public ImageProcessBase(bool IsAddImageProcessList = true, bool IsCreateNewThread = true)
+        public ImageProcessBase(ImageScaleType ImageScale, bool IsAddImageProcessList = true, bool IsCreateNewThread = true)
         {
             if (IsAddImageProcessList)
             {
@@ -152,7 +154,7 @@ namespace ImageProcessModule
                 Buffer.MemoryCopy(ResizedData.DataPointer.ToPointer(), Data.DataPointer.ToPointer(), TotalSize, TotalSize);
             }
             else
-            {   
+            {
                 // The image need to be clipped
                 int RawDataOffset =
                     +4 * ImageTop * ResizedData.Cols  // Skip Top Pixel
@@ -163,7 +165,7 @@ namespace ImageProcessModule
                 for (int i = 0; i < Data_Height; ++i)
                 {
                     // 4 Bytes * Data_Width * i-th rows
-                    int OutputDataOffset = (4 * i * Data_Width);    
+                    int OutputDataOffset = (4 * i * Data_Width);
 
                     // Compute pointer
                     IntPtr DstPointer = Data.DataPointer + OutputDataOffset,
@@ -172,11 +174,20 @@ namespace ImageProcessModule
                     Buffer.MemoryCopy(SrcPointer.ToPointer(), DstPointer.ToPointer(), Length, Length);
                     RawDataOffset += 4 * ResizedData.Cols;
                 }
-            } 
+            }
             // Update done flag
             IsUpdatingData = false;
             // Tell worker thread that it can be process now
             IsProcessingData = true;
+        }
+
+        // Save image to "/cropImage"
+        public static void Save(Mat img, string filename)
+        {
+            var bitmapImage = img.ToBitmap();
+            filename = Directory.GetCurrentDirectory() + "\\cropImage\\" + filename + ".png";
+            Console.WriteLine(filename);
+            bitmapImage.Save(filename, System.Drawing.Imaging.ImageFormat.Png);
         }
     }
 }

@@ -9,9 +9,10 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ImageProcessModule</RootNamespace>
     <AssemblyName>ImageProcessModule</AssemblyName>
-    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -28,7 +29,8 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>
+    </DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -50,17 +52,15 @@
     <Compile Include="BitmapBuffer.cs" />
     <Compile Include="ImageProcessBase.cs" />
     <Compile Include="ImageProcessBase_StaticFunc.cs" />
-    <Compile Include="ProcessingClass\BarBloodIndicatorDetector.cs" />
-    <Compile Include="ProcessingClass\BulletCounter.cs" />
-    <Compile Include="ProcessingClass\CircularIndicatorDetector.cs" />
     <Compile Include="ProcessingClass\ImageProcess.cs" />
-    <Compile Include="ProcessingClass\OpticalFlow.cs" />
-    <Compile Include="ProcessingClass\RedImpulseDetection.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Emgu.CV">
-      <Version>4.2.0.3662</Version>
+      <Version>4.3.0.3890</Version>
+    </PackageReference>
+    <PackageReference Include="Emgu.CV.runtime.windows">
+      <Version>4.3.0.3890</Version>
     </PackageReference>
     <PackageReference Include="System.Threading.Tasks.Dataflow">
       <Version>4.11.1</Version>

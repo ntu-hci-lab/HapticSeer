@@ -1,4 +1,5 @@
-﻿using Emgu.CV;
+﻿#define LOGTIME
+using Emgu.CV;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -12,13 +13,15 @@ namespace ImageProcessModule.ProcessingClass
 {
     public class ImageProcess : ImageProcessBase
     {
+        /*User Defined Variable*/
+        public Dictionary<string, object> Variable = new Dictionary<string, object>();
         /*Initialized By ctor*/
         private double Fraction_Left, Fraction_Right, Fraction_Top, Fraction_Bottom;
         private ImageScaleType IncomingImageScale;
         private int PreferFrameRate;
         /*Initialized By ctor*/
 
-        public delegate void NewFrameArrived(Mat mat);
+        public delegate void NewFrameArrived(ImageProcess sender, Mat mat);
 
         // Declare the event.
         public event NewFrameArrived NewFrameArrivedEvent;
@@ -63,9 +66,9 @@ namespace ImageProcessModule.ProcessingClass
 
         // Signal of stopping running
         private bool IsStopRunning = false;
+        // Record Timestamp 
         private Stopwatch stopwatch;
         private uint NewFrameCount = 0;
-        // Record Timestamp 
 
         /// <summary>
         /// Create a Image Processor to receive the frame from CaptureCard/Texture2D.
@@ -90,7 +93,7 @@ namespace ImageProcessModule.ProcessingClass
         /// <param name="ImageScale">The scale of incoming image.</param>
         /// <param name="FrameRate">The frame rate that application requires. Use negative number to represent infinity.</param>
         public ImageProcess(double Fraction_Left = 0, double Fraction_Right = 1, double Fraction_Top = 0, double Fraction_Bottom = 1, ImageScaleType ImageScale = ImageScaleType.OriginalSize, int FrameRate = 1)
-            :base()
+            : base(ImageScale)
         {
             /*Assertion*/
             Trace.Assert(Fraction_Left >= 0 && Fraction_Left <= 1, "Border Fraction should belongs to [0, 1].");
@@ -118,6 +121,8 @@ namespace ImageProcessModule.ProcessingClass
         }
         private static int CalcFrameRate(long TotalFrameCount, long ElaspedMillsecond)
         {
+            if (ElaspedMillsecond == 0)
+                return 0;
             return (int)((TotalFrameCount * 1000) / ElaspedMillsecond);
         }
         protected override void ImageHandler(object args)
@@ -128,14 +133,20 @@ namespace ImageProcessModule.ProcessingClass
                     Thread.Sleep(1);
 
                 // Check FrameRate
-                if (PreferFrameRate >= 0 && CalcFrameRate(NewFrameCount, stopwatch.ElapsedMilliseconds) >= PreferFrameRate)
-                    return;
+                if (PreferFrameRate >= 0 && stopwatch != null && CalcFrameRate(NewFrameCount, stopwatch.ElapsedMilliseconds) >= PreferFrameRate)
+                {
+                    IsProcessingData = false;
+                    continue;
+                }
+
                 // Invoke Event
-                NewFrameArrivedEvent?.Invoke(Data);
+
+                NewFrameArrivedEvent?.Invoke(this, Data);
+
 
                 // Add FrameCount
                 ++NewFrameCount;
-                
+
                 // Release Lock to fetch new frame
                 IsProcessingData = false;
             }

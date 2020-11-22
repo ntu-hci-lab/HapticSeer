@@ -7,12 +7,15 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using Valve.VR;
+using RedisEndpoint;
 using static OpenVRInputTest.VREventCallback;
 //Sources: https://github.com/BOLL7708/OpenVRInputTest
 namespace OpenVRInputTest
 {
     class Program
     {
+        public static Publisher publisher = new Publisher("localhost", 6380);
+        public static string outletChannelName;
         public static float DataFrameRate = 90f;
         static ulong mActionSetHandle;
         //static ulong mActionHandleLeftB, mActionHandleRightB, mActionHandleLeftA, mActionHandleRightA, mActionHandleChord1, mActionHandleChord2;
@@ -22,6 +25,7 @@ namespace OpenVRInputTest
         // # items are referencing this list of actions: https://github.com/ValveSoftware/openvr/wiki/SteamVR-Input#getting-started
         static void Main(string[] args)
         {
+            outletChannelName = args[0];
             // Initializing connection to OpenVR
             var error = EVRInitError.None;
             OpenVR.Init(ref error, EVRApplicationType.VRApplication_Background); // Had this as overlay before to get it working, but changing it back is now fine?
@@ -34,7 +38,8 @@ namespace OpenVRInputTest
 
                 // Load app manifest, I think this is needed for the application to show up in the input bindings at all
                 Utils.PrintVerbose("Loading app.vrmanifest");
-                var appError = OpenVR.Applications.AddApplicationManifest(Path.GetFullPath("./app.vrmanifest"), false);
+                Console.WriteLine(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Path.GetFullPath("app.vrmanifest")));
+                var appError = OpenVR.Applications.AddApplicationManifest(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Path.GetFullPath("app.vrmanifest")), false);
                 if (appError != EVRApplicationError.None)
                     Utils.PrintError($"Failed to load Application Manifest: {Enum.GetName(typeof(EVRApplicationError), appError)}");
                 else 
@@ -42,7 +47,7 @@ namespace OpenVRInputTest
 
                 // #3 Load action manifest
                 Utils.PrintVerbose("Loading actions.json");
-                var ioErr = OpenVR.Input.SetActionManifestPath(Path.GetFullPath("./actions.json"));
+                var ioErr = OpenVR.Input.SetActionManifestPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Path.GetFullPath("actions.json")));
                 if (ioErr != EVRInputError.None) 
                     Utils.PrintError($"Failed to load Action Manifest: {Enum.GetName(typeof(EVRInputError), ioErr)}");
                 else 
