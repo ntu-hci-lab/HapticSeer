@@ -20,7 +20,7 @@ namespace ScreenCapture
             this.bulletOutlet = bulletOutlet;
             this.bloodOutlet = bloodOutlet;
 
-            ImageProcessesList.Add(new ImageProcess(70 / 1920f, 366 / 1920f, 925 / 1080f, 1020 / 1080f, ImageScaleType.OriginalSize, FrameRate: 10));
+            ImageProcessesList.Add(new ImageProcess(98 / 1920f, 450 / 1920f, 892 / 1080f, 980 / 1080f, ImageScaleType.OriginalSize, FrameRate: 10));
             ImageProcessesList.Last().NewFrameArrivedEvent += BloodDetectorEvent;
 
             ImageProcessesList.Add(new ImageProcess(1580 / 1920f, 1710 / 1920f, 890 / 1080f, 985 / 1080f, ImageScaleType.OriginalSize, FrameRate: 60));
@@ -81,7 +81,7 @@ namespace ScreenCapture
             Mat BinaryImg = sender.Variable["BinaryImage"] as Mat;
             double LowPassFilter_Blood = (double)sender.Variable["LowPassFilter_Blood"];
             double BloodArea = (double)sender.Variable["BloodArea"];
-            ImageProcess.ElimateBackgroundWithSearchingSimilarColor(in mat, ref BinaryImg, new Color[] { Color.FromArgb(250, 0, 0) }, new uint[] { 0x00FF0000 }, ElimateColorApproach.ReserveSimilarColor_RemoveDifferentColor, 70);
+            ImageProcess.ElimateBackgroundWithSearchingSimilarColor(in mat, ref BinaryImg, new Color[] { Color.FromArgb(250, 0, 0) }, new uint[] { 0x00FF0000 }, ElimateColorApproach.ReserveSimilarColor_RemoveDifferentColor, 40);
             double NowBlood;
             unsafe
             {
