@@ -65,6 +65,8 @@ namespace ScreenCapture
                     };
                     tesseractEngine = new TesseractEngine(Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory), "KomuB", EngineMode.Default);
                     return new BF1(outlets[0], outlets[1], outlets[2]);
+                case 4:
+                    return new GR();
                 default:
                     throw new NotImplementedException("Invalid gameID");
             }

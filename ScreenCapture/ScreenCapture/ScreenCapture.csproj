@@ -100,6 +100,7 @@
   <ItemGroup>
     <Compile Include="FeatureExtractors.cs" />
     <Compile Include="FeatureExtractors\BF1.cs" />
+    <Compile Include="FeatureExtractors\GR.cs" />
     <Compile Include="FeatureExtractors\PC2.cs" />
     <Compile Include="FeatureExtractors\HLA.cs" />
     <Compile Include="CaptureMethod\CaptureInterface.cs" />
