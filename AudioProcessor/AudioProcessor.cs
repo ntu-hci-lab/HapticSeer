@@ -15,21 +15,16 @@ namespace AudioProcessor
     public class AudioProcessor
     {
         //All values are in ms
-        const int CAPTURE_LATENCY = 10, PROCESS_WINDOW_LENGTH = 10, LFE_CUTOFF = 125;
+        const int CAPTURE_LATENCY = 10, PROCESS_WINDOW_LENGTH = 10;
 
         private float[] blockBuffer;
-        private int channelNum, systemSampleRate, hitCount = 0;
-        private LowpassFilter lpf;
-        private Localisationer localisationer;
-        private SimplePulseDetector MonoPulseDetector, LFEPulseDetector;
-        private List<float[]> monoBuffers = new List<float[]>();
+        private int channelNum, systemSampleRate;
+        private List<float[]> pcmBuffers = new List<float[]>();
 
         public readonly static string SolutionRoot = Path.GetFullPath(Path.Combine(
             AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\.."));
-        public static Stopwatch sw = new Stopwatch();
-        public static StreamWriter processTimeLogger;
 
-        public AudioProcessor(Publisher publisher, string pulseOutlet = null)
+        public AudioProcessor(Publisher publisher, string outlet = null)
         {
             using WasapiCapture capture = new WasapiLoopbackCapture(CAPTURE_LATENCY);
             capture.Initialize();
@@ -37,76 +32,30 @@ namespace AudioProcessor
             systemSampleRate = capture.WaveFormat.SampleRate;
 
             using SoundInSource captureSource =
-                new SoundInSource(capture) { FillWithZeros = false };
+                new SoundInSource(capture){ FillWithZeros = false };
             using SimpleNotificationSource notificationSource =
                 new SimpleNotificationSource(FluentExtensions.ToSampleSource(captureSource))
                 {
                     Interval = PROCESS_WINDOW_LENGTH
                 };
 
-            InitializeMonoBuffers(monoBuffers, channelNum, notificationSource.BlockCount);
+            InitializeMonoBuffers(pcmBuffers, channelNum, notificationSource.BlockCount);
             blockBuffer = new float[notificationSource.BlockCount * channelNum];
-            lpf = new LowpassFilter(systemSampleRate, LFE_CUTOFF);
-            MonoPulseDetector =
-                new SimplePulseDetector(monoBuffers, lfeProvided: false, biQuadFilter: lpf);
-            localisationer = new Localisationer(monoBuffers);
-            if (channelNum > 2)
-            {
-                LFEPulseDetector =
-                        new SimplePulseDetector(monoBuffers, lfeProvided: true);
-            }
 
             capture.DataAvailable += (s, e) =>
             {
                 while (notificationSource.Read(blockBuffer, 0, notificationSource.BlockCount * channelNum) > 0)
                 {
-                    var dataInTick = sw.ElapsedTicks;
-                    monoBuffers = Deinterlacing(monoBuffers,
+                    // Extracted audio signal
+                    pcmBuffers = Deinterlacing(pcmBuffers,
                                                 blockBuffer,
                                                 channelNum);
-                    if (LFEPulseDetector != null)
-                    {
-                        bool m = MonoPulseDetector.Predict();
-                        bool l = LFEPulseDetector.Predict();
-                        if (m || l)
-                        {
-                            double angle = localisationer.GetLoudestAngle();
-#if DEBUG
-                            Console.Clear();
-                            Console.WriteLine($"LFE Level: {LFEPulseDetector.CurrentReading:F3}, LFE Threshold: {LFEPulseDetector.CurrentThreshold:F3}");
-                            Console.WriteLine($"Mixed Level: {MonoPulseDetector.CurrentReading:F3}, Mixed Threshold: {MonoPulseDetector.CurrentThreshold:F3}");
-                            Console.WriteLine($"Impulse Detected - Mono:{m}, LFE:{l}, Angle: {angle:F3}, Hit Count:{hitCount}");
-#endif
-                            if (publisher != null && pulseOutlet != null)
-                            {
-                                publisher.Publish(pulseOutlet, $"{m}|{l}|{angle:F3}");
-                                processTimeLogger.WriteLineAsync($"{(double)dataInTick / Stopwatch.Frequency * 1000},{(double)sw.ElapsedTicks / Stopwatch.Frequency * 1000}");
-                            }
-                                
-                            hitCount++;
-                        }
-                    }
-                    else
-                    {
-                        if (MonoPulseDetector.Predict())
-                        {
-                            double angle = localisationer.GetLoudestAngle();
-#if DEBUG
-                            Console.Clear();
-                            Console.WriteLine($"Level: {MonoPulseDetector.CurrentReading:F3}, Threshold: {MonoPulseDetector.CurrentThreshold:F3}");
-                            Console.WriteLine($"Impulse Detected - Mono, Angle:{angle:F3}, Hit Count:{hitCount}");
-#endif
-                            if (publisher != null && pulseOutlet != null)
-                            {
-                                publisher.Publish(pulseOutlet, $"True|False|{angle:F3}");
-                                processTimeLogger.WriteLineAsync($"{(double) dataInTick / Stopwatch.Frequency * 1000},{(double)sw.ElapsedTicks / Stopwatch.Frequency * 1000}");
-                            }
-                                
-                            hitCount++;
-                        }
-                    }
+
+                    // TODO: Implement your model
+                    publisher.Publish(outlet, "OUTPUT MESSAGE TO NEXT OUTLET");
                 }
             };
+
             StartCapturingAndHold(capture);
         }
         void InitializeMonoBuffers(List<float[]> monoBuffers, int channelNum, int blockCount)
@@ -138,12 +87,6 @@ namespace AudioProcessor
 
         public static int Main(string[] args)
         {
-            processTimeLogger = new StreamWriter(Path.Combine(SolutionRoot, 
-                $"impluse_extractor_{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}.csv")) 
-            { 
-                AutoFlush = true
-            };
-            sw.Start();
             Publisher publisher = new Publisher("localhost", 6380);
             AudioProcessor audioProcessor = new AudioProcessor(publisher, args[0]);
             return 0;
