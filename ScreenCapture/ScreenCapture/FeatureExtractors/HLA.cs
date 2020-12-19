@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using Accord;
 using Emgu.CV;
 using Emgu.CV.CvEnum;
 using ImageProcessModule.ProcessingClass;
@@ -121,13 +122,13 @@ $"{(double)startTick / Stopwatch.Frequency * 1000},{(double)Program.globalStopwa
 
             Mat BinaryImg = sender.Variable["BinaryImage"] as Mat;
             ImageProcess.ElimateBackgroundWithSearchingSimilarColor(in mat, ref BinaryImg, new Color[] { Color.FromArgb(250, 0, 0) }, new uint[] { 0x00FF0000 }, ElimateColorApproach.ReserveSimilarColor_RemoveDifferentColor, 70);
-            CvInvoke.MorphologyEx(BinaryImg, BinaryImg, MorphOp.Open, ImageProcess.Kernel_2x2, new Point(0, 0), 1, BorderType.Default, new Emgu.CV.Structure.MCvScalar(0, 0, 0));
+            CvInvoke.MorphologyEx(BinaryImg, BinaryImg, MorphOp.Open, ImageProcess.Kernel_2x2, new System.Drawing.Point(0, 0), 1, BorderType.Default, new Emgu.CV.Structure.MCvScalar(0, 0, 0));
             // Tesseract OCR
             Pix pixImage;
             Page page;
             try
             {
-                pixImage = PixConverter.ToPix(BinaryImg.ToBitmap());
+                pixImage = PixConverter.ToPix(BinaryImg.To<Bitmap>());
                 page = tesseractEngine.Process(pixImage, PageSegMode.SingleBlock);
                 var bulletStr = page.GetText();
                 page.Dispose();

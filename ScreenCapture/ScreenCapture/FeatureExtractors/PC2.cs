@@ -11,6 +11,7 @@ using Tesseract;
 using System.Globalization;
 using static ImageProcessModule.ImageProcessBase;
 using System.Diagnostics;
+using Accord;
 
 namespace ScreenCapture
 {
@@ -58,7 +59,7 @@ namespace ScreenCapture
 
             try
             {
-                Bitmap BitmapFrame = mat.ToBitmap();
+                Bitmap BitmapFrame = mat.To<Bitmap>();
                 /* image processing */
                 speedImageProcess.ToBlackWhite(BitmapFrame); // grayscale(black and white)
                 // BitmapFrame = speedImageProcess.NegativePicture(BitmapFrame); //turn into negative image

@@ -19,7 +19,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XBoxInputWrapper", "XBoxInp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RedisEndpoint_dotnetCore", "RedisEndpoint_dotnetCore\RedisEndpoint_dotnetCore.csproj", "{83538ABD-3AE3-4DD7-87FE-58CA3816C315}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ProjectCarsMemMap", "ProjectCarsMemMap\MemMap.vcxproj", "{ADC4AEE6-4946-4818-A6B1-B1BA8243712F}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MemMap", "ProjectCarsMemMap\MemMap.vcxproj", "{ADC4AEE6-4946-4818-A6B1-B1BA8243712F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HapticSeerDashboard", "HapticSeerDashboard\HapticSeerDashboard.csproj", "{64E42399-6765-4298-8C99-93D1D1F7F443}"
 	ProjectSection(ProjectDependencies) = postProject

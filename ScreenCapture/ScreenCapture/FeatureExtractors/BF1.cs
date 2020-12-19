@@ -9,6 +9,7 @@ using RedisEndpoint;
 using static ImageProcessModule.ImageProcessBase;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using Accord;
 
 namespace ScreenCapture
 {
@@ -55,7 +56,7 @@ namespace ScreenCapture
             /* use Tesseract to recognize number */
             try
             {
-                pixImage = PixConverter.ToPix(BinaryImg.ToBitmap());
+                pixImage = PixConverter.ToPix(BinaryImg.To<Bitmap>());
                 tesseractEngine.DefaultPageSegMode = PageSegMode.SingleBlock;
                 page = tesseractEngine.Process(pixImage);
                 var bulletStr = page.GetText(); // 識別後的內容
@@ -189,7 +190,7 @@ $"{(double)startTick / Stopwatch.Frequency * 1000},{(double)Program.globalStopwa
 
                 }
                 //Console.WriteLine("DamageIndicator Latency: {0}", (DateTime.Now.Ticks - temp) / (double)TimeSpan.TicksPerMillisecond);
-                CvInvoke.Blur(AvailableImg, AvailableImg, new Size(5, 5), new Point(0, 0));
+                CvInvoke.Blur(AvailableImg, AvailableImg, new Size(5, 5), new System.Drawing.Point(0, 0));
                 sender.Variable["LastImg"] = AvailableImg;
                 sender.Variable["AvailableImg"] = LastImg;
             }
