@@ -11,6 +11,7 @@ using Tesseract;
 using System.Globalization;
 using static ImageProcessModule.ImageProcessBase;
 using System.Diagnostics;
+using Accord;
 
 namespace ScreenCapture
 {
@@ -58,7 +59,7 @@ namespace ScreenCapture
 
             try
             {
-                Bitmap BitmapFrame = mat.ToBitmap();
+                Bitmap BitmapFrame = mat.To<Bitmap>();
                 /* image processing */
                 speedImageProcess.ToBlackWhite(BitmapFrame); // grayscale(black and white)
                 // BitmapFrame = speedImageProcess.NegativePicture(BitmapFrame); //turn into negative image
@@ -71,15 +72,16 @@ namespace ScreenCapture
 
                 ///* Parse str to int */
                 bool isParsable = Int32.TryParse(speedStr, out speed);
-                if (!isParsable)
+                if (!isParsable || speed < 0 || speed > 300 || Math.Abs(preSpeed-speed) > 6 ) // 6 = 200m/s^2
                 {
+                    Console.WriteLine($"Error: {speed}");
                     // Console.WriteLine("Speed could not be parsed.");
                     speed = preSpeed; // Can't detect speed, use the previous speed value
                 }
-
-                /* Prevent negative number or large number */
-                if (speed < 0 || speed > 300)
-                    speed = preSpeed;
+                else
+                {
+                    preSpeed = speed;
+                }
             }
             catch (Exception ex)
             {
@@ -95,7 +97,7 @@ namespace ScreenCapture
             {
                 publisher.Publish(speedOutlet, $"{speed}");
                 Program.logWriters[0].WriteLineAsync(
-$"{(double)startTick / Stopwatch.Frequency * 1000},{(double)Program.globalStopwatch.ElapsedTicks / Stopwatch.Frequency * 1000}");
+$"{(double)startTick / Stopwatch.Frequency * 1000},{speed}");
             }
                 
 #endif

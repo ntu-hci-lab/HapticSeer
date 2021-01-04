@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using Accord;
 using Emgu.CV;
 using Emgu.CV.CvEnum;
 using ImageProcessModule.ProcessingClass;
@@ -20,10 +21,10 @@ namespace ScreenCapture
             this.bulletOutlet = bulletOutlet;
             this.bloodOutlet = bloodOutlet;
 
-            ImageProcessesList.Add(new ImageProcess(70 / 1920f, 366 / 1920f, 925 / 1080f, 1020 / 1080f, ImageScaleType.OriginalSize, FrameRate: 10));
+            ImageProcessesList.Add(new ImageProcess(98 / 1920f, 450 / 1920f, 892 / 1080f, 980 / 1080f, ImageScaleType.OriginalSize, FrameRate: 10));
             ImageProcessesList.Last().NewFrameArrivedEvent += BloodDetectorEvent;
 
-            ImageProcessesList.Add(new ImageProcess(1648 / 1920f, 1752 / 1920f, 927 / 1080f, 1003 / 1080f, ImageScaleType.OriginalSize, FrameRate: 60));
+            ImageProcessesList.Add(new ImageProcess(1580 / 1920f, 1710 / 1920f, 890 / 1080f, 985 / 1080f, ImageScaleType.OriginalSize, FrameRate: 60));
             ImageProcessesList.Last().NewFrameArrivedEvent += BulletInGunEvent;
 
             //ImageProcessesList.Add(new ImageProcess(1796 / 1920f, 1859 / 1920f, 986 / 1080f, 1015 / 1080f, ImageScaleType.OriginalSize, FrameRate: 3));
@@ -77,11 +78,11 @@ namespace ScreenCapture
                 double _BloodArea = mat.Height * mat.Width * 0.343;
                 sender.Variable.Add("BloodArea", _BloodArea);
             }
-            mat.Save("HLB.png");
+            //mat.Save("HLB.png");
             Mat BinaryImg = sender.Variable["BinaryImage"] as Mat;
             double LowPassFilter_Blood = (double)sender.Variable["LowPassFilter_Blood"];
             double BloodArea = (double)sender.Variable["BloodArea"];
-            ImageProcess.ElimateBackgroundWithSearchingSimilarColor(in mat, ref BinaryImg, new Color[] { Color.FromArgb(250, 0, 0) }, new uint[] { 0x00FF0000 }, ElimateColorApproach.ReserveSimilarColor_RemoveDifferentColor, 70);
+            ImageProcess.ElimateBackgroundWithSearchingSimilarColor(in mat, ref BinaryImg, new Color[] { Color.FromArgb(250, 0, 0) }, new uint[] { 0x00FF0000 }, ElimateColorApproach.ReserveSimilarColor_RemoveDifferentColor, 40);
             double NowBlood;
             unsafe
             {
@@ -114,19 +115,20 @@ $"{(double)startTick / Stopwatch.Frequency * 1000},{(double)Program.globalStopwa
 
         private void BulletInGunEvent(ImageProcess sender, Mat mat)
         {
+            //mat.Save("HLBullet.png");
             var startTick = Program.globalStopwatch.ElapsedTicks;
             if (!sender.Variable.ContainsKey("BinaryImage"))
                 sender.Variable.Add("BinaryImage", new Mat(mat.Size, DepthType.Cv8U, 1));
 
             Mat BinaryImg = sender.Variable["BinaryImage"] as Mat;
             ImageProcess.ElimateBackgroundWithSearchingSimilarColor(in mat, ref BinaryImg, new Color[] { Color.FromArgb(250, 0, 0) }, new uint[] { 0x00FF0000 }, ElimateColorApproach.ReserveSimilarColor_RemoveDifferentColor, 70);
-            CvInvoke.MorphologyEx(BinaryImg, BinaryImg, MorphOp.Open, ImageProcess.Kernel_2x2, new Point(0, 0), 1, BorderType.Default, new Emgu.CV.Structure.MCvScalar(0, 0, 0));
+            CvInvoke.MorphologyEx(BinaryImg, BinaryImg, MorphOp.Open, ImageProcess.Kernel_2x2, new System.Drawing.Point(0, 0), 1, BorderType.Default, new Emgu.CV.Structure.MCvScalar(0, 0, 0));
             // Tesseract OCR
             Pix pixImage;
             Page page;
             try
             {
-                pixImage = PixConverter.ToPix(BinaryImg.ToBitmap());
+                pixImage = PixConverter.ToPix(BinaryImg.To<Bitmap>());
                 page = tesseractEngine.Process(pixImage, PageSegMode.SingleBlock);
                 var bulletStr = page.GetText();
                 page.Dispose();

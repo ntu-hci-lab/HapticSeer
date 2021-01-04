@@ -3,17 +3,17 @@ using System.Collections.Generic;
 using System.Text;
 using System.Diagnostics;
 using System.Threading;
-using LatencyLogger;
+using EvaluationLogger;
 namespace PC2Detectors
 {
     class Program
     {
-        public static LatencyLoggerBase loggers;
+        public static Base loggers;
 
         static int Main(string[] args)
         {
             Thread.Sleep(5000);
-            loggers = new LatencyLoggerBase(
+            loggers = new Base(
                 new string[] { "inertia_detector"}, "PC2"
             );
             InertiaDetector inertiaDetector = new InertiaDetector("localhost", 6380, args[0], args[1], args[2], args[3]);

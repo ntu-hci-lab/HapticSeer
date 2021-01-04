@@ -16,7 +16,8 @@ namespace ScreenCapture
             None,
             HLA,
             PC2,
-            BF1
+            BF1,
+            GR
         }
         public static Stopwatch globalStopwatch;
         public static StreamWriter[] logWriters;
@@ -76,9 +77,14 @@ namespace ScreenCapture
             // Start dispatch frames
             bitmapBuffer.StartDispatchToImageProcessBase();
 
-            FeatureExtractors arrivalEvents = FeatureExtractors.InitFeatureExtractor(
+            /* FeatureExtractors arrivalEvents = FeatureExtractors.InitFeatureExtractor(
                 (int)Enum.Parse(typeof(GameType), args[0]),
                 args.Skip(1).ToArray()
+            );*/
+
+            FeatureExtractors arrivalEvents = FeatureExtractors.InitFeatureExtractor(
+                (int)Enum.Parse(typeof(GameType), "GR"),
+                new string[1]
             );
 
             // Do Cache Optimizer

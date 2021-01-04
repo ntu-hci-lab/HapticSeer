@@ -35,7 +35,7 @@ namespace ScreenCapture
                     {
                         AutoFlush = true
                     };
-                    tesseractEngine = new TesseractEngine(Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory), "Alyx+eng", EngineMode.Default);
+                    tesseractEngine = new TesseractEngine(Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory), "HalfLife", EngineMode.Default);
                     return new HLA(outlets[0], outlets[1]);
                 case 2:
                     Program.logWriters = new StreamWriter[1];
@@ -65,6 +65,8 @@ namespace ScreenCapture
                     };
                     tesseractEngine = new TesseractEngine(Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory), "KomuB", EngineMode.Default);
                     return new BF1(outlets[0], outlets[1], outlets[2]);
+                case 4:
+                    return new GR();
                 default:
                     throw new NotImplementedException("Invalid gameID");
             }

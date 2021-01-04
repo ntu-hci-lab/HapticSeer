@@ -3,7 +3,10 @@
     {
       "Name": "HUDExtractorSet",
       "Preset": "HLA",
-      "Outlets": [ "BULLET", "BLOOD" ]
+      "Outlets": [ "BULLET", "BLOOD" ],
+      "Options": {
+        "UseShellExecute": "True"
+      }
     }
   ],
   "RawCapturers": [
@@ -26,10 +29,7 @@
       "Name": "HitDetector",
       "Preset":  "HLA",
       "Inlets": [ "BLOOD" ],
-      "Outlets": [ "HURT" ],
-      "Options": {
-        "UseShellExecute": "True"
-      }
+      "Outlets": [ "HURT" ]
     }
   ]
 }
