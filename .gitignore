@@ -367,7 +367,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
-/ProjectCarsMemMap/raw.txt
+ProjectCarsMemMap/*
 /SimDevice
 *.csv
 *.xlsx

@@ -15,11 +15,14 @@ namespace AudioProcessor
     public class AudioProcessor
     {
         //All values are in ms
-        const int CAPTURE_LATENCY = 10, PROCESS_WINDOW_LENGTH = 10;
+        const int CAPTURE_LATENCY = 10, PROCESS_WINDOW_LENGTH = 10, LFE_CUTOFF = 125;
 
         private float[] blockBuffer;
-        private int channelNum, systemSampleRate;
-        private List<float[]> pcmBuffers = new List<float[]>();
+        private int channelNum, systemSampleRate, hitCount = 0;
+        private LowpassFilter lpf;
+        private Localisationer localisationer;
+        private SimplePulseDetector MonoPulseDetector, LFEPulseDetector;
+        private List<float[]> monoBuffers = new List<float[]>();
 
         public readonly static string SolutionRoot = Path.GetFullPath(Path.Combine(
             AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\.."));
@@ -39,20 +42,64 @@ namespace AudioProcessor
                     Interval = PROCESS_WINDOW_LENGTH
                 };
 
-            InitializeMonoBuffers(pcmBuffers, channelNum, notificationSource.BlockCount);
+            InitializeMonoBuffers(monoBuffers, channelNum, notificationSource.BlockCount);
             blockBuffer = new float[notificationSource.BlockCount * channelNum];
+            lpf = new LowpassFilter(systemSampleRate, LFE_CUTOFF);
+            MonoPulseDetector =
+                new SimplePulseDetector(monoBuffers, lfeProvided: false, biQuadFilter: lpf);
+            localisationer = new Localisationer(monoBuffers);
+            if (channelNum > 2)
+            {
+                LFEPulseDetector =
+                        new SimplePulseDetector(monoBuffers, lfeProvided: true);
+            }
 
             capture.DataAvailable += (s, e) =>
             {
                 while (notificationSource.Read(blockBuffer, 0, notificationSource.BlockCount * channelNum) > 0)
                 {
-                    // Extracted audio signal
-                    pcmBuffers = Deinterlacing(pcmBuffers,
+                    monoBuffers = Deinterlacing(monoBuffers,
                                                 blockBuffer,
                                                 channelNum);
-
-                    // TODO: Implement your model
-                    publisher.Publish(outlet, "OUTPUT MESSAGE TO NEXT OUTLET");
+                    if (LFEPulseDetector != null)
+                    {
+                        bool m = MonoPulseDetector.Predict();
+                        bool l = LFEPulseDetector.Predict();
+                        if (m || l)
+                        {
+                            double angle = localisationer.GetLoudestAngle();
+#if DEBUG
+                            Console.Clear();
+                            Console.WriteLine($"LFE Level: {LFEPulseDetector.CurrentReading:F3}, LFE Threshold: {LFEPulseDetector.CurrentThreshold:F3}");
+                            Console.WriteLine($"Mixed Level: {MonoPulseDetector.CurrentReading:F3}, Mixed Threshold: {MonoPulseDetector.CurrentThreshold:F3}");
+                            Console.WriteLine($"Impulse Detected - Mono:{m}, LFE:{l}, Angle: {angle:F3}, Hit Count:{hitCount}");
+#endif
+                            if (publisher != null && outlet != null)
+                            {
+                                publisher.Publish(outlet, $"{m}|{l}|{angle:F3}");
+                            }
+                                
+                            hitCount++;
+                        }
+                    }
+                    else
+                    {
+                        if (MonoPulseDetector.Predict())
+                        {
+                            double angle = localisationer.GetLoudestAngle();
+#if DEBUG
+                            Console.Clear();
+                            Console.WriteLine($"Level: {MonoPulseDetector.CurrentReading:F3}, Threshold: {MonoPulseDetector.CurrentThreshold:F3}");
+                            Console.WriteLine($"Impulse Detected - Mono, Angle:{angle:F3}, Hit Count:{hitCount}");
+#endif
+                            if (publisher != null && outlet != null)
+                            {
+                                publisher.Publish(outlet, $"True|False|{angle:F3}");
+                            }
+                                
+                            hitCount++;
+                        }
+                    }
                 }
             };
 
