@@ -12,8 +12,8 @@ Three games to choose from:
 2. Naming of inlets/outlets **would not affect** contents passing through them, i.e., ```Outlets: ["A", "B", "C"]``` is equal to ```Outlets: ["X", "Y", "Z"]```.
 3. Position of inlets/outlets **matters**. 
     * e.g., ```HUDExtractorSet``` with preset ```BF1``` will always send ```"BulletInGun(Int32)"``` messages by its first outlet.
-4. You may found all of possible messages [HERE](https://hackmd.io/@yuhsinlin/rJe8kNtmP), follow their format
-5. If you want to see output of a component in the console, enable ```UseShellExecute```
+4. You may found all of possible messages [HERE](./listOfOutletMassages.md), follow their format
+5. If you want to see output of a component in a seperated console, enable ```UseShellExecute```
 ---
 ![](https://i.imgur.com/hZGMbd3.png)
 
