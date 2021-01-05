@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
-using static EvaluationLogger.Base;
 namespace BF1Detectors
 {
     public static class HurtFunctions
@@ -22,7 +21,6 @@ namespace BF1Detectors
         }
         static void UpdateHPState(string inputMsg, ref StateObject state)
         {
-            var startMs = GetElapsedMillseconds();
             double curHP;
             byte roundedCurHP;
             try
@@ -45,9 +43,6 @@ namespace BF1Detectors
                             (now - state.LastHitSignal).TotalMilliseconds       > HIT_EPS)
                         {
                             state.LastHitSignal = now;
-                            Program.loggers.loggerDict["hit_detector"].WriteLineAsync(
-                                $"{startMs},{GetElapsedMillseconds()},1"
-                            );
                             if (state.IncomingOutlet != null)
                                 state.publisher.Publish(state.IncomingOutlet, $"{bloodLoss},{state.LastHitAngle.ToString()}");
 #if DEBUG

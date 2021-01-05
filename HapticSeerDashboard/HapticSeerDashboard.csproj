@@ -37,13 +37,13 @@
     <None Update="path.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="sampleConfig3.json">
+    <None Update="BF1Config.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="sampleConfig2.json">
+    <None Update="PC2Config.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="sampleConfig.json">
+    <None Update="HLAConfig.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="vive_cosmos_controller.json">

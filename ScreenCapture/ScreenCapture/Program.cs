@@ -3,6 +3,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 
 namespace ScreenCapture
 {
@@ -53,7 +54,7 @@ namespace ScreenCapture
             globalStopwatch = new Stopwatch();
             globalStopwatch.Start();
 
-            //Thread.Sleep(5000);
+            Thread.Sleep(5000);
             Console.CancelKeyPress +=
                 new ConsoleCancelEventHandler((o, t) =>
                 {
@@ -77,14 +78,9 @@ namespace ScreenCapture
             // Start dispatch frames
             bitmapBuffer.StartDispatchToImageProcessBase();
 
-            /* FeatureExtractors arrivalEvents = FeatureExtractors.InitFeatureExtractor(
-                (int)Enum.Parse(typeof(GameType), args[0]),
-                args.Skip(1).ToArray()
-            );*/
-
             FeatureExtractors arrivalEvents = FeatureExtractors.InitFeatureExtractor(
-                (int)Enum.Parse(typeof(GameType), "GR"),
-                new string[1]
+               (int)Enum.Parse(typeof(GameType), args[0]),
+               args.Skip(1).ToArray()
             );
 
             // Do Cache Optimizer

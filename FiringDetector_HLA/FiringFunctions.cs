@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Windows;
-using static EvaluationLogger.Base;
 namespace HLADetectors
 {
     public static class FiringFunctions
@@ -18,7 +17,6 @@ namespace HLADetectors
 
         public static void Router(string channelName, string msg, ref StateObject state)
         {
-            if (!commonStopwatch.IsRunning) commonStopwatch.Start();
             if (channelName == state.openvrInlet)
             {
                 UpdateInputState(msg, ref state);
@@ -53,7 +51,6 @@ namespace HLADetectors
         }
         static void UpdateBulletState(string inputMsg, ref StateObject state)
         {
-            var startMs = GetElapsedMillseconds();
 #if DEBUG
             var start = commonStopwatch.Elapsed;
 #endif
@@ -65,9 +62,6 @@ namespace HLADetectors
                 {
                     if (state.BulletCount > curBullet)
                     {
-                        Program.loggers.loggerDict["firing_detector"].WriteLineAsync(
-                            $"SHOOT,{GetElapsedMillseconds()}"
-                        );
                         if (state.fireOutlet!=null)
                             state.publisher.Publish(state.fireOutlet, "FIRE");
 # if DEBUG

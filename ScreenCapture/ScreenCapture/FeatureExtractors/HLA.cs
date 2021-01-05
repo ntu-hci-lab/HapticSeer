@@ -106,8 +106,6 @@ namespace ScreenCapture
             if (bloodOutlet != null)
             {
                 publisher.Publish(bloodOutlet, NowBlood.ToString("0.000"));
-                Program.logWriters[0].WriteLineAsync(
-$"{(double)startTick / Stopwatch.Frequency * 1000},{(double)Program.globalStopwatch.ElapsedTicks / Stopwatch.Frequency * 1000}");
             }
                 
             sender.Variable["LowPassFilter_Blood"] = EstimatedBlood;
@@ -140,8 +138,6 @@ $"{(double)startTick / Stopwatch.Frequency * 1000},{(double)Program.globalStopwa
                         if(bulletOutlet != null)
                         {
                             publisher.Publish(bulletOutlet, num.ToString());
-                            Program.logWriters[1].WriteLineAsync(
-$"{(double)startTick / Stopwatch.Frequency * 1000},{(double)Program.globalStopwatch.ElapsedTicks / Stopwatch.Frequency * 1000}");
                         }
                             
 #if DEBUG
@@ -152,7 +148,7 @@ $"{(double)startTick / Stopwatch.Frequency * 1000},{(double)Program.globalStopwa
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error message: " + ex.Message);
+                Console.WriteLine(ex.ToString());
             }
         }
 

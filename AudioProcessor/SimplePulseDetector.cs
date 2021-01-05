@@ -27,7 +27,7 @@ namespace AudioProcessor
         public double CurrentReading => currentReading;
 
         public SimplePulseDetector(List<float[]> monoBuffers, bool lfeProvided,
-            BiQuad biQuadFilter = null, double alpha = 0.85, double margin = 4.5, double noiseThreshold = -45)
+            BiQuad biQuadFilter = null, double alpha = 0.85, double margin = 4.5, double noiseThreshold = -50)
         {
             this.alpha = alpha;
             this.biQuadFilter = biQuadFilter;

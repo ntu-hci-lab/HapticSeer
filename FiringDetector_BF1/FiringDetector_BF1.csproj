@@ -14,7 +14,6 @@
     <PackageReference Include="StackExchange.Redis" Version="2.1.58" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\LatencyLogger\EvalutationLogger.csproj" />
     <ProjectReference Include="..\RedisEndpoint_dotnetCore\RedisEndpoint_dotnetCore.csproj" />
   </ItemGroup>
 </Project>

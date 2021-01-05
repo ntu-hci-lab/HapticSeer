@@ -1,7 +1,6 @@
 ﻿
 using System;
 using RedisEndpoint;
-using EvaluationLogger;
 namespace BF1Detectors
 {
     class Program
@@ -9,13 +8,8 @@ namespace BF1Detectors
         const string URL = "localhost";
         const ushort PORT = 6380;
 
-        public static Base loggers;
-
         static int Main(string[] args)
         {
-            loggers = new Base(
-            new string[] { "firing_detector" }, "BF1"
-            );
             FiringDetector f = new FiringDetector(URL,
                 PORT,
                 enableHighFreqWeapons: true,

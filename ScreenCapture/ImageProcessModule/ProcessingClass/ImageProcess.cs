@@ -1,5 +1,4 @@
-﻿#define LOGTIME
-using Emgu.CV;
+﻿using Emgu.CV;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

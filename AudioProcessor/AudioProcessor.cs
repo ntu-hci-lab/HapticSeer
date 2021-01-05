@@ -126,6 +126,7 @@ namespace AudioProcessor
             capture.Start();
 #if DEBUG
             Console.WriteLine("Start Capturing...");
+            Console.WriteLine(capture.Device.ToString());
             Console.WriteLine("Input Format: " + capture.WaveFormat.ToString());
 #endif
             _ = Console.ReadKey();
@@ -134,6 +135,7 @@ namespace AudioProcessor
 
         public static int Main(string[] args)
         {
+            if (args == null) throw new ArgumentNullException("No outlet was assigned"); 
             Publisher publisher = new Publisher("localhost", 6380);
             AudioProcessor audioProcessor = new AudioProcessor(publisher, args[0]);
             return 0;

@@ -19,13 +19,6 @@ namespace ScreenCapture
 
     class PC2 : FeatureExtractors
     {
-
-#if LOG
-        static DateTime startTime = DateTime.Now;
-        static StreamWriter csvWriter = new StreamWriter($"{startTime.ToString("mm_ss_ffff")}_send.csv");
-        static long msgCnt = 0;
-#endif
-
         private SpeedImageProcess speedImageProcess = new SpeedImageProcess();
         private int speed = 0; // current speed
         private int preSpeed = 0; // previous speed
@@ -85,22 +78,13 @@ namespace ScreenCapture
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error message: " + ex.Message);
+                Console.WriteLine(ex.ToString());
             }
-#if LOG
-            csvWriter.WriteLine($"{speed},{++msgCnt},{(DateTime.Now - startTime).TotalMilliseconds}");
-            if(speedOutlet!=null)
-                publisher.Publish(speedOutlet, $"{speed},{msgCnt}");
-#endif
-#if !LOG
             if (speedOutlet != null) 
             {
                 publisher.Publish(speedOutlet, $"{speed}");
-                Program.logWriters[0].WriteLineAsync(
-$"{(double)startTick / Stopwatch.Frequency * 1000},{speed}");
             }
-                
-#endif
+
 
 #if DEBUG
             var time = localDate.Minute * 60 * 1000 + localDate.Second * 1000 + localDate.Millisecond;

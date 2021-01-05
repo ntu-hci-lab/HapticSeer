@@ -7,7 +7,7 @@ namespace HLADetectors
 {
     class HitDetector
     {
-        private Subscriber bloodSubscriber, hitSubscriber;
+        private Subscriber bloodSubscriber;
         private Publisher commonPublisher;
         private StateObject state;
 

@@ -6,7 +6,7 @@ namespace HLADetectors
 {
     class FiringDetector
     {
-        private Subscriber bulletSubscriber, inputSubscriber, impulseSubscriber;
+        private Subscriber bulletSubscriber, inputSubscriber;
         private Publisher commonPublisher;
         private StateObject state;
 

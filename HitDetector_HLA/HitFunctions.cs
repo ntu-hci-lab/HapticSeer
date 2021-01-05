@@ -1,7 +1,5 @@
-﻿#define LOG
-using System;
+﻿using System;
 using System.Diagnostics;
-using static EvaluationLogger.Base;
 
 namespace HLADetectors
 {
@@ -15,7 +13,6 @@ namespace HLADetectors
 #endif
         public static void Router(string channelName, string msg, ref StateObject state)
         {
-            if (!commonStopwatch.IsRunning) commonStopwatch.Start();
             if (channelName == state.bloodInlet)
             {
                 UpdateHPState(msg, ref state);
@@ -23,8 +20,6 @@ namespace HLADetectors
         }
         static void UpdateHPState(string inputMsg, ref StateObject state)
         {
-            var startMs = GetElapsedMillseconds();
-            var start = commonStopwatch.Elapsed;
             double curHP;
             byte roundedCurHP;
             try
@@ -41,9 +36,6 @@ namespace HLADetectors
                         {
                             state.LastBloodLossSignal = DateTime.Now;
                             state.RealHP = roundedCurHP;
-                            Program.loggers.loggerDict["hit_detector"].WriteLineAsync(
-                                $"HIT,{GetElapsedMillseconds()}"
-                            );
                             if (state.hitOutlet!=null)
                                 state.publisher.Publish(state.hitOutlet, bloodLoss.ToString());
                             Console.WriteLine("HIT");
@@ -73,7 +65,6 @@ namespace HLADetectors
                 }
 #if DEBUG
                 Console.WriteLine($"Real: {state.RealHP}, Reading: {roundedCurHP}");
-                var elapsed = commonStopwatch.Elapsed - start;
                 //Console.WriteLine($"Updated HP in {elapsed.TotalMilliseconds} ms");
 #endif
             }

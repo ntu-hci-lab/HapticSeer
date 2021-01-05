@@ -1,20 +1,11 @@
 ﻿using System;
 using System.IO;
 using System.Text;
-using static EvaluationLogger.Base;
 namespace PC2Detectors
 {
     public static class InertiaFunctions
     {
         const double HANDLER_MAX_ANGLE = 15d;
-
-# if LOG
-        public static DateTime startTime = DateTime.Now;
-        public static StreamWriter csvWriter = new StreamWriter(startTime.ToString("mm_ss_fff") + "_predict.csv")
-        {
-            AutoFlush = true
-        };
-# endif
         public static void Router(string channelName, string msg, ref StateObject state)
         {
             if(channelName == state.xinputInlet)
@@ -31,7 +22,6 @@ namespace PC2Detectors
         }
         public static void UpdateSpeedState(string msg, ref StateObject state)
         {
-            var startMs = GetElapsedMillseconds();
             string[] splited = msg.Split(',');
             try
             {
@@ -41,14 +31,8 @@ namespace PC2Detectors
                 state.Angle = state.LastAngle;
                 var accX = state.AccelX;
                 var accY = state.AccelY;
-                Program.loggers.loggerDict["inertia_detector"].WriteLineAsync(
-                    $"{state.AccelX},{state.AccelY},{GetElapsedMillseconds()}"
-                );
                 if (state.accXOutlet != null) state.publisher.Publish(state.accXOutlet, $"{accX.ToString()}");
                 if (state.accYOutlet != null) state.publisher.Publish(state.accYOutlet, $"{accY.ToString()}");
-# if LOG
-                csvWriter.WriteLine($"{(DateTime.Now - startTime).Ticks / TimeSpan.TicksPerMillisecond},{state.AccelX},{state.AccelY}");
-# endif
                 Console.WriteLine(state.AccelY);
             }
             catch (Exception e) 

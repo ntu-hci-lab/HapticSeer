@@ -50,7 +50,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FiringDetector_BF1", "Firin
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FFTExtractor", "FFTExtractor\FFTExtractor.csproj", "{918D2855-FC6A-49D5-9050-58AFE347B2CB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EvalutationLogger", "EvaluationLogger\EvalutationLogger.csproj", "{AB57DCD5-8124-422F-9E9E-43CA46F4AFC5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EvaluationLogger", "EvaluationLogger\EvaluationLogger.csproj", "{AB57DCD5-8124-422F-9E9E-43CA46F4AFC5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -10,13 +10,19 @@
     },
     {
       "Name": "GenericPulseExtractor",
-      "Outlets": [ "PULSE" ]
+      "Outlets": [ "PULSE" ],
+      "Options": {
+        "UseShellExecute": "True"
+      }
     }
   ],
   "RawCapturers": [
     {
       "Name": "GenericXboxInputCapturer",
-      "Outlets": [ "XINPUT" ]
+      "Outlets": [ "XINPUT" ],
+      "Options": {
+        "UseShellExecute": "True"
+      }
     }
   ],
   "EventDetectors": [

@@ -56,7 +56,7 @@ namespace ScreenCapture
             /* use Tesseract to recognize number */
             try
             {
-                pixImage = PixConverter.ToPix(BinaryImg.To<Bitmap>());
+                pixImage = PixConverter.ToPix(BinaryImg.ToBitmap());
                 tesseractEngine.DefaultPageSegMode = PageSegMode.SingleBlock;
                 page = tesseractEngine.Process(pixImage);
                 var bulletStr = page.GetText(); // 識別後的內容
@@ -69,8 +69,6 @@ namespace ScreenCapture
                         if(bulletOutlet != null)
                         {
                             publisher.Publish(bulletOutlet, num.ToString());
-                            Program.logWriters[0].WriteLineAsync(
-                                $"{(double)startTick / Stopwatch.Frequency * 1000},{(double)Program.globalStopwatch.ElapsedTicks / Stopwatch.Frequency * 1000}");
                         }
                     }
                 }
@@ -80,7 +78,7 @@ namespace ScreenCapture
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error message: " + ex.Message);
+                Console.WriteLine(ex.ToString());
             }
             //Console.WriteLine("Bullet Feature Latency: {0}", elasped);
         }
@@ -124,8 +122,6 @@ namespace ScreenCapture
                 if (bloodOutlet != null)
                 {
                     publisher.Publish(bloodOutlet, BloodValue.ToString());
-                    Program.logWriters[1].WriteLineAsync(
-$"{(double)startTick / Stopwatch.Frequency * 1000},{(double)Program.globalStopwatch.ElapsedTicks / Stopwatch.Frequency * 1000}");
                 }
 #if DEBUG
                 Console.WriteLine($"Actual: {BloodValue.ToString("0.000")}");
@@ -184,8 +180,6 @@ $"{(double)startTick / Stopwatch.Frequency * 1000},{(double)Program.globalStopwa
                     if (hitOutlet != null)
                     {
                         publisher.Publish(hitOutlet, angle.ToString());
-                        Program.logWriters[2].WriteLineAsync(
-$"{(double)startTick / Stopwatch.Frequency * 1000},{(double)Program.globalStopwatch.ElapsedTicks / Stopwatch.Frequency * 1000}");
                     }
 
                 }
