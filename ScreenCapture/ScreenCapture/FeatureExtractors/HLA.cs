@@ -126,7 +126,7 @@ namespace ScreenCapture
             Page page;
             try
             {
-                pixImage = PixConverter.ToPix(BinaryImg.To<Bitmap>());
+                pixImage = PixConverter.ToPix(BinaryImg.ToBitmap());
                 page = tesseractEngine.Process(pixImage, PageSegMode.SingleBlock);
                 var bulletStr = page.GetText();
                 page.Dispose();
