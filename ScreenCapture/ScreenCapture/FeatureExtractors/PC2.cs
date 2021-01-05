@@ -52,7 +52,7 @@ namespace ScreenCapture
 
             try
             {
-                Bitmap BitmapFrame = mat.To<Bitmap>();
+                Bitmap BitmapFrame = mat.ToBitmap();
                 /* image processing */
                 speedImageProcess.ToBlackWhite(BitmapFrame); // grayscale(black and white)
                 // BitmapFrame = speedImageProcess.NegativePicture(BitmapFrame); //turn into negative image
