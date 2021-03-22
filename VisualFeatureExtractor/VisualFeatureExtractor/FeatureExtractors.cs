@@ -20,7 +20,7 @@ namespace VisualFeatureExtractor
         protected FeatureExtractors() { }
 
         /// <summary>
-        /// The function acts as a "factor" in the factory pattern
+        /// The function acts as a "factory" in the factory pattern
         /// </summary>
         /// <param name="gameID">The game ID for selecting which extractor to instantiate</param>
         /// <param name="outlets">Some extractors will send their data to upstream extractors/detectors. This the an array containing theire names.</param>

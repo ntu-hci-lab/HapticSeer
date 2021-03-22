@@ -19,7 +19,6 @@ namespace PC2Detectors
             // If an inlet for controller input and an outlet for the lateral acceleration was also provided 
             else if (args.Length == 4)
             {
-
                 InertiaDetector inertiaDetector = new InertiaDetector("localhost", 6380, args[0], args[2], args[1], args[3]);
             }
             else
