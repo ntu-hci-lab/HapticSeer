@@ -15,7 +15,7 @@ namespace VisualFeatureExtractor
         /// Initialize Tesseract object
         /// Remember to add tessdata directory
         protected static TesseractEngine tesseractEngine;
-        protected static Publisher publisher = new Publisher("localhost", 6380);
+        protected static Publisher publisher = new Publisher("localhost", 6379);
         protected List<ImageProcess> ImageProcessesList = new List<ImageProcess>();
         protected FeatureExtractors() { }
 
