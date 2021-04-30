@@ -1,0 +1,23 @@
+{
+  "ExtractorSets": [
+    {
+      "Name": "VisualFeatureExtractor",
+      "Preset": "PC2",
+      "Outlets": [ "SPEED" ],
+      "Options": {
+        "UseShellExecute": "True"
+      }
+    }
+  ],
+  "RawCapturers": [ ],
+  "EventDetectors": [
+    {
+      "Name": "SampleEventDetector",
+      "Inlets": [ "SPEED" ],
+      "Outlets": [ "ACCELY" ],
+      "Options": {
+        "UseShellExecute": "True"
+      }
+    }
+  ]
+}

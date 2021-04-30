@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "AudioProcessor": {
-      "commandName": "Project",
-      "commandLineArgs": "PULSE"
-    }
-  }
-}

@@ -39,8 +39,16 @@ namespace HapticSeerDashboard
 
             virtual protected string GetPath(string type, string subtype)
             {
+                string exePath = null;
                 if (paths == null) throw new InvalidOperationException("You must load paths first!");
-                paths.TryGetValue($"{type}_{subtype}", out string exePath);
+                if (subtype != null)
+                {
+                    paths.TryGetValue($"{type}_{subtype}", out exePath);
+                }
+                else
+                {
+                    paths.TryGetValue($"{type}", out exePath);
+                }
                 return exePath;
             }
             static public void LoadPath(Dictionary<string, string> paths, String solutionRoot)
