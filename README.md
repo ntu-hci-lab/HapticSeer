@@ -1,5 +1,11 @@
 # HapticSeer: A Multi-channel, Black-box, Platform-agnostic Approach to Detecting Video Game Events for Real-time Haptic Feedback
 
+## Notice
+**This project is undergoing a major code refactoring for a better developer experience.** For instance, we are making feature extractors get rid of integrated raw capturers one by one. 
+
+More details will be announced in next few months.
+(If you're interested, the "WIP" repo could be found [HERE](https://github.com/eKL016/HapticSeerNeo))
+
 ## System Overview
 ![](https://i.imgur.com/hZGMbd3.png)
 ## Steps
